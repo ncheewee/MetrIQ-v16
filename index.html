@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0c0c0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MetrIQ">
+<title>MetrIQ</title>
+<link rel="manifest" href="data:application/json,{%22name%22:%22MetrIQ%22,%22short_name%22:%22MetrIQ%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c0f%22,%22theme_color%22:%22%230c0c0f%22}">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── THEME ── */
+:root{
+  --bg:#0c0c0f;--sf:#141418;--sf2:#1c1c22;
+  --bd:#2a2a38;--bd2:#3a3a4a;
+  --am:#f59e0b;--amg:rgba(245,158,11,.15);
+  --gn:#10b981;--gnd:rgba(16,185,129,.15);
+  --rd:#ef4444;--rdd:rgba(239,68,68,.15);
+  --bl:#3b82f6;--bld:rgba(59,130,246,.15);
+  --yl:#eab308;--yld:rgba(234,179,8,.15);
+  --tx:#e0e0ea;--tx2:#8888a0;--tx3:#555568;
+  --num:#fbbf24;--r:12px;--rs:8px;--fs:1;
+}
+body.light{
+  --bg:#f0f2f5;--sf:#fff;--sf2:#e8eaf0;
+  --bd:#d0d4de;--bd2:#b8bdd0;
+  --am:#d97706;--amg:rgba(217,119,6,.12);
+  --gn:#059669;--gnd:rgba(5,150,105,.12);
+  --rd:#dc2626;--rdd:rgba(220,38,38,.12);
+  --bl:#2563eb;--bld:rgba(37,99,235,.12);
+  --yl:#ca8a04;--yld:rgba(202,138,4,.12);
+  --tx:#1a1a2e;--tx2:#44445a;--tx3:#888899;--num:#b45309;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;overflow:hidden;transition:background .2s,color .2s}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:60px 20px 32px;transition:opacity .3s}
+#loginScreen.hidden{opacity:0;pointer-events:none}
+.ll{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:38px;letter-spacing:3px;color:var(--am);margin-bottom:4px}
+.lt{font-size:calc(12px * var(--fs));color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+.lver{position:fixed;bottom:20px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tx3);letter-spacing:1px}
+.pg{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px}
+.pc{display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px;cursor:pointer;transition:all .2s}
+.pc:active{border-color:var(--am);background:var(--amg)}
+.pi{font-size:26px;width:44px;height:44px;background:var(--sf2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pn{font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:600}
+.pa{font-size:calc(12px * var(--fs));color:var(--tx2);margin-top:2px}
+#pinScreen{display:none;flex-direction:column;align-items:center;width:100%;max-width:320px}
+#pinScreen.show{display:flex}
+.ppn{font-family:'Rajdhani',sans-serif;font-size:calc(18px * var(--fs));font-weight:600;margin-bottom:4px;text-align:center}
+.ppl{font-size:calc(13px * var(--fs));color:var(--tx2);margin-bottom:18px}
+.pds{display:flex;gap:14px;margin-bottom:20px}
+.pd{width:16px;height:16px;border-radius:50%;border:2px solid var(--bd2);transition:all .15s}
+.pd.on{background:var(--am);border-color:var(--am)}
+.pd.err{background:var(--rd);border-color:var(--rd)}
+.pe{font-size:calc(13px * var(--fs));color:var(--rd);margin-top:-14px;margin-bottom:12px;height:18px;text-align:center}
+.pp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.pb{height:58px;border-radius:var(--rs);background:var(--sf);border:1px solid var(--bd);font-family:'Rajdhani',sans-serif;font-size:calc(22px * var(--fs));font-weight:600;color:var(--tx);cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
+.pb:active{background:var(--amg);border-color:var(--am);transform:scale(.95)}
+.pb.del{color:var(--tx2)}.pb.emp{background:none;border:none;cursor:default}
+.pbk{margin-top:14px;background:none;border:none;color:var(--tx3);font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:500;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto}
+#hdr{padding:10px 14px 9px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);flex-shrink:0;gap:8px}
+.logo{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:calc(19px * var(--fs));letter-spacing:2px;color:var(--am);flex-shrink:0}
+.hc{display:flex;flex-direction:column;flex:1;min-width:0;padding:0 8px}
+.hp{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hu{font-family:'Share Tech Mono',monospace;font-size:calc(10px * var(--fs));color:var(--tx3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sochip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:14px;border:1px solid var(--bd);background:var(--sf2);font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx2);cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.5px}
+.sochip:active{border-color:var(--rd);color:var(--rd);background:var(--rdd)}
+
+#screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;padding:13px 14px 18px;display:none;flex-direction:column;gap:12px}
+.screen.active{display:flex}
+#nav{display:flex;border-top:1px solid var(--bd);flex-shrink:0;background:var(--sf)}
+.nb{flex:1;padding:9px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--tx3);font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;transition:color .2s}
+.nb .ni{font-size:18px}.nb.active{color:var(--am)}.nb:active{opacity:.7}
+
+/* ── UNIT SELECTOR BUTTON ── */
+.usb{display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);cursor:pointer;transition:border-color .2s;text-align:left}
+.usb:active{border-color:var(--am)}
+.usb-ico{font-size:20px;width:38px;height:38px;background:var(--sf2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.usb-num{font-family:'Rajdhani',sans-serif;font-size:calc(18px * var(--fs));font-weight:700;color:var(--tx);line-height:1.1}
+.usb-desc{font-size:calc(12px * var(--fs));color:var(--tx2);margin-top:1px}
+.usb-meta{margin-left:auto;text-align:right;flex-shrink:0}
+.usb-cnt{font-family:'Share Tech Mono',monospace;font-size:calc(11px * var(--fs));color:var(--tx3)}
+.usb-arr{color:var(--tx3);font-size:13px;margin-top:2px}
+
+/* Unit picker list */
+.usrch{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;color:var(--tx);font-family:'Barlow',sans-serif;font-size:calc(15px * var(--fs));outline:none;width:100%;margin-bottom:11px}
+.usrch:focus{border-color:var(--am)}
+.upl{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow-y:auto}
+.upi{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);cursor:pointer;transition:all .15s}
+.upi:active,.upi.cur{border-color:var(--am);background:var(--amg)}
+.upi-num{font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700;color:var(--tx)}
+.upi-desc{font-size:calc(12px * var(--fs));color:var(--tx2);margin-top:1px}
+.upi-meta{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:calc(11px * var(--fs));color:var(--tx3);text-align:right;flex-shrink:0;line-height:1.5}
+.upadd{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:none;border:1px dashed var(--bd2);border-radius:var(--rs);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:500;color:var(--tx3);width:100%;margin-top:2px;transition:all .15s}
+.upadd:active{border-color:var(--am);color:var(--am)}
+
+/* ── METER TABS ── */
+.mtabs{display:flex;gap:0;background:var(--sf2);border-radius:var(--rs);padding:3px}
+.mtab{flex:1;padding:8px 4px;border:none;background:none;border-radius:6px;font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx3);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.mtab span{font-size:16px}.mtab.active{background:var(--sf);color:var(--am);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+
+/* ── CARDS ── */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
+.clbl{font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px}
+.shdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.stitle{font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--tx3)}
+
+/* ── DASHBOARD ── */
+.dnum{font-family:'Share Tech Mono',monospace;font-size:calc(38px * var(--fs));color:var(--num);letter-spacing:3px;line-height:1}
+.dunit{font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));color:var(--tx2);margin-top:4px}
+.ddate{font-family:'Share Tech Mono',monospace;font-size:calc(10px * var(--fs));color:var(--tx3);margin-top:4px}
+.srow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:11px}
+.sv{font-family:'Share Tech Mono',monospace;font-size:calc(18px * var(--fs));color:var(--num);margin:3px 0}
+.sl{font-size:calc(11px * var(--fs));color:var(--tx2)}
+.cw{position:relative;height:140px}
+.fab{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--am);color:#000;border:none;border-radius:var(--r);padding:14px;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;width:100%;transition:opacity .15s,transform .1s}
+.fab:active{opacity:.85;transform:scale(.98)}
+
+/* ── TREND ── */
+.tbadge{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:var(--rs);font-size:calc(13px * var(--fs));font-weight:500}
+.t-normal  {background:var(--gnd);border:1px solid var(--gn);color:var(--gn)}
+.t-high    {background:var(--yld);border:1px solid var(--yl);color:var(--yl)}
+.t-critical{background:var(--rdd);border:1px solid var(--rd);color:var(--rd)}
+.t-low     {background:var(--bld);border:1px solid var(--bl);color:var(--bl)}
+.tico{font-size:18px;flex-shrink:0}
+
+/* ── CAPTURE ── */
+.sbar{display:flex;align-items:center;margin-bottom:5px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--bd2);transition:all .3s}
+.sdot.done{background:var(--am)}.sdot.cur{background:var(--am);box-shadow:0 0 7px var(--am);width:22px;border-radius:4px}
+.sline{flex:1;height:1px;background:var(--bd)}
+.stit{font-family:'Rajdhani',sans-serif;font-size:calc(19px * var(--fs));font-weight:600}
+.ssub{font-size:calc(12px * var(--fs));color:var(--tx2);margin-top:2px}
+
+.ctips{background:var(--sf2);border:1px solid var(--am);border-radius:var(--rs);padding:12px 14px}
+.ctit{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--am);margin-bottom:8px}
+.ctip{display:flex;align-items:flex-start;gap:8px;font-size:calc(12px * var(--fs));color:var(--tx2);margin-bottom:5px}
+.ctip:last-child{margin-bottom:0}
+
+/* ── CAPTURE ENTRY MODES ── */
+.entry-modes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.entry-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 8px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf);cursor:pointer;transition:all .15s;font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx2);letter-spacing:.5px}
+.entry-btn:active{border-color:var(--am);background:var(--amg);color:var(--am)}
+.entry-btn .eico{font-size:28px}
+.phase-lbl{font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);padding:4px 0}
+
+/* ── CROP TOOL ── */
+.crop-wrap{position:relative;border-radius:var(--rs);overflow:hidden;border:1px solid var(--bd);background:#000;touch-action:none;cursor:crosshair}
+.crop-wrap canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.crop-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.crop-reset{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--sf2);font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx2);cursor:pointer}
+.crop-extract{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:var(--rs);border:none;background:var(--am);font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:700;color:#000;cursor:pointer;letter-spacing:.5px}
+.crop-extract:disabled{opacity:.5;cursor:default}
+.parea img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pov{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.pbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pbtn{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--sf2);font-family:'Rajdhani',sans-serif;font-size:calc(14px * var(--fs));font-weight:600;color:var(--tx2);cursor:pointer;transition:all .15s}
+.pbtn:active{background:var(--amg);border-color:var(--am);color:var(--am)}
+
+.extbox{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:13px}
+.extrow{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.extlbl{font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));color:var(--tx2);letter-spacing:1px;text-transform:uppercase}
+.extnum{font-family:'Share Tech Mono',monospace;font-size:calc(36px * var(--fs));color:var(--num);letter-spacing:4px}
+.extconf{font-size:calc(11px * var(--fs));margin-top:3px}
+.chi{color:var(--gn)}.cmd{color:var(--am)}.clo{color:var(--rd)}
+.spin{width:16px;height:16px;border:2px solid var(--bd2);border-top-color:var(--am);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* Ref card */
+.refcard{background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--rs);padding:11px 13px}
+.reftit{font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px}
+.refgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.refil{font-size:calc(10px * var(--fs));color:var(--tx3);margin-bottom:2px}
+.refiv{font-family:'Share Tech Mono',monospace;font-size:calc(14px * var(--fs));color:var(--tx)}
+.refiv.exp{color:var(--am)}
+
+/* Confirm step */
+.cbanner{background:var(--amg);border:1.5px solid var(--am);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:11px}
+.cbtxt{font-family:'Rajdhani',sans-serif;font-size:calc(14px * var(--fs));font-weight:600;color:var(--am);line-height:1.3}
+.cbsub{font-size:calc(11px * var(--fs));color:var(--tx2);font-weight:400;margin-top:2px}
+.cnbox{text-align:center;padding:18px 14px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r)}
+.cnnum{font-family:'Share Tech Mono',monospace;font-size:calc(50px * var(--fs));color:var(--num);letter-spacing:5px;line-height:1}
+.cnunit{font-family:'Rajdhani',sans-serif;font-size:calc(14px * var(--fs));color:var(--tx2);margin-top:5px}
+.cinput{background:var(--sf2);border:2px solid var(--am);border-radius:var(--rs);padding:13px;color:var(--tx);font-family:'Share Tech Mono',monospace;font-size:calc(22px * var(--fs));outline:none;width:100%;text-align:center;transition:box-shadow .2s}
+.cinput:focus{box-shadow:0 0 0 3px var(--amg)}
+
+/* ── FORMS ── */
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3)}
+.fi{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;color:var(--tx);font-family:'Share Tech Mono',monospace;font-size:calc(15px * var(--fs));outline:none;transition:border-color .2s;width:100%}
+.fi:focus{border-color:var(--am)}
+.ft{font-family:'Barlow',sans-serif;font-size:calc(14px * var(--fs))}
+select.fi{cursor:pointer}
+select.fi option{background:var(--sf)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fhint{font-size:calc(11px * var(--fs));color:var(--tx3)}
+.btn{padding:11px 16px;border-radius:var(--rs);font-family:'Rajdhani',sans-serif;font-size:calc(14px * var(--fs));font-weight:600;letter-spacing:.8px;cursor:pointer;border:none;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btp{background:var(--am);color:#000}.btg{background:var(--sf2);color:var(--tx2);border:1px solid var(--bd)}
+.btd{background:var(--rdd);color:var(--rd);border:1px solid rgba(239,68,68,.3)}
+.brow{display:flex;gap:9px}.brow .btn{flex:1}.bfull{width:100%}
+
+/* ── HISTORY ── */
+.hi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:border-color .2s}
+.hi:active{border-color:var(--bd2)}
+.hico{font-size:20px;width:36px;height:36px;background:var(--sf2);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hb{flex:1;min-width:0}
+.hn{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:500;color:var(--tx2)}
+.hr{font-family:'Share Tech Mono',monospace;font-size:calc(18px * var(--fs));color:var(--num)}
+.hd{font-size:calc(10px * var(--fs));color:var(--tx3);margin-top:1px}
+.hcons{text-align:right;flex-shrink:0}
+.hcv{font-family:'Share Tech Mono',monospace;font-size:calc(13px * var(--fs))}
+.hcl{font-size:calc(9px * var(--fs));color:var(--tx3);margin-top:1px}
+.cp{color:var(--am)}.cn{color:var(--rd)}
+.empty{text-align:center;padding:34px 20px;color:var(--tx3)}
+.eico{font-size:40px;margin-bottom:9px;opacity:.4}
+.etit{font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));color:var(--tx2)}
+.esub{font-size:calc(12px * var(--fs));margin-top:4px}
+
+/* ── ANALYTICS ── */
+.prow{display:flex;gap:5px}
+.pbtn2{padding:4px 11px;border-radius:5px;border:1px solid var(--bd);background:none;font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:500;color:var(--tx3);cursor:pointer}
+.pbtn2.active{background:var(--amg);border-color:var(--am);color:var(--am)}
+.irow{display:flex;flex-direction:column}
+.ii{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)}
+.ii:last-child{border-bottom:none}
+.il{font-size:calc(13px * var(--fs));color:var(--tx2)}
+.iv{font-family:'Share Tech Mono',monospace;font-size:calc(13px * var(--fs));color:var(--tx)}
+
+/* ── SETTINGS ── */
+.si{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bd)}
+.si:last-child{border-bottom:none}
+.slbl{font-size:calc(14px * var(--fs))}
+.ssub{font-size:calc(11px * var(--fs));color:var(--tx3);margin-top:2px}
+.tog{width:44px;height:24px;background:var(--bd2);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none}
+.tog.on{background:var(--am)}
+.tog::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tog.on::after{left:23px}
+.sw{display:flex;align-items:center;gap:9px;width:100%}
+.sw input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--bd2);border-radius:2px;outline:none}
+.sw input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--am);cursor:pointer}
+.swv{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx2);width:32px;text-align:right}
+
+/* ── MODALS ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;z-index:100;backdrop-filter:blur(4px)}
+.ov.open{display:flex}
+.modal{background:var(--sf);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;padding:20px 18px 34px;width:100%;max-width:480px;margin:0 auto;animation:sup .25s ease;max-height:85vh;overflow-y:auto}
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mh{width:38px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px}
+.mt{font-family:'Rajdhani',sans-serif;font-size:calc(19px * var(--fs));font-weight:600;margin-bottom:13px}
+
+/* Detail */
+.detnum{font-family:'Share Tech Mono',monospace;font-size:calc(42px * var(--fs));color:var(--num);letter-spacing:4px;text-align:center;padding:14px 0}
+.detgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.deti{background:var(--sf2);border-radius:var(--rs);padding:10px}
+.detil{font-size:calc(10px * var(--fs));color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.detiv{font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:500}
+.pthumb{width:100%;border-radius:var(--rs);max-height:170px;object-fit:cover}
+.tag{display:inline-block;padding:3px 9px;border-radius:4px;font-size:calc(10px * var(--fs));font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.tg{background:var(--gnd);color:var(--gn)}.ta{background:var(--amg);color:var(--am)}.tr{background:var(--rdd);color:var(--rd)}
+
+/* Assess */
+.anum{font-family:'Share Tech Mono',monospace;font-size:calc(36px * var(--fs));color:var(--num);text-align:center;letter-spacing:3px;padding:14px 0 4px}
+.acons{text-align:center;font-size:calc(13px * var(--fs));color:var(--tx2);margin-bottom:14px}
+
+/* ── ANALYTICS REDESIGN ── */
+.anl-scope{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.anl-scope-btn{padding:9px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--sf2);font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx2);cursor:pointer;transition:all .15s;text-align:center}
+.anl-scope-btn.active{background:var(--amg);border-color:var(--am);color:var(--am)}
+.anl-period{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.anl-period .ptab{padding:5px 12px;border-radius:5px;border:1px solid var(--bd);background:none;font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx3);cursor:pointer;transition:all .15s}
+.anl-period .ptab.active{background:var(--amg);border-color:var(--am);color:var(--am)}
+.anl-period .yr-nav{background:none;border:none;color:var(--tx3);font-size:16px;cursor:pointer;padding:2px 6px}
+.anl-period .yr-nav:active{color:var(--am)}
+.ytd-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ytd-cell{display:flex;flex-direction:column;gap:2px}
+.ytd-lbl{font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3)}
+.ytd-val{font-family:'Share Tech Mono',monospace;font-size:calc(22px * var(--fs));color:var(--num);line-height:1.1}
+.ytd-sub{font-size:calc(11px * var(--fs));color:var(--tx2)}
+.ytd-proj{grid-column:1/-1;margin-top:4px;padding-top:9px;border-top:1px solid var(--bd);font-size:calc(12px * var(--fs));color:var(--tx2);line-height:1.5}
+.ytd-proj strong{color:var(--am)}
+/* alert config checkboxes */
+.alert-opts{display:flex;flex-direction:column;gap:8px}
+.alert-opt{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer}
+.alert-opt:last-child{border-bottom:none}
+.alert-opt input[type=checkbox]{width:18px;height:18px;accent-color:var(--am);cursor:pointer;flex-shrink:0}
+.alert-opt-lbl{font-size:calc(13px * var(--fs));color:var(--tx);flex:1}
+.alert-opt-sub{font-size:calc(11px * var(--fs));color:var(--tx3)}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-60px);background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:8px 16px;font-size:calc(13px * var(--fs));z-index:600;transition:transform .28s ease;white-space:nowrap;max-width:88vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--gn);color:var(--gn)}
+#toast.err{border-color:var(--rd);color:var(--rd)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.wf{width:100%}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="ll">⚡ MetrIQ</div>
+  <div class="lt">Smart Meter Reader</div>
+  <div id="propList" class="pg"></div>
+  <div id="pinScreen">
+    <div class="ppn" id="pinPropName"></div>
+    <div class="ppl">Enter PIN to continue</div>
+    <div class="pds"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div></div>
+    <div class="pe" id="pinErr"></div>
+    <div class="pp">
+      <button class="pb" onclick="pk('1')">1</button><button class="pb" onclick="pk('2')">2</button><button class="pb" onclick="pk('3')">3</button>
+      <button class="pb" onclick="pk('4')">4</button><button class="pb" onclick="pk('5')">5</button><button class="pb" onclick="pk('6')">6</button>
+      <button class="pb" onclick="pk('7')">7</button><button class="pb" onclick="pk('8')">8</button><button class="pb" onclick="pk('9')">9</button>
+      <button class="pb emp"></button><button class="pb" onclick="pk('0')">0</button><button class="pb del" onclick="pdel()">⌫</button>
+    </div>
+    <button class="pbk" onclick="backToProp()">← Back</button>
+  </div>
+  <div class="lver">v16</div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+  <div id="hdr">
+    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v16</span></div>
+    <div class="hc">
+      <div class="hp" id="hdrProp"></div>
+      <div class="hu" id="hdrUnit"></div>
+    </div>
+    <button class="sochip" onclick="logout()">🔒 Sign Out</button>
+  </div>
+
+  <div id="screens">
+
+    <!-- DASHBOARD -->
+    <div class="screen active" id="screen-dash">
+      <button class="usb" onclick="openUnitPicker()">
+        <div class="usb-ico">🏢</div>
+        <div style="flex:1;min-width:0"><div class="usb-num" id="usbN">Select unit…</div><div class="usb-desc" id="usbD">Tap to choose</div></div>
+        <div class="usb-meta"><div class="usb-cnt" id="usbC"></div><div class="usb-arr">▾</div></div>
+      </button>
+      <div class="mtabs" id="mTabsDash"></div>
+      <div class="card">
+        <div class="clbl">Latest Reading</div>
+        <div class="dnum" id="dNum">— — —</div>
+        <div class="dunit" id="dUnit">Select a unit above</div>
+        <div class="ddate" id="dDate"></div>
+      </div>
+      <div class="srow">
+        <div class="sc"><div class="clbl">This Month</div><div class="sv" id="sMo">—</div><div class="sl" id="sMoU">—</div></div>
+        <div class="sc"><div class="clbl">Daily Avg</div> <div class="sv" id="sAv">—</div><div class="sl" id="sAvU">—</div></div>
+        <div class="sc"><div class="clbl">Readings</div>  <div class="sv" id="sCt">0</div><div class="sl">total</div></div>
+      </div>
+      <div id="trendBanner"></div>
+      <div class="card">
+        <div class="stitle">Consumption Trend</div>
+        <div class="cw" style="margin-top:10px"><canvas id="miniChart"></canvas></div>
+      </div>
+      <button class="fab" onclick="startCapture()"><span style="font-size:19px">📷</span> CAPTURE READING</button>
+    </div>
+
+    <!-- CAPTURE -->
+    <div class="screen" id="screen-capture">
+      <div><div class="sbar" id="stepBar"></div><div style="height:5px"></div><div class="stit" id="stepTitle">—</div><div class="ssub" id="stepSub">—</div></div>
+      <div id="capContent"></div>
+      <div class="brow"><button class="btn btg" id="btnBack" onclick="capBack()">Back</button><button class="btn btp" id="btnNext" onclick="capNext()">Continue</button></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="screen" id="screen-history">
+      <button class="usb" onclick="openUnitPicker()">
+        <div class="usb-ico">🏢</div>
+        <div style="flex:1;min-width:0"><div class="usb-num" id="usbNH">Select unit…</div><div class="usb-desc" id="usbDH">Tap to choose</div></div>
+        <div class="usb-meta"><div class="usb-arr">▾</div></div>
+      </button>
+      <div class="mtabs" id="mTabsHist"></div>
+      <div id="histList"></div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="screen" id="screen-analytics">
+      <!-- Scope: Building or Unit -->
+      <div class="anl-scope">
+        <button class="anl-scope-btn active" id="anlScopeBuilding" onclick="setAnlScope('building')">🏢 Whole Building</button>
+        <button class="anl-scope-btn"        id="anlScopeUnit"     onclick="setAnlScope('unit')">📍 Single Unit</button>
+      </div>
+      <!-- Unit picker row (hidden for building) -->
+      <div id="anlUnitRow" style="display:none">
+        <button class="usb" onclick="openUnitPicker()">
+          <div class="usb-ico">🏢</div>
+          <div style="flex:1;min-width:0"><div class="usb-num" id="usbNA">Select unit…</div><div class="usb-desc" id="usbDA">Tap to choose</div></div>
+          <div class="usb-meta"><div class="usb-arr">▾</div></div>
+        </button>
+      </div>
+      <!-- Period + meter type -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="anl-period">
+          <button class="yr-nav" onclick="shiftAnlYear(-1)">‹</button>
+          <button class="ptab active" id="anlCY" onclick="setAnlPeriod('CY')">CY <span id="anlYrLbl">2026</span></button>
+          <button class="ptab"        id="anlFY" onclick="setAnlPeriod('FY')">FY <span id="anlFYLbl">25/26</span></button>
+          <button class="yr-nav" onclick="shiftAnlYear(1)">›</button>
+        </div>
+        <div class="mtabs" id="mTabsAnal" style="flex:1"></div>
+      </div>
+      <!-- YTD summary -->
+      <div class="ytd-card" id="ytdCard"></div>
+      <!-- Main chart: monthly actuals + prediction -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="clbl">Monthly Consumption & Forecast</div>
+          <div style="display:flex;gap:8px;font-size:calc(10px * var(--fs));color:var(--tx3)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:rgba(245,158,11,.4);border-radius:2px;display:inline-block"></span>Actual</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:20px;height:2px;background:#f59e0b;display:inline-block;border-top:2px dashed #f59e0b"></span>Forecast</span>
+          </div>
+        </div>
+        <div class="cw" style="height:220px"><canvas id="anlMainChart"></canvas></div>
+      </div>
+      <!-- Insights -->
+      <div class="card"><div class="clbl" style="margin-bottom:8px">AI Insights</div><div id="anlInsights"></div></div>
+      <!-- Multi-year chart (building scope only) -->
+      <div class="card" id="anlMultiYearCard" style="display:none">
+        <div class="clbl" style="margin-bottom:8px">Multi-Year Comparison</div>
+        <div class="cw" style="height:180px"><canvas id="anlMultiChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="screen" id="screen-settings">
+      <div class="card">
+        <div class="stitle" style="margin-bottom:4px">Appearance</div>
+        <div class="si"><div><div class="slbl">Dark Theme</div></div><button class="tog on" id="themeToggle" onclick="toggleTheme()"></button></div>
+        <div class="si" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div><div class="slbl">Font Size</div><div class="ssub">Adjust for readability</div></div>
+          <div class="sw wf"><span style="font-size:12px">A</span><input type="range" id="fontSlider" min="1" max="4" step="1" value="1" oninput="applyFont(parseInt(this.value))"><span style="font-size:17px">A</span><span class="swv" id="fontLbl">100%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:4px">Property Access</div>
+        <div class="si"><div><div class="slbl" id="setPropName">—</div><div class="ssub">Currently signed in</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="openChangePIN()">Change PIN</button></div>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:11px">AI Provider</div>
+        <div class="fg" style="margin-bottom:11px"><div class="fl">Provider</div><select class="fi" id="aiProv" onchange="onProvChange()"><option value="groq">⚡ Groq — Llama 4 Vision (Free, Fast)</option><option value="openrouter">🔀 OpenRouter — Llama Vision (Free)</option><option value="gemini">🔵 Google Gemini Flash (Free)</option><option value="claude">🟠 Anthropic Claude (Paid)</option><option value="none">✏️ None — Manual entry</option></select></div>
+        <div id="gGroq"   class="fg" style="margin-bottom:11px"><div class="fl">Groq API Key</div><input class="fi ft" type="password" id="groqKey" placeholder="gsk_…"><div class="fhint" style="margin-top:4px">Free at <strong style="color:var(--am)">console.groq.com</strong> → API Keys</div></div>
+        <div id="gOR"     class="fg" style="display:none;margin-bottom:11px"><div class="fl">OpenRouter Key</div><input class="fi ft" type="password" id="orKey" placeholder="sk-or-…"></div>
+        <div id="gGemini" class="fg" style="display:none;margin-bottom:11px"><div class="fl">Gemini API Key</div><input class="fi ft" type="password" id="gemKey" placeholder="AIza…"><div class="fhint" style="margin-top:4px">Free at <strong style="color:var(--am)">aistudio.google.com</strong>. 15/min limit.</div></div>
+        <div id="gClaude" class="fg" style="display:none;margin-bottom:11px"><div class="fl">Anthropic Key</div><input class="fi ft" type="password" id="claKey" placeholder="sk-ant-…"></div>
+        <button class="btn btp wf" onclick="saveSettings()">Save Settings</button>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:11px">🔔 Telegram Alerts</div>
+        <div class="fg" style="margin-bottom:11px">
+          <div class="fl">Bot Token</div>
+          <input class="fi ft" type="password" id="tgToken" placeholder="7123456789:AAFxxx…">
+          <div class="fhint" style="margin-top:4px">From <strong style="color:var(--am)">@BotFather</strong> on Telegram → /newbot</div>
+        </div>
+        <div class="fg" style="margin-bottom:11px">
+          <div class="fl">Your Chat ID</div>
+          <input class="fi ft" type="text" id="tgChatId" placeholder="987654321" inputmode="numeric">
+          <div class="fhint" style="margin-top:4px">From <strong style="color:var(--am)">@userinfobot</strong> on Telegram → send any message</div>
+        </div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:9px">Alert Triggers</div>
+        <div class="alert-opts">
+          <label class="alert-opt"><input type="checkbox" id="acOnSave"><div><div class="alert-opt-lbl">Every reading saved</div><div class="alert-opt-sub">Informational — sent for all readings</div></div></label>
+          <label class="alert-opt"><input type="checkbox" id="acOnCritical" checked><div><div class="alert-opt-lbl">🔴 Critical anomaly detected</div><div class="alert-opt-sub">Sudden spike/drop or >100% above normal</div></div></label>
+          <label class="alert-opt"><input type="checkbox" id="acOnHigh" checked><div><div class="alert-opt-lbl">🟡 Elevated consumption</div><div class="alert-opt-sub">30–100% above normal average</div></div></label>
+          <label class="alert-opt"><input type="checkbox" id="acOnGradRise"><div><div class="alert-opt-lbl">📈 Gradual upward trend</div><div class="alert-opt-sub">Steady increase across multiple readings</div></div></label>
+          <label class="alert-opt"><input type="checkbox" id="acOnGradFall"><div><div class="alert-opt-lbl">📉 Gradual downward trend</div><div class="alert-opt-sub">Steady decline — may indicate vacancy</div></div></label>
+          <label class="alert-opt"><input type="checkbox" id="acOnLow"><div><div class="alert-opt-lbl">🔵 Unusually low reading</div><div class="alert-opt-sub">>40% below normal — possible meter fault</div></div></label>
+        </div>
+        <div class="brow" style="margin-top:11px">
+          <button class="btn btg" style="flex:1" onclick="testTelegram()">Send Test</button>
+          <button class="btn btp" style="flex:1" onclick="saveTelegram()">Save</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:4px">Units & Meters</div>
+        <div id="unitSettList"></div>
+        <div style="height:9px"></div>
+        <button class="btn btg wf" onclick="openAddUnit()">+ Add Unit</button>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:4px">Data</div>
+        <div class="si">
+          <div><div class="slbl">Management Report</div><div class="ssub">PDF — selected units, meters, period</div></div>
+          <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="openReportModal()">Generate</button>
+        </div>
+        <div class="si">
+          <div><div class="slbl">Export Raw Data</div><div class="ssub">Download as JSON</div></div>
+          <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="exportData()">Export</button>
+        </div>
+        <div class="si"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
+      </div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v16 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+    </div>
+  </div>
+
+  <nav id="nav">
+    <button class="nb active" data-s="dash"      onclick="go('dash')">     <span class="ni">🏠</span>Home</button>
+    <button class="nb"        data-s="capture"   onclick="startCapture()"> <span class="ni">📷</span>Capture</button>
+    <button class="nb"        data-s="history"   onclick="go('history')">  <span class="ni">📋</span>History</button>
+    <button class="nb"        data-s="analytics" onclick="go('analytics')"><span class="ni">📊</span>Analytics</button>
+    <button class="nb"        data-s="settings"  onclick="go('settings')"> <span class="ni">⚙️</span>Settings</button>
+  </nav>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+<div class="ov" id="mUnitPicker">
+  <div class="modal">
+    <div class="mh"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="mt" style="margin-bottom:0">Select Unit</div>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx3)" id="upCount"></span>
+    </div>
+    <input type="search" class="usrch" id="upSearch" placeholder="🔍  Search by unit number or description…" oninput="filterUP()">
+    <div class="upl" id="upList"></div>
+  </div>
+</div>
+
+<div class="ov" id="mAddUnit">
+  <div class="modal"><div class="mh"></div><div class="mt">Add Unit</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><div class="fl">Unit Number</div><input class="fi ft" id="nuNum" placeholder="e.g. #01-23" maxlength="20"></div>
+      <div class="fg"><div class="fl">Description (optional)</div><input class="fi ft" id="nuDesc" placeholder="e.g. Ground Floor Retail" maxlength="40"></div>
+      <div class="brow"><button class="btn btg" onclick="closeM('mAddUnit')">Cancel</button><button class="btn btp" onclick="addUnit()">Add Unit</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="mRenameUnit">
+  <div class="modal"><div class="mh"></div><div class="mt">Rename Unit</div>
+    <input type="hidden" id="rnUnitId">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><div class="fl">Unit Number</div><input class="fi ft" id="rnNum" maxlength="20"></div>
+      <div class="fg"><div class="fl">Description</div><input class="fi ft" id="rnDesc" maxlength="40"></div>
+      <div class="brow"><button class="btn btg" onclick="closeM('mRenameUnit')">Cancel</button><button class="btn btp" onclick="confirmRename()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="mPIN">
+  <div class="modal"><div class="mh"></div><div class="mt">Change PIN</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><div class="fl">Current PIN</div><input class="fi" type="password" id="pinCur" inputmode="numeric" maxlength="4" placeholder="••••"></div>
+      <div class="fg"><div class="fl">New PIN (4 digits)</div><input class="fi" type="password" id="pinNew" inputmode="numeric" maxlength="4" placeholder="••••"></div>
+      <div class="fg"><div class="fl">Confirm New PIN</div><input class="fi" type="password" id="pinCf" inputmode="numeric" maxlength="4" placeholder="••••"></div>
+      <div class="brow"><button class="btn btg" onclick="closeM('mPIN')">Cancel</button><button class="btn btp" onclick="savePIN()">Change PIN</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="mDetail"><div class="modal"><div class="mh"></div><div id="detailContent"></div></div></div>
+
+<div class="ov" id="mAssess">
+  <div class="modal"><div class="mh"></div><div class="mt">Reading Saved ✓</div>
+    <div id="assessContent"></div>
+    <div style="height:12px"></div>
+    <button class="btn btp wf" onclick="closeM('mAssess')">Got it</button>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="ov" id="mReport">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">Generate Report</div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="fg">
+        <div class="fl">Period</div>
+        <select class="fi" id="rptPeriod">
+          <option value="30">Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="180">Last 6 months</option>
+          <option value="365">Last 12 months</option>
+          <option value="all">All time</option>
+        </select>
+      </div>
+      <div class="fg">
+        <div class="fl">Meters</div>
+        <div style="display:flex;gap:8px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
+            <input type="checkbox" id="rptElec" checked style="accent-color:var(--am);width:16px;height:16px"> ⚡ Electricity
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
+            <input type="checkbox" id="rptWater" checked style="accent-color:var(--am);width:16px;height:16px"> 💧 Water
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
+            <input type="checkbox" id="rptGas" checked style="accent-color:var(--am);width:16px;height:16px"> 🔥 Gas
+          </label>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="fl">Units</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:5px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
+            <input type="checkbox" id="rptAllUnits" checked onchange="toggleAllUnits(this.checked)" style="accent-color:var(--am);width:16px;height:16px"> All units
+          </label>
+        </div>
+        <div id="rptUnitList" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+      </div>
+      <div class="btn-row" style="display:flex;gap:10px">
+        <button class="btn btg" style="flex:1" onclick="closeM('mReport')">Cancel</button>
+        <button class="btn btp" style="flex:1" onclick="generateReport()">📄 Generate PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════
+const PROPS=[
+  {id:'p1',name:'VivoCity',           addr:'HarbourFront Walk, S099253',icon:'🏬',pin:'1234'},
+  {id:'p2',name:'Festival Walk',      addr:'80 Tat Chee Ave, Kowloon',  icon:'🛍️',pin:'1234'},
+  {id:'p3',name:'Harbourfront Centre',addr:'1 Maritime Square, S099253',icon:'🏢',pin:'1234'},
+];
+const MDEFS=[
+  {type:'electricity',icon:'⚡',label:'Electricity',unit:'kWh',dec:1},
+  {type:'water',      icon:'💧',label:'Water',       unit:'m³', dec:2},
+  {type:'gas',        icon:'🔥',label:'Gas',         unit:'m³', dec:3},
+];
+const FSC=[1.35,1.5,1.65,1.85], FLB=['100%','110%','120%','135%'];
+const STEPS=[
+  {t:'Select Unit',      s:'Which unit and meter type are you reading?'},
+  {t:'Capture & Save',   s:'Add photo → crop → extract → verify → save'},
+];
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+const DB={
+  async get(k){
+    if(window.storage){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null;}catch{}}
+    try{const v=localStorage.getItem('mq4_'+k);return v?JSON.parse(v):null;}catch{return null;}
+  },
+  async set(k,v){
+    const s=JSON.stringify(v);
+    if(window.storage){try{await window.storage.set(k,s);}catch{}}
+    try{localStorage.setItem('mq4_'+k,s);}catch{}
+  }
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let S={prop:null,units:[],readings:[],activeUnit:null,activeMeter:'electricity',
+  aiProv:'groq',groqKey:'',orKey:'',gemKey:'',claKey:'',dark:true,fs:1,
+  tgToken:'',tgChatId:'',
+  alertCfg:{onSave:false,onHigh:true,onCritical:true,onGradRise:false,onGradFall:false,onLow:false}};
+let anlScope='building', anlPeriodType='CY', anlYear=new Date().getFullYear();
+let cap={step:0,uid:null,mt:'electricity',photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null};
+let CH={mini:null,anlMain:null,anlMulti:null};
+let apd=7;
+let pe='',pp=null;
+// Crop tool state
+let CR={img:null,box:{x:.05,y:.2,w:.9,h:.6},drag:null,canvas:null,ctx:null};
+
+// ═══════════════════════════════════════════
+//  DEMO DATA
+// ═══════════════════════════════════════════
+function genDemo(pid){
+  const today=new Date('2026-03-20');
+  const templates={
+    p1:{prefix:['#B','#01','#02','#03','#04'],descs:['Kiosk','Retail','F&B','Fashion','Anchor','Service','Pop-up','ATM Room','Storage','Mgmt Office','Lobby','Food Court','Pharmacy','Optician','Electronics','Jewellery','Beauty','Sporting'],rates:{electricity:28,water:0.9,gas:0.4},count:18},
+    p2:{prefix:['#01','#02','#03'],descs:['F&B','Fashion','Anchor','Cinema','Gym','Beauty','Electronics','Books','Toys','Café'],rates:{electricity:32,water:1.1,gas:0.5},count:9},
+    p3:{prefix:['#01','#02','#03','#04','#05'],descs:['Office','Meeting Rm','Server Rm','Reception','Pantry','Board Rm','HR Suite','Finance','IT Dept','Legal','Operations','Marketing','Admin','Sales','Exec Suite','Lobby','Security','Archive','Loading Bay','Carpark','Utilities','M&E Room','AHU Room','Roof Plant'],rates:{electricity:22,water:0.7,gas:0.25},count:24},
+  };
+  const tmpl=templates[pid];
+  const starts={electricity:45200,water:1240,gas:380};
+  const units=[],readings=[];
+
+  for(let ui=0;ui<tmpl.count;ui++){
+    const uid='u_'+pid+'_'+ui;
+    const pfx=tmpl.prefix[ui%tmpl.prefix.length];
+    const sub=String(ui+1).padStart(2,'0');
+    units.push({id:uid,propId:pid,number:`${pfx}-${sub}`,desc:tmpl.descs[ui%tmpl.descs.length]});
+
+    MDEFS.forEach(md=>{
+      const baseRate=tmpl.rates[md.type];
+      let val=starts[md.type]+(ui*baseRate*6);
+
+      // Pattern assignment — first 5 units get showcase patterns, rest are normal
+      // Pattern: 0=normal, 1=gradual rise, 2=sudden spike (latest), 3=gradual fall, 4=stabilising
+      const pattern=ui<5?ui:0;
+
+      for(let i=9;i>=0;i--){
+        const dAgo=i*9+Math.floor(Math.random()*2);
+        const d=new Date(today);d.setDate(d.getDate()-dAgo);
+        let periodRate=baseRate;
+
+        if(pattern===1){
+          // Gradual rise: each successive reading ~8% higher than previous
+          periodRate=baseRate*(1+(9-i)*0.08);
+        } else if(pattern===2){
+          // Sudden spike on the LAST reading only (i===0)
+          periodRate=i===0?baseRate*4.2:baseRate*(0.9+Math.random()*0.2);
+        } else if(pattern===3){
+          // Gradual decline: business winding down
+          periodRate=baseRate*(1.6-(9-i)*0.07);
+          periodRate=Math.max(periodRate,baseRate*0.3);
+        } else if(pattern===4){
+          // Was high, now stabilising back to normal
+          const halfPoint=4;
+          if(i>halfPoint) periodRate=baseRate*(2.1-Math.random()*0.3);
+          else periodRate=baseRate*(1+((i/halfPoint)*0.3)+(Math.random()-0.5)*0.1);
+        } else {
+          // Normal with realistic small variation
+          periodRate=baseRate*(0.9+Math.random()*0.2);
+        }
+
+        val+=9*periodRate;
+        const rv=md.type==='electricity'?Math.round(val*10)/10:Math.round(val*Math.pow(10,md.dec))/Math.pow(10,md.dec);
+        const ts=(8+Math.floor(Math.random()*3)).toString().padStart(2,'0')+':'+(Math.floor(Math.random()*60)).toString().padStart(2,'0');
+        readings.push({id:'rd_'+uid+'_'+md.type+'_'+i,propId:pid,unitId:uid,meterType:md.type,reading:rv.toString(),date:d.toISOString().split('T')[0],time:ts,notes:'',aiConf:'high',savedAt:d.toISOString()});
+      }
+    });
+  }
+  return{units,readings};
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+async function init(){
+  const [ap,gk,ok,gmk,ck,dk,fk,tgt,tgc,ac]=await Promise.all([
+    DB.get('aiProv'),DB.get('groqKey'),DB.get('orKey'),DB.get('gemKey'),DB.get('claKey'),DB.get('dark'),DB.get('fs'),
+    DB.get('tgToken'),DB.get('tgChatId'),DB.get('alertCfg')
+  ]);
+  if(ap!==null)S.aiProv=ap;if(gk!==null)S.groqKey=gk;if(ok!==null)S.orKey=ok;
+  if(gmk!==null)S.gemKey=gmk;if(ck!==null)S.claKey=ck;if(dk!==null)S.dark=dk;if(fk!==null)S.fs=fk;
+  if(tgt!==null)S.tgToken=tgt;if(tgc!==null)S.tgChatId=tgc;
+  if(ac!==null)S.alertCfg={...S.alertCfg,...ac};
+  applyTheme(S.dark);applyFont(S.fs,false);
+  const sp=sessionStorage.getItem('mq4_prop');
+  if(sp){const p=PROPS.find(x=>x.id===sp);if(p){await loginAs(p);return;}}
+  renderPropList();
+}
+
+// ═══════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════
+function renderPropList(){
+  document.getElementById('propList').innerHTML=PROPS.map(p=>`
+    <div class="pc" onclick="selProp('${p.id}')"><div class="pi">${p.icon}</div>
+      <div><div class="pn">${p.name}</div><div class="pa">${p.addr}</div></div></div>`).join('');
+  document.getElementById('propList').style.display='flex';
+  document.getElementById('pinScreen').classList.remove('show');
+}
+function selProp(id){
+  pp=PROPS.find(p=>p.id===id);pe='';upd();
+  document.getElementById('pinPropName').textContent=pp.icon+' '+pp.name;
+  document.getElementById('pinErr').textContent='';
+  document.getElementById('propList').style.display='none';
+  document.getElementById('pinScreen').classList.add('show');
+}
+function backToProp(){pe='';upd();renderPropList();}
+function pk(d){if(pe.length>=4)return;pe+=d;upd();if(pe.length===4)setTimeout(chkPin,120);}
+function pdel(){pe=pe.slice(0,-1);upd();document.getElementById('pinErr').textContent='';}
+function upd(st=''){for(let i=0;i<4;i++){const d=document.getElementById('pd'+i);d.classList.toggle('on',i<pe.length);d.classList.toggle('err',st==='err'&&i<pe.length);}}
+async function chkPin(){
+  const stored=await DB.get('pin_'+pp.id)||pp.pin;
+  if(pe===stored){sessionStorage.setItem('mq4_prop',pp.id);await loginAs(pp);}
+  else{upd('err');document.getElementById('pinErr').textContent='Incorrect PIN';setTimeout(()=>{pe='';upd();document.getElementById('pinErr').textContent='';},1200);}
+}
+async function loginAs(prop){
+  S.prop=prop;
+  let u=await DB.get('units_'+prop.id),r=await DB.get('readings_'+prop.id);
+  if(!u||!u.length){const d=genDemo(prop.id);u=d.units;r=d.readings;await DB.set('units_'+prop.id,u);await DB.set('readings_'+prop.id,r);}
+  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;S.activeMeter='electricity';
+  // settings inputs
+  document.getElementById('aiProv').value=S.aiProv;document.getElementById('groqKey').value=S.groqKey;
+  document.getElementById('orKey').value=S.orKey;document.getElementById('gemKey').value=S.gemKey;
+  document.getElementById('claKey').value=S.claKey;document.getElementById('setPropName').textContent=prop.icon+' '+prop.name;
+  document.getElementById('fontSlider').value=S.fs;document.getElementById('themeToggle').classList.toggle('on',S.dark);
+  document.getElementById('tgToken').value=S.tgToken||'';
+  document.getElementById('tgChatId').value=S.tgChatId||'';
+  // Alert config checkboxes
+  document.getElementById('acOnSave').checked     =S.alertCfg.onSave;
+  document.getElementById('acOnCritical').checked =S.alertCfg.onCritical;
+  document.getElementById('acOnHigh').checked     =S.alertCfg.onHigh;
+  document.getElementById('acOnGradRise').checked =S.alertCfg.onGradRise;
+  document.getElementById('acOnGradFall').checked =S.alertCfg.onGradFall;
+  document.getElementById('acOnLow').checked      =S.alertCfg.onLow;
+  onProvChange();
+  document.getElementById('loginScreen').classList.add('hidden');
+  setTimeout(()=>document.getElementById('loginScreen').style.display='none',350);
+  document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeM(o.id);}));
+  refreshAll();
+}
+function logout(){
+  sessionStorage.removeItem('mq4_prop');S.prop=null;S.units=[];S.readings=[];S.activeUnit=null;
+  ['mini','anlMain','anlMulti'].forEach(k=>{if(CH[k]){CH[k].destroy();CH[k]=null;}});
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginScreen').classList.remove('hidden');
+  renderPropList();
+}
+
+// ═══════════════════════════════════════════
+//  PIN CHANGE
+// ═══════════════════════════════════════════
+function openChangePIN(){['pinCur','pinNew','pinCf'].forEach(id=>document.getElementById(id).value='');openM('mPIN');}
+async function savePIN(){
+  const c=document.getElementById('pinCur').value.trim(),n=document.getElementById('pinNew').value.trim(),f=document.getElementById('pinCf').value.trim();
+  const s=await DB.get('pin_'+S.prop.id)||S.prop.pin;
+  if(c!==s){toast('Current PIN incorrect','err');return;}
+  if(!/^\d{4}$/.test(n)){toast('New PIN must be 4 digits','err');return;}
+  if(n!==f){toast('PINs do not match','err');return;}
+  await DB.set('pin_'+S.prop.id,n);closeM('mPIN');toast('✓ PIN changed','ok');
+}
+
+// ═══════════════════════════════════════════
+//  THEME & FONT
+// ═══════════════════════════════════════════
+function toggleTheme(){S.dark=!S.dark;applyTheme(S.dark);DB.set('dark',S.dark);document.getElementById('themeToggle').classList.toggle('on',S.dark);}
+function applyTheme(d){document.body.classList.toggle('light',!d);}
+function applyFont(step,save=true){
+  const sc=FSC[step-1]||1;
+  // Inject style with !important — most reliable cross-browser approach
+  let el=document.getElementById('_fs');
+  if(!el){el=document.createElement('style');el.id='_fs';document.head.appendChild(el);}
+  el.textContent=`:root{--fs:${sc} !important}`;
+  const l=document.getElementById('fontLbl');if(l)l.textContent=FLB[step-1]||'100%';
+  const sl=document.getElementById('fontSlider');if(sl)sl.value=step;
+  S.fs=parseInt(step);if(save)DB.set('fs',S.fs);
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.querySelector(`.nb[data-s="${id}"]`)?.classList.add('active');
+  if(id==='analytics')setTimeout(renderAnalytics,40);
+  if(id==='history'){renderMTabs('mTabsHist','history');renderHistory();}
+  if(id==='settings')renderUnitSettings();
+}
+
+// ═══════════════════════════════════════════
+//  UNIT PICKER
+// ═══════════════════════════════════════════
+function openUnitPicker(){
+  document.getElementById('upSearch').value='';
+  document.getElementById('upCount').textContent=S.units.length+' unit'+(S.units.length!==1?'s':'');
+  renderUPList('');
+  openM('mUnitPicker');
+  setTimeout(()=>document.getElementById('upSearch').focus(),300);
+}
+function filterUP(){renderUPList(document.getElementById('upSearch').value);}
+function renderUPList(q){
+  const lc=q.toLowerCase();
+  const f=S.units.filter(u=>u.number.toLowerCase().includes(lc)||(u.desc||'').toLowerCase().includes(lc));
+  const el=document.getElementById('upList');
+  if(!f.length){
+    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No units match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit()">+ Add New Unit</button>`;
+    return;
+  }
+  el.innerHTML=f.map(u=>{
+    const cnt=S.readings.filter(r=>r.unitId===u.id).length;
+    const lr=getMR(u.id,'electricity');const ld=lr.length?fDate(lr[lr.length-1].date):'no readings';
+    const cur=u.id===S.activeUnit;
+    return`<div class="upi${cur?' cur':''}" onclick="pickUnit('${u.id}')">
+      <div style="font-size:20px;width:36px;height:36px;background:var(--sf);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">🏢</div>
+      <div style="flex:1;min-width:0"><div class="upi-num">${u.number}${cur?' ✓':''}</div><div class="upi-desc">${u.desc||'—'}</div></div>
+      <div class="upi-meta">${cnt} rdgs<br>${ld}</div></div>`;
+  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit()">+ Add New Unit</button>`;
+}
+function pickUnit(id){
+  S.activeUnit=id;closeM('mUnitPicker');
+  updateUSBs();updateHeader();
+  renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
+  renderDashboard();renderHistory();
+  // Always refresh analytics if on that screen, or queue it
+  if(document.getElementById('screen-analytics').classList.contains('active')) renderAnalytics();
+}
+
+// Update all unit selector buttons across screens
+function updateUSBs(){
+  const u=S.units.find(x=>x.id===S.activeUnit);
+  const cnt=u?S.readings.filter(r=>r.unitId===u.id).length:0;
+  const n=u?u.number:'Select unit…';
+  const d=u?(u.desc||'Tap to choose different unit'):'Tap to choose a unit';
+  const c=u?cnt+' reading'+(cnt!==1?'s':''):'';
+  [['usbN','usbD','usbC'],['usbNH','usbDH',null],['usbNA','usbDA',null]].forEach(([ni,di,ci])=>{
+    const ne=document.getElementById(ni),de=document.getElementById(di),ce=ci?document.getElementById(ci):null;
+    if(ne)ne.textContent=n;if(de)de.textContent=d;if(ce)ce.textContent=c;
+  });
+}
+
+// ═══════════════════════════════════════════
+//  HEADER
+// ═══════════════════════════════════════════
+function updateHeader(){
+  const u=S.units.find(x=>x.id===S.activeUnit);
+  document.getElementById('hdrProp').textContent=S.prop?S.prop.icon+' '+S.prop.name:'';
+  document.getElementById('hdrUnit').textContent=u?u.number+(u.desc?' · '+u.desc:''):'No unit selected';
+}
+
+// ═══════════════════════════════════════════
+//  METER TABS
+// ═══════════════════════════════════════════
+function renderMTabs(elId,screen){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML=MDEFS.map(md=>`
+    <button class="mtab${S.activeMeter===md.type?' active':''}" onclick="setMeter('${md.type}','${screen}')">
+      <span>${md.icon}</span>${md.label}</button>`).join('');
+}
+function setMeter(type,screen){
+  S.activeMeter=type;
+  ['mTabsDash','mTabsHist','mTabsAnal'].forEach(id=>{
+    const sc=id==='mTabsDash'?'dash':id==='mTabsHist'?'history':'analytics';
+    renderMTabs(id,sc);
+  });
+  renderDashboard();renderHistory();
+  if(screen==='analytics')setTimeout(renderAnalytics,30);
+}
+
+// ═══════════════════════════════════════════
+//  UNITS CRUD
+// ═══════════════════════════════════════════
+function saveU(){DB.set('units_'+S.prop.id,S.units);}
+function saveR(){DB.set('readings_'+S.prop.id,S.readings);}
+function openAddUnit(){openM('mAddUnit');document.getElementById('nuNum').value='';document.getElementById('nuDesc').value='';}
+function addUnit(){
+  const n=document.getElementById('nuNum').value.trim(),d=document.getElementById('nuDesc').value.trim();
+  if(!n){toast('Enter a unit number','err');return;}
+  const u={id:'u_'+Date.now(),propId:S.prop.id,number:n,desc:d};
+  S.units.push(u);S.activeUnit=u.id;saveU();closeM('mAddUnit');refreshAll();toast('✓ Unit added');
+}
+function openRenameUnit(id){
+  const u=S.units.find(x=>x.id===id);if(!u)return;
+  document.getElementById('rnUnitId').value=id;document.getElementById('rnNum').value=u.number;document.getElementById('rnDesc').value=u.desc||'';
+  openM('mRenameUnit');
+}
+function confirmRename(){
+  const id=document.getElementById('rnUnitId').value,n=document.getElementById('rnNum').value.trim();
+  if(!n){toast('Enter unit number','err');return;}
+  const u=S.units.find(x=>x.id===id);if(!u)return;
+  u.number=n;u.desc=document.getElementById('rnDesc').value.trim();
+  saveU();closeM('mRenameUnit');refreshAll();toast('✓ Renamed');
+}
+function delUnit(id){
+  const u=S.units.find(x=>x.id===id);
+  if(!confirm(`Remove "${u?.number}"? All its readings will be deleted.`))return;
+  S.units=S.units.filter(x=>x.id!==id);S.readings=S.readings.filter(r=>r.unitId!==id);
+  if(S.activeUnit===id)S.activeUnit=S.units[0]?.id||null;
+  saveU();saveR();refreshAll();toast('Unit removed');
+}
+function renderUnitSettings(){
+  const el=document.getElementById('unitSettList');if(!el)return;
+  if(!S.units.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:8px 0">No units added</div>';return;}
+  el.innerHTML=S.units.map(u=>{
+    const cnt=S.readings.filter(r=>r.unitId===u.id).length;
+    return`<div class="si">
+      <div style="flex:1;min-width:0"><div class="slbl">${u.number}</div><div class="ssub">${u.desc||''} · ${cnt} readings</div></div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick="openRenameUnit('${u.id}')">Rename</button>
+        <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="delUnit('${u.id}')">Remove</button>
+      </div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function getMR(uid,type){return S.readings.filter(r=>r.unitId===uid&&r.meterType===type).sort((a,b)=>new Date(a.date+'T'+a.time)-new Date(b.date+'T'+b.time));}
+function fNum(r,dec=2){const n=parseFloat(r);return isNaN(n)?r:n.toLocaleString('en-SG',{minimumFractionDigits:dec,maximumFractionDigits:dec});}
+function fDate(d){if(!d)return'';return new Date(d+'T12:00').toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'2-digit'});}
+function dBetween(a,b){return Math.max(0,(new Date(b)-new Date(a))/86400000);}
+
+// ═══════════════════════════════════════════
+//  TREND ASSESSMENT — pattern intelligence
+// ═══════════════════════════════════════════
+function assessTrend(rds){
+  if(rds.length<4)return null;
+  const md=MDEFS.find(m=>m.type===rds[0].meterType),u=md?.unit||'units';
+  // Build daily-rate series
+  const pts=[];
+  for(let i=1;i<rds.length;i++){
+    const d=Math.max(1,dBetween(rds[i-1].date,rds[i].date));
+    const c=parseFloat(rds[i].reading)-parseFloat(rds[i-1].reading);
+    if(c>=0)pts.push({rate:c/d,date:rds[i].date});
+  }
+  if(pts.length<3)return null;
+
+  const rates=pts.map(p=>p.rate);
+  const mean=rates.reduce((s,v)=>s+v,0)/rates.length;
+  const latest=rates[rates.length-1];
+  const prev=rates.slice(0,-1);
+  const prevMean=prev.reduce((s,v)=>s+v,0)/prev.length;
+  const pct=prevMean>0?((latest-prevMean)/prevMean)*100:0;
+
+  // Variance — detect sudden vs gradual
+  const variance=rates.reduce((s,v)=>s+(v-mean)**2,0)/rates.length;
+  const stdDev=Math.sqrt(variance);
+  const cv=mean>0?stdDev/mean:0; // coefficient of variation
+
+  // Linear regression slope — detect gradual trend
+  const n=rates.length;
+  let sumX=0,sumY=0,sumXY=0,sumX2=0;
+  rates.forEach((r,i)=>{sumX+=i;sumY+=r;sumXY+=i*r;sumX2+=i*i;});
+  const slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX);
+  const slopePct=mean>0?(slope/mean)*100:0; // % change per reading
+
+  // Sudden spike: last point is outlier (>2.5 std devs above mean of previous)
+  const prevStd=prev.length>1?Math.sqrt(prev.reduce((s,v)=>s+(v-prevMean)**2,0)/prev.length):0;
+  const isSuddenSpike=prevStd>0&&(latest-prevMean)>2.5*prevStd&&pct>80;
+  const isSuddenDrop =prevStd>0&&(prevMean-latest)>2.5*prevStd&&pct<-50;
+
+  // Gradual increase/decrease: consistent slope, low variance
+  const isGradualRise=slopePct>3&&cv<0.3&&!isSuddenSpike;
+  const isGradualFall=slopePct<-3&&cv<0.3&&!isSuddenDrop;
+
+  // Stabilising: was abnormal earlier, recent points converging toward mean
+  const earlyMean=rates.slice(0,Math.floor(n/2)).reduce((s,v)=>s+v,0)/Math.floor(n/2);
+  const recentMean=rates.slice(Math.floor(n/2)).reduce((s,v)=>s+v,0)/Math.ceil(n/2);
+  const isStabilising=Math.abs(earlyMean-mean)/mean>0.25&&Math.abs(recentMean-mean)/mean<0.12;
+
+  const avg=prevMean.toFixed(md.dec);
+  const latF=latest.toFixed(md.dec);
+  const slopeSig=(Math.abs(slopePct)*rates.length).toFixed(0);
+
+  if(isSuddenSpike)
+    return{lv:'critical',icon:'🔴',lbl:'Sudden Spike Detected',
+      txt:`Last reading shows ${pct.toFixed(0)}% surge above baseline (${avg} ${u}/day). Sudden spikes may indicate meter fault, leak, or unauthorised usage. Verify meter and check for anomalies.`,cls:'t-critical'};
+
+  if(isSuddenDrop)
+    return{lv:'critical',icon:'🔴',lbl:'Sudden Drop Detected',
+      txt:`Usage dropped ${Math.abs(pct).toFixed(0)}% below baseline — potentially a meter fault, supply interruption, or unit vacancy. Inspect meter and confirm occupancy status.`,cls:'t-critical'};
+
+  if(pct>100)
+    return{lv:'critical',icon:'🔴',lbl:'Abnormally High',
+      txt:`Current rate ${latF} ${u}/day is ${pct.toFixed(0)}% above normal (${avg}/day). Check for equipment fault or unusual activity.`,cls:'t-critical'};
+
+  if(isGradualRise&&pct>15)
+    return{lv:'high',icon:'🟡',lbl:'Gradual Upward Trend',
+      txt:`Consumption rising steadily — up ~${slopeSig}% over the recording period. Could reflect business growth, seasonal load, or gradual equipment degradation. Monitor closely.`,cls:'t-high'};
+
+  if(pct>30)
+    return{lv:'high',icon:'🟡',lbl:'Elevated Usage',
+      txt:`${pct.toFixed(0)}% above normal average (${avg} ${u}/day). Worth investigating.`,cls:'t-high'};
+
+  if(isGradualFall&&pct<-15)
+    return{lv:'low',icon:'🔵',lbl:'Gradual Downward Trend',
+      txt:`Consumption declining steadily — down ~${slopeSig}% over the recording period. May reflect operational changes, efficiency gains, or reduced occupancy.`,cls:'t-low'};
+
+  if(pct<-40)
+    return{lv:'low',icon:'🔵',lbl:'Unusually Low',
+      txt:`${Math.abs(pct).toFixed(0)}% below normal average. Check for meter issue or reduced operations.`,cls:'t-low'};
+
+  if(isStabilising)
+    return{lv:'normal',icon:'🟢',lbl:'Stabilising',
+      txt:`Usage was irregular earlier but is converging toward normal range (${avg} ${u}/day). Situation appears to be resolving.`,cls:'t-normal'};
+
+  return{lv:'normal',icon:'🟢',lbl:'Normal',
+    txt:`Consumption stable at ${avg} ${u}/day. No anomalies detected.`,cls:'t-normal'};
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard(){
+  const u=S.units.find(x=>x.id===S.activeUnit),md=MDEFS.find(m=>m.type===S.activeMeter);
+  if(!u||!md){
+    ['dNum','dUnit','dDate','sMo','sAv'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('dNum').textContent='— — —';document.getElementById('dUnit').textContent='Select a unit above';
+    document.getElementById('sCt').textContent='0';document.getElementById('trendBanner').innerHTML='';
+    updateMC([]);return;
+  }
+  const rds=getMR(u.id,md.type);document.getElementById('sCt').textContent=rds.length;
+  document.getElementById('sAvU').textContent=md.unit+'/day';document.getElementById('sMoU').textContent=md.unit;
+  if(!rds.length){
+    document.getElementById('dNum').textContent='— — —';document.getElementById('dUnit').textContent='No readings for '+u.number;
+    document.getElementById('dDate').textContent='';document.getElementById('sMo').textContent='—';document.getElementById('sAv').textContent='—';
+    document.getElementById('trendBanner').innerHTML='';updateMC([]);return;
+  }
+  const last=rds[rds.length-1];
+  document.getElementById('dNum').textContent=fNum(last.reading,md.dec);
+  document.getElementById('dUnit').textContent=md.unit+' · '+u.number+' '+md.icon+' '+md.label;
+  document.getElementById('dDate').textContent=fDate(last.date)+'  '+last.time;
+  const now=new Date(),ms=new Date(now.getFullYear(),now.getMonth(),1);
+  const mr=rds.filter(r=>new Date(r.date)>=ms);
+  if(mr.length>=2){const c=parseFloat(mr[mr.length-1].reading)-parseFloat(mr[0].reading),d=Math.max(1,dBetween(mr[0].date,mr[mr.length-1].date));document.getElementById('sMo').textContent=c.toFixed(md.dec);document.getElementById('sAv').textContent=(c/d).toFixed(md.dec);}
+  else{document.getElementById('sMo').textContent='—';document.getElementById('sAv').textContent='—';}
+  const tr=assessTrend(rds);
+  document.getElementById('trendBanner').innerHTML=tr?`<div class="tbadge ${tr.cls}"><div class="tico">${tr.icon}</div><div><strong>${tr.lbl}</strong><br><span style="font-weight:400;font-size:calc(11px * var(--fs))">${tr.txt}</span></div></div>`:'';
+  const pts=[];for(let i=1;i<rds.length;i++){const d=Math.max(1,dBetween(rds[i-1].date,rds[i].date));pts.push({date:rds[i].date,v:(parseFloat(rds[i].reading)-parseFloat(rds[i-1].reading))/d});}
+  updateMC(pts.slice(-15));
+}
+
+// Compress image to small thumbnail for storage (~15-40KB)
+function compressForStorage(dataUrl){
+  return new Promise(res=>{
+    if(!dataUrl){res(null);return;}
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=480;
+      let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      res(cv.toDataURL('image/jpeg',.45));
+    };
+    img.onerror=()=>res(null);
+    img.src=dataUrl;
+  });
+}
+
+// Image preprocessing for AI accuracy
+function preprocess(dataUrl){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1280;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+      const ctx=cv.getContext('2d');ctx.drawImage(img,0,0,w,h);
+      const id=ctx.getImageData(0,0,w,h),data=id.data;
+      for(let i=0;i<data.length;i+=4){
+        data[i]  =Math.min(255,Math.max(0,(data[i]  -128)*1.15+128+8));
+        data[i+1]=Math.min(255,Math.max(0,(data[i+1]-128)*1.15+128+8));
+        data[i+2]=Math.min(255,Math.max(0,(data[i+2]-128)*1.15+128+8));
+      }
+      ctx.putImageData(id,0,0);res(cv.toDataURL('image/jpeg',.88));
+    };
+    img.onerror=()=>res(dataUrl);img.src=dataUrl;
+  });
+}
+
+// ═══════════════════════════════════════════
+//  CAPTURE
+// ═══════════════════════════════════════════
+function startCapture(){
+  if(!S.units.length){toast('Add a unit first','err');openAddUnit();return;}
+  cap={step:0,uid:S.activeUnit||S.units[0].id,mt:S.activeMeter,photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
+  if(S.units.length===1)cap.step=1;
+  renderStep();go('capture');
+}
+
+function renderStep(){
+  const s=cap.step;
+  document.getElementById('stepTitle').textContent=STEPS[s].t;document.getElementById('stepSub').textContent=STEPS[s].s;
+  let bar='';STEPS.forEach((_,i)=>{if(i>0)bar+='<div class="sline"></div>';bar+=`<div class="sdot ${i<s?'done':i===s?'cur':''}"></div>`;});
+  document.getElementById('stepBar').innerHTML=bar;
+  document.getElementById('btnBack').style.display=s===0?'none':'';
+  document.getElementById('btnNext').textContent=s===STEPS.length-1?'Save Reading':'Continue';
+  document.getElementById('btnNext').disabled=false;
+  const c=document.getElementById('capContent');
+
+  if(s===0){
+    c.innerHTML=`<div style="display:flex;flex-direction:column;gap:9px">${S.units.map(u=>{
+      const sel=cap.uid===u.id?'border-color:var(--am);background:var(--amg)':'';
+      return`<div class="card" style="cursor:pointer;${sel}" onclick="selU('${u.id}')">
+        <div style="display:flex;align-items:center;gap:11px">
+          <div style="font-size:22px;width:38px;height:38px;background:var(--sf2);border-radius:8px;display:flex;align-items:center;justify-content:center">🏢</div>
+          <div><div style="font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700">${u.number}</div><div style="font-size:calc(12px * var(--fs));color:var(--tx2)">${u.desc||''}</div></div>
+          <div style="display:flex;gap:5px;margin-left:auto">${MDEFS.map(md=>`<button style="padding:4px 8px;border-radius:5px;border:1px solid ${cap.mt===md.type&&cap.uid===u.id?'var(--am)':'var(--bd)'};background:${cap.mt===md.type&&cap.uid===u.id?'var(--amg)':'var(--sf2)'};font-size:13px;cursor:pointer" onclick="event.stopPropagation();selUM('${u.id}','${md.type}')">${md.icon}</button>`).join('')}</div>
+        </div></div>`;}).join('')}</div>`;
+
+  } else if(s===1){
+    const md=MDEFS.find(m=>m.type===cap.mt);
+    const hp=!!cap.photo;
+    const now=new Date();
+
+    // ── PHASE A: no photo yet — 3 clean entry buttons ──
+    if(!hp && !cap.manualMode){
+      c.innerHTML=`
+        <div class="phase-lbl">Step 1 of 3 — Add Photo</div>
+        <div class="entry-modes">
+          <button class="entry-btn" onclick="tCam()">
+            <span class="eico">📷</span>Camera
+          </button>
+          <button class="entry-btn" onclick="tGal()">
+            <span class="eico">🖼️</span>Gallery
+          </button>
+          <button class="entry-btn" onclick="enterManual()">
+            <span class="eico">✏️</span>Manual
+          </button>
+        </div>
+        <input type="file" id="camIn" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(event)">
+        <input type="file" id="galIn" accept="image/*" style="display:none" onchange="onPhoto(event)">
+        <div style="font-size:calc(11px * var(--fs));color:var(--tx3);text-align:center;padding:4px 0">
+          Camera / Gallery → AI extracts reading from photo<br>Manual → type reading directly
+        </div>
+        ${getRefCard()}`;
+      document.getElementById('btnNext').disabled=true;
+
+    // ── PHASE B: photo loaded — crop canvas ──
+    } else if(hp){
+      c.innerHTML=`
+        <div class="phase-lbl">Step 2 of 3 — Crop to Meter Digits</div>
+        <div class="crop-wrap" id="cropWrap"><canvas id="cropCanvas"></canvas></div>
+        <div class="crop-actions">
+          <button class="crop-reset" onclick="resetCrop()">↺ Retake Photo</button>
+          <button class="crop-extract" id="btnExtract" onclick="doExtractCropped()">⚡ Extract Reading</button>
+        </div>
+        <input type="file" id="camIn" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(event)">
+        <input type="file" id="galIn" accept="image/*" style="display:none" onchange="onPhoto(event)">
+        <div class="extbox" id="extBox" style="display:none">
+          <div class="extrow"><span id="extIco">⏳</span><div class="spin" id="extSpin"></div><span class="extlbl" id="extLbl">Analysing…</span></div>
+          <div class="extnum pulse" id="extNum">. . .</div>
+          <div class="extconf" id="extConf"></div>
+        </div>
+        <div id="confirmZone" style="display:none;flex-direction:column;gap:10px">
+          <div class="phase-lbl">Step 3 of 3 — Verify & Save</div>
+          <div class="cbanner">
+            <span style="font-size:22px;flex-shrink:0">👁️</span>
+            <div><div class="cbtxt">Verify Reading</div><div class="cbsub">Compare against meter display — edit if needed</div></div>
+          </div>
+          <div class="fg">
+            <label style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3)">✏️ Confirmed Reading (${md.unit})</label>
+            <input class="cinput" type="number" id="confIn" step="0.001" inputmode="decimal"
+              oninput="checkAnomaly(this.value)">
+          </div>
+          <div id="anomalyZone"></div>
+          ${getRefCard()}
+          <div class="frow">
+            <div class="fg"><div class="fl">Date</div><input class="fi" type="date" id="rDate" value="${now.toISOString().split('T')[0]}"></div>
+            <div class="fg"><div class="fl">Time</div><input class="fi" type="time" id="rTime" value="${now.toTimeString().slice(0,5)}"></div>
+          </div>
+          <div class="fg"><div class="fl">Notes (optional)</div><input class="fi ft" id="rNotes" placeholder="e.g. after shutdown…" maxlength="100"></div>
+        </div>`;
+      setTimeout(()=>initCropTool('cropCanvas'),60);
+      if(cap.extracted){ setTimeout(()=>showConfirmZone(),80); }
+      document.getElementById('btnNext').disabled=true;
+      document.getElementById('btnNext').textContent='Confirm & Save';
+
+    // ── PHASE C: manual mode ──
+    } else if(cap.manualMode){
+      c.innerHTML=`
+        <div class="phase-lbl">Manual Entry</div>
+        <div class="fg">
+          <label style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3)">Enter Reading (${md.unit} · ${md.icon} ${md.label})</label>
+          <input class="cinput" type="number" id="confIn" step="0.001" inputmode="decimal" autofocus
+            placeholder="e.g. 12345.6"
+            oninput="checkAnomaly(this.value)">
+        </div>
+        <div id="anomalyZone"></div>
+        ${getRefCard()}
+        <div class="frow">
+          <div class="fg"><div class="fl">Date</div><input class="fi" type="date" id="rDate" value="${now.toISOString().split('T')[0]}"></div>
+          <div class="fg"><div class="fl">Time</div><input class="fi" type="time" id="rTime" value="${now.toTimeString().slice(0,5)}"></div>
+        </div>
+        <div class="fg"><div class="fl">Notes (optional)</div><input class="fi ft" id="rNotes" placeholder="e.g. manual read…" maxlength="100"></div>
+        <button class="crop-reset" style="font-size:calc(12px * var(--fs))" onclick="exitManual()">← Back to photo options</button>`;
+      document.getElementById('btnNext').disabled=false;
+      document.getElementById('btnNext').textContent='Save Reading';
+    }
+  }
+}
+
+function showConfirmZone(){
+  const eb=document.getElementById('extBox');
+  const cz=document.getElementById('confirmZone');
+  const ci=document.getElementById('confIn');
+  if(eb) showExtRes();
+  if(cz) cz.style.display='flex';
+  if(ci) ci.value=cap.extracted||'';
+  checkAnomaly(cap.extracted);
+  document.getElementById('btnNext').disabled=false;
+}
+
+function getRefCard(){
+  const md=MDEFS.find(m=>m.type===cap.mt),u=S.units.find(x=>x.id===cap.uid);
+  if(!u||!md)return'';
+  const rds=getMR(u.id,md.type);if(!rds.length)return'';
+  const last=rds[rds.length-1],dAgo=Math.round(dBetween(last.date,new Date().toISOString().split('T')[0]));
+  let expHtml='';
+  if(rds.length>=2){
+    const pts=[];for(let i=Math.max(1,rds.length-6);i<rds.length;i++){const d=Math.max(1,dBetween(rds[i-1].date,rds[i].date));const c=parseFloat(rds[i].reading)-parseFloat(rds[i-1].reading);if(c>=0)pts.push(c/d);}
+    if(pts.length){const avg=pts.reduce((s,v)=>s+v,0)/pts.length;const lo=(parseFloat(last.reading)+avg*dAgo*0.7).toFixed(md.dec),hi=(parseFloat(last.reading)+avg*dAgo*1.3).toFixed(md.dec);
+      expHtml=`<div><div class="refil">Expected today</div><div class="refiv exp">${lo} – ${hi}</div></div>`;}
+  }
+  return`<div class="refcard"><div class="reftit">📌 Last Recorded — Reference</div>
+    <div class="refgrid"><div><div class="refil">Last reading</div><div class="refiv">${fNum(last.reading,md.dec)} ${md.unit}</div></div>
+    <div><div class="refil">Recorded</div><div class="refiv">${fDate(last.date)} (${dAgo}d ago)</div></div>
+    ${expHtml}<div><div class="refil">Meter</div><div class="refiv">${md.icon} ${md.label}</div></div></div></div>`;
+}
+
+// ═══════════════════════════════════════════
+//  INTERACTIVE CROP TOOL — pointer events, native px
+// ═══════════════════════════════════════════
+function initCropTool(canvasId){
+  const cv=document.getElementById(canvasId);if(!cv)return;
+  CR.canvas=cv;CR.ctx=cv.getContext('2d');CR.img=new Image();
+  CR.img.onload=()=>{
+    cv.width=CR.img.width;cv.height=CR.img.height;
+    drawCrop();
+    cv.addEventListener('pointerdown', onCropDown);
+    cv.addEventListener('pointermove', onCropMove);
+    cv.addEventListener('pointerup',   onCropUp);
+    cv.addEventListener('pointercancel',onCropUp);
+  };
+  CR.img.src=cap.photo;
+}
+
+// Convert client coords → native canvas pixels (corrects for CSS scaling)
+function c2n(e){
+  const r=CR.canvas.getBoundingClientRect();
+  return{
+    x:(e.clientX-r.left)*CR.img.width /r.width,
+    y:(e.clientY-r.top) *CR.img.height/r.height
+  };
+}
+// Box in normalised 0–1 → native px rect
+function boxNative(){
+  const W=CR.img.width,H=CR.img.height,b=CR.box;
+  return{x:b.x*W,y:b.y*H,w:b.w*W,h:b.h*H};
+}
+// Hit radius in native px — 4% of image width, plenty for fat fingers
+function HR(){return Math.max(30,CR.img.width*0.04);}
+
+function getHandleNative(pt){
+  const bn=boxNative(),hr=HR();
+  const handles=[
+    {id:'tl',x:bn.x,          y:bn.y},
+    {id:'tm',x:bn.x+bn.w/2,   y:bn.y},
+    {id:'tr',x:bn.x+bn.w,     y:bn.y},
+    {id:'ml',x:bn.x,           y:bn.y+bn.h/2},
+    {id:'mr',x:bn.x+bn.w,     y:bn.y+bn.h/2},
+    {id:'bl',x:bn.x,           y:bn.y+bn.h},
+    {id:'bm',x:bn.x+bn.w/2,   y:bn.y+bn.h},
+    {id:'br',x:bn.x+bn.w,     y:bn.y+bn.h},
+  ];
+  for(const h of handles){
+    if(Math.hypot(pt.x-h.x,pt.y-h.y)<hr)return h.id;
+  }
+  return null;
+}
+function inBoxNative(pt){const bn=boxNative();return pt.x>bn.x&&pt.x<bn.x+bn.w&&pt.y>bn.y&&pt.y<bn.y+bn.h;}
+
+function onCropDown(e){
+  e.preventDefault();
+  CV_setCapture(e);
+  const pt=c2n(e);
+  const hid=getHandleNative(pt);
+  const bn=boxNative();
+  if(hid){
+    // Store offset from pointer to the relevant edge(s) in native px
+    CR.drag={type:'handle',id:hid,pt0:{...pt},
+      left0:bn.x, top0:bn.y, right0:bn.x+bn.w, bottom0:bn.y+bn.h};
+  }else if(inBoxNative(pt)){
+    CR.drag={type:'move',pt0:{...pt},box0:{...CR.box}};
+  }
+}
+function onCropMove(e){
+  e.preventDefault();
+  if(!CR.drag)return;
+  const pt=c2n(e);
+  const W=CR.img.width,H=CR.img.height;
+  const MIN=W*0.06; // min box size = 6% of image
+  if(CR.drag.type==='move'){
+    const dx=(pt.x-CR.drag.pt0.x)/W, dy=(pt.y-CR.drag.pt0.y)/H;
+    CR.box.x=Math.max(0,Math.min(1-CR.drag.box0.w, CR.drag.box0.x+dx));
+    CR.box.y=Math.max(0,Math.min(1-CR.drag.box0.h, CR.drag.box0.y+dy));
+  }else{
+    const id=CR.drag.id;
+    const dx=pt.x-CR.drag.pt0.x, dy=pt.y-CR.drag.pt0.y;
+    let L=CR.drag.left0, T=CR.drag.top0, R=CR.drag.right0, B=CR.drag.bottom0;
+    // Each handle moves specific edges from their drag-start positions
+    if(id==='tl'||id==='ml'||id==='bl') L=Math.max(0,         Math.min(R-MIN, L+dx));
+    if(id==='tr'||id==='mr'||id==='br') R=Math.max(L+MIN,     Math.min(W,     R+dx));
+    if(id==='tl'||id==='tm'||id==='tr') T=Math.max(0,         Math.min(B-MIN, T+dy));
+    if(id==='bl'||id==='bm'||id==='br') B=Math.max(T+MIN,     Math.min(H,     B+dy));
+    CR.box={x:L/W, y:T/H, w:(R-L)/W, h:(B-T)/H};
+  }
+  drawCrop();
+}
+function onCropUp(e){e.preventDefault();CR.drag=null;CV_releaseCapture(e);}
+function CV_setCapture(e){try{CR.canvas.setPointerCapture(e.pointerId);}catch{}}
+function CV_releaseCapture(e){try{CR.canvas.releasePointerCapture(e.pointerId);}catch{}}
+
+function drawCrop(){
+  const cv=CR.canvas,ctx=CR.ctx,img=CR.img;if(!cv||!ctx||!img)return;
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);ctx.drawImage(img,0,0);
+  const b=CR.box,x=b.x*W,y=b.y*H,w=b.w*W,h=b.h*H;
+  ctx.fillStyle='rgba(0,0,0,0.52)';
+  ctx.fillRect(0,0,W,y);ctx.fillRect(0,y+h,W,H-y-h);
+  ctx.fillRect(0,y,x,h);ctx.fillRect(x+w,y,W-x-w,h);
+  ctx.strokeStyle='#f59e0b';ctx.lineWidth=Math.max(3,W*0.005);ctx.strokeRect(x,y,w,h);
+  ctx.fillStyle='rgba(245,158,11,0.07)';ctx.fillRect(x,y,w,h);
+  const hr=HR();
+  [[x,y],[x+w/2,y],[x+w,y],[x,y+h/2],[x+w,y+h/2],[x,y+h],[x+w/2,y+h],[x+w,y+h]].forEach(([hx,hy])=>{
+    ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(hx,hy,hr,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(2,W*0.003);ctx.beginPath();ctx.arc(hx,hy,hr,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,0.45)';ctx.beginPath();ctx.arc(hx,hy,hr*0.32,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function getCroppedDataUrl(){
+  if(!CR.img||!CR.canvas)return cap.photo;
+  const W=CR.img.width,H=CR.img.height,b=CR.box;
+  const PAD=0.02,x=Math.max(0,(b.x-PAD)*W),y=Math.max(0,(b.y-PAD)*H);
+  const w=Math.min(W-x,(b.w+PAD*2)*W),h=Math.min(H-y,(b.h+PAD*2)*H);
+  const tmp=document.createElement('canvas');tmp.width=w;tmp.height=h;
+  tmp.getContext('2d').drawImage(CR.img,x,y,w,h,0,0,w,h);
+  return tmp.toDataURL('image/jpeg',.92);
+}
+
+async function doExtractCropped(){
+  const btn=document.getElementById('btnExtract');if(btn)btn.disabled=true;
+  const eb=document.getElementById('extBox');if(eb){eb.style.display='';eb.style.display='block';}
+  // Reset confirm zone while extracting
+  const cz=document.getElementById('confirmZone');if(cz)cz.style.display='none';
+  document.getElementById('btnNext').disabled=true;
+  cap.croppedPhoto=getCroppedDataUrl();
+  await doExtract(cap.croppedPhoto);
+  if(btn)btn.disabled=false;
+  // Show confirm zone once extraction completes
+  setTimeout(()=>showConfirmZone(),60);
+}
+
+function selU(id){cap.uid=id;renderStep();}
+function selUM(id,type){cap.uid=id;cap.mt=type;renderStep();}
+function renderBboxCanvas(fullId, zoomId, dataUrl, bbox){
+  const img=new Image();
+  img.onload=()=>{
+    // Full image with overlay
+    const cvF=document.getElementById(fullId);
+    if(cvF){
+      cvF.width=img.width;cvF.height=img.height;
+      const ctx=cvF.getContext('2d');
+      ctx.drawImage(img,0,0);
+      if(bbox){
+        const x=bbox.x*img.width,y=bbox.y*img.height,w=bbox.w*img.width,h=bbox.h*img.height;
+        // Dim outside
+        ctx.fillStyle='rgba(0,0,0,0.38)';
+        ctx.fillRect(0,0,img.width,y);
+        ctx.fillRect(0,y+h,img.width,img.height-y-h);
+        ctx.fillRect(0,y,x,h);
+        ctx.fillRect(x+w,y,img.width-x-w,h);
+        // Highlight box fill
+        ctx.fillStyle='rgba(245,158,11,0.12)';ctx.fillRect(x,y,w,h);
+        // Box stroke
+        ctx.strokeStyle='#f59e0b';ctx.lineWidth=Math.max(2,img.width*0.004);ctx.strokeRect(x,y,w,h);
+        // Corner ticks
+        const tk=Math.min(w,h)*0.18,lw=ctx.lineWidth*1.8;
+        ctx.strokeStyle='#fbbf24';ctx.lineWidth=lw;
+        [[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]].forEach(([cx,cy,dx,dy])=>{
+          ctx.beginPath();ctx.moveTo(cx+dx*tk,cy);ctx.lineTo(cx,cy);ctx.lineTo(cx,cy+dy*tk);ctx.stroke();
+        });
+      }
+    }
+    // Zoomed crop
+    const cvZ=document.getElementById(zoomId);
+    if(cvZ){
+      if(bbox){
+        const PAD=0.05;
+        const x2=Math.max(0,(bbox.x-PAD)*img.width),y2=Math.max(0,(bbox.y-PAD)*img.height);
+        const w2=Math.min(img.width-x2,(bbox.w+PAD*2)*img.width),h2=Math.min(img.height-y2,(bbox.h+PAD*2)*img.height);
+        const aspect=w2/h2;const OUT_W=320,OUT_H=Math.round(OUT_W/aspect);
+        cvZ.width=OUT_W;cvZ.height=OUT_H;
+        const ctx2=cvZ.getContext('2d');
+        // Draw cropped region
+        ctx2.drawImage(img,x2,y2,w2,h2,0,0,OUT_W,OUT_H);
+        // Draw inner border hint
+        ctx2.strokeStyle='#f59e0b';ctx2.lineWidth=2;ctx2.strokeRect(1,1,OUT_W-2,OUT_H-2);
+      } else {
+        // No bbox — just show full image
+        const OUT_W=320,OUT_H=Math.round(320*img.height/img.width);
+        cvZ.width=OUT_W;cvZ.height=OUT_H;
+        const ctx2=cvZ.getContext('2d');ctx2.drawImage(img,0,0,OUT_W,OUT_H);
+        ctx2.fillStyle='rgba(245,158,11,0.15)';ctx2.fillRect(0,0,OUT_W,OUT_H);
+        ctx2.fillStyle='#f59e0b';ctx2.font='bold 13px Barlow,sans-serif';ctx2.textAlign='center';
+        ctx2.fillText('No bbox detected',OUT_W/2,OUT_H/2);
+      }
+    }
+  };
+  img.src=dataUrl;
+}
+
+// ── ANOMALY CHECK (inline on confirm step) ──
+function checkAnomaly(val){
+  const zone=document.getElementById('anomalyZone');if(!zone)return;
+  const md=MDEFS.find(m=>m.type===cap.mt);
+  const rds=getMR(cap.uid,cap.mt);
+  if(!rds.length||!val||isNaN(parseFloat(val))){zone.innerHTML='';return;}
+  const v=parseFloat(val);const warnings=[];
+  const last=rds[rds.length-1];const lastV=parseFloat(last.reading);
+  // 1. Reading went backwards
+  if(v<lastV){warnings.push({cls:'t-critical',icon:'🔴',msg:`Reading ${v} is LOWER than last recorded ${lastV} ${md.unit} — meters cannot run backwards. Likely OCR error.`});}
+  // 2. Compare vs expected range
+  if(rds.length>=2){
+    const pts=[];
+    for(let i=Math.max(1,rds.length-8);i<rds.length;i++){const d=Math.max(1,dBetween(rds[i-1].date,rds[i].date));const c=parseFloat(rds[i].reading)-parseFloat(rds[i-1].reading);if(c>=0)pts.push(c/d);}
+    if(pts.length>=2){
+      const avg=pts.reduce((s,x)=>s+x,0)/pts.length;
+      const dAgo=Math.max(1,dBetween(last.date,new Date().toISOString().split('T')[0]));
+      const lo=lastV+avg*dAgo*0.4,hi=lastV+avg*dAgo*2.5;
+      const consumption=v-lastV;
+      const dailyRate=consumption/dAgo;
+      if(v>lastV){
+        if(dailyRate>avg*3){warnings.push({cls:'t-critical',icon:'🔴',msg:`Daily rate ${dailyRate.toFixed(md.dec)} ${md.unit}/day is ${((dailyRate/avg-1)*100).toFixed(0)}% above normal (${avg.toFixed(md.dec)}/day). Verify reading — possible OCR digit error.`});}
+        else if(dailyRate>avg*1.5){warnings.push({cls:'t-high',icon:'🟡',msg:`Daily rate ${dailyRate.toFixed(md.dec)} ${md.unit}/day is elevated vs normal ${avg.toFixed(md.dec)}/day. Worth confirming.`});}
+        else if(dailyRate<avg*0.3&&dAgo>3){warnings.push({cls:'t-low',icon:'🔵',msg:`Daily rate ${dailyRate.toFixed(md.dec)} ${md.unit}/day seems very low vs normal ${avg.toFixed(md.dec)}/day. Check reading.`});}
+        else{warnings.push({cls:'t-normal',icon:'🟢',msg:`Consumption rate ${dailyRate.toFixed(md.dec)} ${md.unit}/day — within normal range (avg ${avg.toFixed(md.dec)}/day). ✓`});}
+      }
+    }
+  }
+  if(!warnings.length){zone.innerHTML='';return;}
+  zone.innerHTML=warnings.map(w=>`<div class="tbadge ${w.cls}" style="font-size:calc(12px * var(--fs))"><span style="font-size:17px;flex-shrink:0">${w.icon}</span><span>${w.msg}</span></div>`).join('');
+}
+function tCam(){document.getElementById('camIn')?.click();}
+function tGal(){document.getElementById('galIn')?.click();}
+async function onPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    toast('Processing…');
+    cap.photo=await preprocess(ev.target.result);
+    cap.extracted=null;cap.bbox=null;cap.croppedPhoto=null;
+    // Reset crop box to a sensible centre region
+    CR.box={x:.05,y:.15,w:.9,h:.5};
+    renderStep();
+  };
+  reader.readAsDataURL(f);
+}
+function capBack(){
+  if(cap.step===0){go('dash');return;}
+  cap.step--;
+  if(cap.step===0&&S.units.length===1){go('dash');return;}
+  renderStep();
+}
+function capNext(){
+  if(cap.step===0){if(!cap.uid){toast('Select a unit','err');return;}cap.step=1;renderStep();return;}
+  if(cap.step===1){
+    if(!cap.extracted&&!cap.manualMode){toast('Extract a reading first','err');return;}
+    const v=document.getElementById('confIn')?.value;
+    if(!v||isNaN(parseFloat(v))){toast('Enter a valid reading','err');return;}
+    cap.confirmed=v;
+    saveReading();
+  }
+}
+function enterManual(){cap.manualMode=true;cap.photo=null;renderStep();}
+function exitManual(){cap.manualMode=false;cap.photo=null;renderStep();}
+function resetCrop(){
+  // Go back to entry screen to retake
+  cap.photo=null;cap.extracted=null;cap.croppedPhoto=null;cap.bbox=null;
+  CR.box={x:.05,y:.15,w:.9,h:.5};
+  renderStep();
+}
+
+// ═══════════════════════════════════════════
+//  AI EXTRACTION
+// ═══════════════════════════════════════════
+function buildPrompt(mt,uid){
+  const md=MDEFS.find(m=>m.type===mt),rds=getMR(uid,mt);
+  let ctx='';
+  if(rds.length>=2){
+    const last=rds[rds.length-1],pts=[];
+    for(let i=Math.max(1,rds.length-6);i<rds.length;i++){const d=Math.max(1,dBetween(rds[i-1].date,rds[i].date));const c=parseFloat(rds[i].reading)-parseFloat(rds[i-1].reading);if(c>=0)pts.push(c/d);}
+    if(pts.length){const avg=pts.reduce((s,v)=>s+v,0)/pts.length;const dAgo=Math.round(dBetween(last.date,new Date().toISOString().split('T')[0]));
+      const lo=(parseFloat(last.reading)+avg*dAgo*0.6).toFixed(md.dec),hi=(parseFloat(last.reading)+avg*dAgo*1.4).toFixed(md.dec);
+      ctx=`\nHISTORICAL CONTEXT:\n- Last reading: ${last.reading} ${md.unit} on ${last.date} (${dAgo} days ago)\n- Historical daily avg: ${avg.toFixed(md.dec)} ${md.unit}/day\n- Expected range today: ${lo} to ${hi}\n- If extracted reading is far outside this range, re-examine the image carefully.\n- Common OCR errors: 6→0, 1→7, decimal in wrong position.`;}
+  }
+  const hints={
+    electricity:`METER TYPE: Electricity (kWh). Extract PRIMARY kWh reading. Usually no decimal (integer like 45678). Some meters show one decimal. Ignore kvarh/kvar columns.`,
+    water:`METER TYPE: Water (m³). Water meters split by COLOUR: LEFT digits (black on white) = whole m³, RIGHT digits (red on red background) = decimal fraction. You MUST include BOTH sections. Example: "01234" (black) + "56" (red) = 1234.56 m³. Never round to whole number.`,
+    gas:`METER TYPE: Gas (m³). Typically 5 integer + 3 decimal digits separated by colour. Include all decimal digits.`,
+    custom:`Extract the complete numeric meter reading including all decimal digits.`,
+  };
+  return`${hints[mt]||hints.custom}${ctx}
+
+Also identify the bounding box of the meter reading digits in the image (normalized 0.0–1.0 coordinates from top-left).
+
+Return ONLY valid JSON, no markdown:
+{"reading":"<full number>","unit":"${md.unit}","confidence":"high|medium|low","notes":"<image quality, colour split, OCR uncertainty, range issues>","bbox":{"x":0.0,"y":0.0,"w":1.0,"h":1.0}}`;
+}
+
+async function doExtract(imageDataUrl){
+  document.getElementById('btnNext').disabled=true;
+  const prov=S.aiProv,keys={groq:S.groqKey,openrouter:S.orKey,gemini:S.gemKey,claude:S.claKey};
+  if(prov==='none'||(prov!=='none'&&!keys[prov])){showExtManual(prov==='none'?'Manual mode':'No API key — go to Settings');return;}
+  const src=imageDataUrl||cap.croppedPhoto||cap.photo;
+  try{
+    const b64=src.split(',')[1],mt2=src.split(';')[0].split(':')[1];
+    const prompt=buildPrompt(cap.mt,cap.uid);let parsed;
+    if(prov==='groq'||prov==='openrouter'){
+      const url=prov==='groq'?'https://api.groq.com/openai/v1/chat/completions':'https://openrouter.ai/api/v1/chat/completions';
+      const model=prov==='groq'?'meta-llama/llama-4-scout-17b-16e-instruct':'meta-llama/llama-3.2-11b-vision-instruct:free';
+      const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+keys[prov]},
+        body:JSON.stringify({model,max_tokens:500,temperature:0.05,messages:[{role:'user',content:[{type:'image_url',image_url:{url:`data:${mt2};base64,${b64}`}},{type:'text',text:prompt}]}]})});
+      const data=await res.json();if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+      parsed=JSON.parse(data.choices?.[0]?.message?.content.replace(/```json|```/g,'').trim()||'{}');
+    } else if(prov==='gemini'){
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.gemKey}`,
+        {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{inline_data:{mime_type:mt2,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:500,temperature:0.05}})});
+      const data=await res.json();if(data.error)throw new Error(data.error.message);
+      parsed=JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+    } else if(prov==='claude'){
+      const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':S.claKey,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt2,data:b64}},{type:'text',text:prompt}]}]})});
+      const data=await res.json();parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+    }
+    cap.extracted=parsed.reading;cap.conf=parsed.confidence;cap.notes=parsed.notes;
+    if(parsed.bbox){
+      const b=parsed.bbox;
+      if(b.x_min!==undefined){cap.bbox={x:b.x_min/1000,y:b.y_min/1000,w:(b.x_max-b.x_min)/1000,h:(b.y_max-b.y_min)/1000};}
+      else{cap.bbox={x:parseFloat(b.x)||0,y:parseFloat(b.y)||0,w:parseFloat(b.w)||1,h:parseFloat(b.h)||1};}
+    } else { cap.bbox=null; }
+    showExtRes();
+  }catch(err){showExtErr(err.message||'Check API key');}
+  document.getElementById('btnNext').disabled=false;
+}
+function showExtRes(){
+  const c=cap.conf,cls=c==='high'?'chi':c==='medium'?'cmd':'clo',lbl=c==='high'?'✓ High confidence':c==='medium'?'~ Medium confidence':'⚠ Low confidence — check carefully';
+  document.getElementById('extIco').textContent=c==='high'?'✅':c==='medium'?'⚡':'⚠️';
+  document.getElementById('extSpin').style.display='none';document.getElementById('extLbl').textContent='Reading extracted';
+  document.getElementById('extNum').textContent=cap.extracted;document.getElementById('extNum').classList.remove('pulse');
+  document.getElementById('extConf').innerHTML=`<span class="${cls}">${lbl}</span>${cap.notes?` · <span style="color:var(--tx3)">${cap.notes}</span>`:''}`;
+  document.getElementById('btnNext').disabled=false;
+}
+function showExtManual(msg){
+  document.getElementById('extIco').textContent='✏️';document.getElementById('extSpin').style.display='none';
+  document.getElementById('extLbl').textContent='Enter reading manually';document.getElementById('extNum').textContent='?';
+  document.getElementById('extNum').classList.remove('pulse');document.getElementById('extConf').innerHTML=`<span style="color:var(--tx3)">${msg}</span>`;
+  cap.extracted='0';document.getElementById('btnNext').disabled=false;
+}
+function showExtErr(msg){
+  document.getElementById('extIco').textContent='⚠️';document.getElementById('extSpin').style.display='none';
+  document.getElementById('extLbl').textContent='Extraction failed';document.getElementById('extNum').textContent='?';
+  document.getElementById('extNum').classList.remove('pulse');document.getElementById('extConf').innerHTML=`<span class="clo">${msg}</span>`;
+  cap.extracted='0';cap.conf='low';document.getElementById('btnNext').disabled=false;
+}
+
+async function saveReading(){
+  const date=document.getElementById('rDate').value,time=document.getElementById('rTime').value,notes=document.getElementById('rNotes')?.value.trim()||'';
+  if(!date||!time){toast('Date and time required','err');return;}
+  // Compress photo to thumbnail for storage
+  const photoThumb=await compressForStorage(cap.croppedPhoto||cap.photo);
+  const r={id:'r_'+Date.now(),propId:S.prop.id,unitId:cap.uid,meterType:cap.mt,reading:cap.confirmed,
+    date,time,notes,photoData:photoThumb,aiConf:cap.conf,savedAt:new Date().toISOString()};
+  S.readings.push(r);saveR();S.activeUnit=cap.uid;S.activeMeter=cap.mt;
+  refreshAll();
+  const allR=getMR(cap.uid,cap.mt),tr=assessTrend(allR),md=MDEFS.find(m=>m.type===cap.mt);
+  const prev=allR.length>=2?allR[allR.length-2]:null;
+  const cons=prev?(parseFloat(r.reading)-parseFloat(prev.reading)).toFixed(md.dec):null;
+  const days=prev?Math.round(dBetween(prev.date,r.date)):null;
+  document.getElementById('assessContent').innerHTML=`<div class="anum">${fNum(r.reading,md.dec)}</div>
+    <div class="acons">${md.unit} · ${md.icon} ${md.label}${cons!==null?` · +${cons} over ${days}d`:''}</div>
+    ${tr?`<div class="tbadge ${tr.cls}"><div class="tico">${tr.icon}</div><div><strong>${tr.lbl}</strong><br><span style="font-weight:400;font-size:calc(11px * var(--fs))">${tr.txt}</span></div></div>`:`<div style="color:var(--tx2);font-size:calc(13px * var(--fs));padding:8px 0">✓ Saved. Trend analysis available after 5+ readings.</div>`}`;
+  toast('✓ Reading saved!','ok');go('dash');setTimeout(()=>openM('mAssess'),300);
+  // Telegram alerts based on user config
+  if(S.tgToken&&S.tgChatId){
+    const u2=S.units.find(x=>x.id===cap.uid);
+    const shouldAlert=(
+      (S.alertCfg.onSave) ||
+      (S.alertCfg.onCritical && tr?.lv==='critical') ||
+      (S.alertCfg.onHigh     && tr?.lv==='high') ||
+      (S.alertCfg.onGradRise && tr?.lbl?.includes('Upward')) ||
+      (S.alertCfg.onGradFall && tr?.lbl?.includes('Downward')) ||
+      (S.alertCfg.onLow      && tr?.lv==='low')
+    );
+    if(shouldAlert){
+      const lvEmoji=tr ? (tr.lv==='critical'?'🔴':tr.lv==='high'?'🟡':tr.lv==='low'?'🔵':'🟢') : 'ℹ️';
+      const lvLbl=tr?tr.lbl:'Reading saved';
+      const msg=`${lvEmoji} <b>MetrIQ — ${S.prop?.name||''}</b>\n`+
+        `Unit: <b>${u2?.number||''}</b>${u2?.desc?' · '+u2.desc:''}\n`+
+        `Meter: ${md.icon} ${md.label}\n\n`+
+        `<b>${lvLbl}</b>${tr?'\n'+tr.txt:''}\n\n`+
+        `Reading: <b>${fNum(r.reading,md.dec)} ${md.unit}</b>`+
+        (cons!==null?`\nConsumption: +${cons} ${md.unit} over ${days}d`:'')+
+        `\nSaved: ${fDate(r.date)} ${r.time}`;
+      sendTelegramAlert(msg);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════
+function renderHistory(){
+  renderMTabs('mTabsHist','history');
+  const list=document.getElementById('histList'),u=S.units.find(x=>x.id===S.activeUnit),md=MDEFS.find(m=>m.type===S.activeMeter);
+  if(!u||!md){list.innerHTML='<div class="empty"><div class="eico">📋</div><div class="etit">Select a unit</div></div>';return;}
+  const rds=getMR(u.id,md.type).slice().reverse();
+  if(!rds.length){list.innerHTML=`<div class="empty"><div class="eico">${md.icon}</div><div class="etit">No ${md.label} readings</div><div class="esub">Tap Capture to add the first one</div></div>`;return;}
+  const sorted=getMR(u.id,md.type);
+  list.innerHTML=rds.map(r=>{
+    const idx=sorted.findIndex(x=>x.id===r.id),prev=sorted[idx-1];
+    let cH='';
+    if(prev){const c=parseFloat(r.reading)-parseFloat(prev.reading),d=Math.max(1,dBetween(prev.date,r.date));cH=`<div class="hcons"><div class="hcv ${c>=0?'cp':'cn'}">${c>=0?'+':''}${c.toFixed(md.dec)}</div><div class="hcl">${md.unit}·${d}d</div></div>`;}
+    return`<div class="hi" onclick="showDetail('${r.id}')"><div class="hico">${md.icon}</div>
+      <div class="hb"><div class="hn">${u.number}${r.notes?' · '+r.notes:''}</div><div class="hr">${fNum(r.reading,md.dec)}</div><div class="hd">${fDate(r.date)} ${r.time}</div></div>${cH}</div>`;
+  }).join('');
+}
+
+function showDetail(id){
+  const r=S.readings.find(x=>x.id===id);if(!r)return;
+  const u=S.units.find(x=>x.id===r.unitId),md=MDEFS.find(m=>m.type===r.meterType);if(!u||!md)return;
+  const sorted=getMR(u.id,md.type),idx=sorted.findIndex(x=>x.id===id),prev=sorted[idx-1];
+  let cons='—',daily='—';
+  if(prev){const c=parseFloat(r.reading)-parseFloat(prev.reading),d=Math.max(1,dBetween(prev.date,r.date));cons=`${c.toFixed(md.dec)} ${md.unit}`;daily=`${(c/d).toFixed(md.dec)} ${md.unit}/day`;}
+  const ct=r.aiConf==='high'?'tg':r.aiConf==='medium'?'ta':'tr';
+  document.getElementById('detailContent').innerHTML=`<div class="mt">${md.icon} ${u.number} · ${md.label}</div>
+    ${r.photoData?`<img src="${r.photoData}" class="pthumb">`:''}
+    <div class="detnum">${fNum(r.reading,md.dec)}</div>
+    <div style="text-align:center;color:var(--tx2);font-size:13px;margin-bottom:12px;margin-top:-4px">${md.unit}</div>
+    <div class="detgrid">
+      <div class="deti"><div class="detil">Date</div><div class="detiv">${fDate(r.date)}</div></div>
+      <div class="deti"><div class="detil">Time</div><div class="detiv">${r.time}</div></div>
+      <div class="deti"><div class="detil">Consumption</div><div class="detiv">${cons}</div></div>
+      <div class="deti"><div class="detil">Daily Avg</div><div class="detiv">${daily}</div></div>
+    </div>
+    ${r.notes?`<div style="margin:9px 0;padding:9px 11px;background:var(--sf2);border-radius:var(--rs);font-size:13px;color:var(--tx2)">📝 ${r.notes}</div>`:''}
+    ${r.aiConf?`<div style="text-align:center;margin:7px 0"><span class="tag ${ct}">AI ${r.aiConf} confidence</span></div>`:''}
+    <div style="height:11px"></div>
+    <button class="btn btd bfull" onclick="delReading('${r.id}')">Delete Reading</button>`;
+  openM('mDetail');
+}
+function delReading(id){
+  if(!confirm('Delete?'))return;S.readings=S.readings.filter(r=>r.id!==id);saveR();closeM('mDetail');renderHistory();renderDashboard();toast('Deleted');
+}
+
+// ═══════════════════════════════════════════
+//  ANALYTICS
+// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  ANALYTICS — redesigned
+// ═══════════════════════════════════════════
+function setAnlScope(scope){
+  anlScope=scope;
+  document.getElementById('anlScopeBuilding').classList.toggle('active',scope==='building');
+  document.getElementById('anlScopeUnit').classList.toggle('active',scope==='unit');
+  document.getElementById('anlUnitRow').style.display=scope==='unit'?'':'none';
+  document.getElementById('anlMultiYearCard').style.display=scope==='building'?'':'none';
+  renderAnalytics();
+}
+function setAnlPeriod(type){
+  anlPeriodType=type;
+  document.getElementById('anlCY').classList.toggle('active',type==='CY');
+  document.getElementById('anlFY').classList.toggle('active',type==='FY');
+  renderAnalytics();
+}
+function shiftAnlYear(delta){
+  anlYear+=delta;
+  renderAnalytics();
+}
+function getAnlPeriodMonths(){
+  // Returns array of 12 {year,month(0-11),label} in period order
+  if(anlPeriodType==='CY'){
+    return Array.from({length:12},(_,i)=>({year:anlYear,month:i,label:new Date(anlYear,i).toLocaleString('en',{month:'short'})}));
+  } else {
+    // FY Apr(3) to Mar(2) — FY starts Apr of anlYear-1, ends Mar of anlYear
+    return Array.from({length:12},(_,i)=>{
+      const mo=(3+i)%12; const yr=anlYear-1+(3+i>=12?1:0);
+      return{year:yr,month:mo,label:new Date(yr,mo).toLocaleString('en',{month:'short'})};
+    });
+  }
+}
+function getAnlPeriodLabel(){
+  if(anlPeriodType==='CY') return`CY ${anlYear}`;
+  const fy0=String(anlYear-1).slice(2),fy1=String(anlYear).slice(2);
+  return`FY ${fy0}/${fy1}`;
+}
+
+// Get monthly consumption totals for a unit (or all units if null)
+function getMonthlyConsumption(unitId, meterType){
+  const units=unitId?[unitId]:S.units.map(u=>u.id);
+  const map={};
+  units.forEach(uid=>{
+    const rds=getMR(uid,meterType);
+    for(let i=1;i<rds.length;i++){
+      const c=parseFloat(rds[i].reading)-parseFloat(rds[i-1].reading);
+      if(c<0)continue;
+      const key=rds[i].date.slice(0,7); // YYYY-MM
+      map[key]=(map[key]||0)+c;
+    }
+  });
+  return map; // {YYYY-MM: consumption}
+}
+
+// Polynomial fit (degree 2) — returns [a, b, c] for y = a + bx + cx²
+function polyFit2(xs, ys){
+  const n=xs.length; if(n<3)return[ys[0]||0,0,0];
+  let s0=n,s1=0,s2=0,s3=0,s4=0,t0=0,t1=0,t2=0;
+  xs.forEach((x,i)=>{const y=ys[i];s1+=x;s2+=x*x;s3+=x*x*x;s4+=x*x*x*x;t0+=y;t1+=x*y;t2+=x*x*y;});
+  const A=[[s0,s1,s2,t0],[s1,s2,s3,t1],[s2,s3,s4,t2]];
+  for(let col=0;col<3;col++){
+    let mx=col;for(let r=col+1;r<3;r++)if(Math.abs(A[r][col])>Math.abs(A[mx][col]))mx=r;
+    [A[col],A[mx]]=[A[mx],A[col]];
+    for(let r=col+1;r<3;r++){const f=A[r][col]/A[col][col]||0;for(let k=col;k<=3;k++)A[r][k]-=f*A[col][k];}
+  }
+  const c=[0,0,0];
+  for(let i=2;i>=0;i--){c[i]=A[i][3];for(let k=i+1;k<3;k++)c[i]-=A[i][k]*c[k];c[i]/=A[i][i]||1;}
+  return c;
+}
+
+// Compute seasonal indices from historical monthly data (24+ months preferred)
+function seasonalIdx(monthlyMap){
+  const byMonth=Array.from({length:12},()=>[]);
+  Object.entries(monthlyMap).forEach(([k,v])=>{const mo=parseInt(k.slice(5))-1;byMonth[mo].push(v);});
+  const allVals=Object.values(monthlyMap);
+  if(!allVals.length)return Array(12).fill(1);
+  const overall=allVals.reduce((s,v)=>s+v,0)/allVals.length;
+  return byMonth.map(vals=>{if(!vals.length)return 1;const avg=vals.reduce((s,v)=>s+v,0)/vals.length;return overall>0?avg/overall:1;});
+}
+
+// Compute prediction for remaining months of period
+function computePrediction(periodMonths, monthlyMap, allMonthlyMap){
+  const seIdx=seasonalIdx(allMonthlyMap);
+  // Deseasonalize actuals for poly fit
+  const actuals=periodMonths.map(m=>{const k=`${m.year}-${String(m.month+1).padStart(2,'0')}`;return monthlyMap[k]??null;});
+  const knownIdx=actuals.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
+  const knownVals=knownIdx.map(i=>actuals[i]/(seIdx[periodMonths[i].month]||1));
+  if(knownVals.length<2)return{pred:Array(12).fill(null),upper:Array(12).fill(null),lower:Array(12).fill(null)};
+  // Fit poly to known deseasonalized values
+  const coef=polyFit2(knownIdx.map(i=>i),knownVals);
+  const polyVal=x=>coef[0]+coef[1]*x+coef[2]*x*x;
+  // RMSE for CI
+  const rmse=Math.sqrt(knownVals.reduce((s,v,j)=>{const diff=v-polyVal(knownIdx[j]);return s+diff*diff;},0)/knownVals.length)||0;
+  const pred=periodMonths.map((_,i)=>{
+    if(actuals[i]!==null)return null; // don't predict known months
+    const deSeas=polyVal(i);
+    return Math.max(0,deSeas*(seIdx[periodMonths[i].month]||1));
+  });
+  const upper=pred.map((v,i)=>{if(v===null)return null;const ds=polyVal(i);return Math.max(0,(ds+1.5*rmse)*(seIdx[periodMonths[i].month]||1));});
+  const lower=pred.map((v,i)=>{if(v===null)return null;const ds=polyVal(i);return Math.max(0,(ds-1.5*rmse)*(seIdx[periodMonths[i].month]||1));});
+  return{pred,upper,lower};
+}
+
+function renderAnalytics(){
+  renderMTabs('mTabsAnal','analytics');
+  // Destroy old charts
+  ['anlMain','anlMulti'].forEach(k=>{if(CH[k]){CH[k].destroy();CH[k]=null;}});
+  const md=MDEFS.find(m=>m.type===S.activeMeter);
+  const periodMos=getAnlPeriodMonths();
+  const now=new Date();
+  // Update period labels
+  document.getElementById('anlYrLbl').textContent=anlYear;
+  const fy0=String(anlYear-1).slice(2),fy1=String(anlYear).slice(2);
+  document.getElementById('anlFYLbl').textContent=`${fy0}/${fy1}`;
+
+  const unitId=anlScope==='unit'?S.activeUnit:null;
+  if(anlScope==='unit'&&!unitId){
+    document.getElementById('ytdCard').innerHTML='<div style="color:var(--tx3);font-size:13px;padding:8px 0;grid-column:1/-1">Select a unit above</div>';
+    document.getElementById('anlInsights').innerHTML='';return;
+  }
+
+  const monthlyMap=getMonthlyConsumption(unitId,md.type);
+  // Historical: last 3 years for seasonal + poly baseline
+  const allMonthlyMap=getMonthlyConsumption(unitId,md.type); // same but we have all time
+
+  const {pred,upper,lower}=computePrediction(periodMos,monthlyMap,allMonthlyMap);
+
+  // Build chart data
+  const labels=periodMos.map(m=>m.label);
+  const actuals=periodMos.map(m=>{const k=`${m.year}-${String(m.month+1).padStart(2,'0')}`;return monthlyMap[k]??null;});
+  // Is this month past, current, or future?
+  const periodKeys=periodMos.map(m=>`${m.year}-${String(m.month+1).padStart(2,'0')}`);
+  const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const currentIdx=periodKeys.indexOf(nowKey);
+
+  // YTD stats
+  const ytdActuals=actuals.filter(v=>v!==null);
+  const ytdTotal=ytdActuals.reduce((s,v)=>s+v,0);
+  const ytdMonths=ytdActuals.length;
+  const predFuture=pred.filter(v=>v!==null);
+  const projTotal=ytdTotal+predFuture.reduce((s,v)=>s+v,0);
+  const projUpper=ytdTotal+upper.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+  const projLower=ytdTotal+lower.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+  const scopeLabel=anlScope==='building'?`All ${S.units.length} units`:(S.units.find(u=>u.id===unitId)?.number||'Unit');
+  document.getElementById('ytdCard').innerHTML=`
+    <div class="ytd-cell"><div class="ytd-lbl">YTD Consumed</div><div class="ytd-val">${fNum(ytdTotal,md.dec)}</div><div class="ytd-sub">${md.unit} · ${ytdMonths} month${ytdMonths!==1?'s':''} · ${scopeLabel}</div></div>
+    <div class="ytd-cell"><div class="ytd-lbl">Monthly Avg</div><div class="ytd-val">${ytdMonths>0?fNum(ytdTotal/ytdMonths,md.dec):'—'}</div><div class="ytd-sub">${md.unit}/month</div></div>
+    ${predFuture.length>0?`<div class="ytd-proj">
+      ${getAnlPeriodLabel()} projected total: <strong>${fNum(projTotal,md.dec)} ${md.unit}</strong>
+      <span style="color:var(--tx3)"> (range: ${fNum(projLower,md.dec)}–${fNum(projUpper,md.dec)})</span>
+    </div>`:''}`;
+
+  // Main chart
+  const am='#f59e0b';
+  const barColors=actuals.map((_,i)=>i===currentIdx?'rgba(245,158,11,.7)':'rgba(245,158,11,.38)');
+  const mc=document.getElementById('anlMainChart');if(!mc)return;
+  CH.anlMain=new Chart(mc.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Actual',data:actuals,backgroundColor:barColors,borderRadius:3,order:2},
+        {label:'Forecast',data:pred,backgroundColor:'rgba(245,158,11,.18)',borderColor:am,borderWidth:2,borderDash:[5,4],type:'line',tension:.4,pointRadius:4,pointBackgroundColor:am,fill:false,order:1},
+        {label:'Upper',data:upper,borderColor:'transparent',backgroundColor:'rgba(245,158,11,.09)',type:'line',tension:.4,pointRadius:0,fill:'+1',order:0},
+        {label:'Lower',data:lower,borderColor:'transparent',backgroundColor:'transparent',type:'line',tension:.4,pointRadius:0,fill:false,order:0},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(md.dec)+' '+md.unit:'—'}`}}},
+      scales:{x:{grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{callback:v=>v.toFixed(md.dec)},grid:{color:'rgba(255,255,255,.04)'}}}}
+  });
+
+  // Insights
+  const allRds=anlScope==='unit'?(S.activeUnit?getMR(S.activeUnit,md.type):[]):
+    S.units.flatMap(u=>getMR(u.id,md.type)).sort((a,b)=>a.date.localeCompare(b.date));
+  const tr=assessTrend(allRds);
+  const annualGrowthPct=coefToGrowth(actuals.filter(v=>v!==null),predFuture);
+  let insightText='';
+  if(ytdMonths<2){insightText=`<div style="color:var(--tx3);font-size:calc(13px * var(--fs))">Need at least 2 months of data for analytics.</div>`;}
+  else{
+    const avgMo=ytdMonths>0?ytdTotal/ytdMonths:0;
+    const trendTxt=tr?`${tr.icon} <strong>${tr.lbl}</strong> — ${tr.txt}`:'Insufficient data for trend analysis.';
+    const projPct=avgMo>0?((projTotal-(avgMo*12))/(avgMo*12)*100):0;
+    insightText=`
+      <div class="irow">
+        ${tr?`<div class="ii"><div class="il">Trend</div><div class="iv" style="color:${tr.lv==='critical'?'var(--rd)':tr.lv==='high'?'var(--yl)':tr.lv==='low'?'var(--bl)':'var(--gn)'};font-size:calc(12px * var(--fs));white-space:normal;line-height:1.4">${trendTxt}</div></div>`:''}
+        <div class="ii"><div class="il">YTD total</div><div class="iv">${fNum(ytdTotal,md.dec)} ${md.unit}</div></div>
+        <div class="ii"><div class="il">Monthly avg</div><div class="iv">${fNum(avgMo,md.dec)} ${md.unit}</div></div>
+        ${predFuture.length>0?`
+        <div class="ii"><div class="il">Full-year forecast</div><div class="iv">${fNum(projTotal,md.dec)} ${md.unit}</div></div>
+        <div class="ii"><div class="il">vs flat projection</div><div class="iv" style="color:${projPct>10?'var(--rd)':projPct<-10?'var(--bl)':'var(--gn)'}">${projPct>0?'+':''}${projPct.toFixed(1)}%</div></div>
+        <div class="ii"><div class="il">Forecast range</div><div class="iv" style="font-size:calc(11px * var(--fs))">${fNum(projLower,md.dec)} – ${fNum(projUpper,md.dec)} ${md.unit}</div></div>`:''}
+      </div>`;
+  }
+  document.getElementById('anlInsights').innerHTML=insightText;
+
+  // Multi-year chart (building scope)
+  if(anlScope==='building'){
+    document.getElementById('anlMultiYearCard').style.display='';
+    const mc2=document.getElementById('anlMultiChart');if(!mc2)return;
+    const years=[anlYear-2,anlYear-1,anlYear];
+    const colors=['rgba(245,158,11,.3)','rgba(245,158,11,.55)','#f59e0b'];
+    const datasets=years.map((yr,yi)=>{
+      const map=getMonthlyConsumption(null,md.type);
+      const data=Array.from({length:12},(_,mo)=>{
+        const k=`${yr}-${String(mo+1).padStart(2,'0')}`;
+        return map[k]??null;
+      });
+      return{label:String(yr),data,borderColor:colors[yi],backgroundColor:'transparent',type:'line',tension:.4,pointRadius:yi===2?4:2,borderWidth:yi===2?2:1,fill:false};
+    });
+    CH.anlMulti=new Chart(mc2.getContext('2d'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:12,font:{size:11}}}},
+        scales:{x:{grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{callback:v=>v.toFixed(md.dec)},grid:{color:'rgba(255,255,255,.04)'}}}}});
+  } else {
+    document.getElementById('anlMultiYearCard').style.display='none';
+  }
+}
+
+function coefToGrowth(actuals, future){
+  if(!actuals.length||!future.length)return 0;
+  const lastAct=actuals[actuals.length-1];
+  const lastFut=future[future.length-1];
+  return lastAct>0?((lastFut-lastAct)/lastAct*100):0;
+}
+function initMC(){
+  Chart.defaults.color='#5a5a70';Chart.defaults.borderColor='#2a2a38';Chart.defaults.font.family="'Share Tech Mono',monospace";
+  CH.mini=new Chart(document.getElementById('miniChart').getContext('2d'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:'rgba(245,158,11,.4)',borderColor:'#f59e0b',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}});
+}
+function updateMC(pts){if(!CH.mini)return;CH.mini.data.labels=pts.map(p=>p.date);CH.mini.data.datasets[0].data=pts.map(p=>Math.max(0,p.v));CH.mini.update();}
+
+// ═══════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════
+function onProvChange(){
+  const v=document.getElementById('aiProv')?.value;if(!v)return;
+  ['gGroq','gOR','gGemini','gClaude'].forEach(id=>document.getElementById(id).style.display='none');
+  const m={groq:'gGroq',openrouter:'gOR',gemini:'gGemini',claude:'gClaude'};
+  if(m[v])document.getElementById(m[v]).style.display='flex';
+}
+function saveSettings(){
+  S.aiProv=document.getElementById('aiProv').value;S.groqKey=document.getElementById('groqKey').value.trim();
+  S.orKey=document.getElementById('orKey').value.trim();S.gemKey=document.getElementById('gemKey').value.trim();S.claKey=document.getElementById('claKey').value.trim();
+  DB.set('aiProv',S.aiProv);DB.set('groqKey',S.groqKey);DB.set('orKey',S.orKey);DB.set('gemKey',S.gemKey);DB.set('claKey',S.claKey);
+  toast('✓ Settings saved','ok');
+}
+function saveTelegram(){
+  S.tgToken=document.getElementById('tgToken').value.trim();
+  S.tgChatId=document.getElementById('tgChatId').value.trim();
+  S.alertCfg={
+    onSave:    document.getElementById('acOnSave').checked,
+    onCritical:document.getElementById('acOnCritical').checked,
+    onHigh:    document.getElementById('acOnHigh').checked,
+    onGradRise:document.getElementById('acOnGradRise').checked,
+    onGradFall:document.getElementById('acOnGradFall').checked,
+    onLow:     document.getElementById('acOnLow').checked,
+  };
+  DB.set('tgToken',S.tgToken);DB.set('tgChatId',S.tgChatId);DB.set('alertCfg',S.alertCfg);
+  toast('✓ Telegram settings saved','ok');
+}
+async function testTelegram(){
+  const tok=document.getElementById('tgToken').value.trim();
+  const cid=document.getElementById('tgChatId').value.trim();
+  if(!tok||!cid){toast('Enter token and chat ID first','err');return;}
+  toast('Sending…');
+  try{
+    const url=`https://api.telegram.org/bot${tok}/sendMessage?`+
+      `chat_id=${encodeURIComponent(cid)}`+
+      `&text=${encodeURIComponent('⚡ MetrIQ — Test alert!\nYour Telegram alerts are working ✓')}`+
+      `&parse_mode=HTML`;
+    const res=await fetch(url);
+    const d=await res.json();
+    if(d.ok)toast('✓ Message sent! Check Telegram','ok');
+    else if(d.error_code===401)toast('Invalid token — check @BotFather','err');
+    else if(d.error_code===400)toast('Bad chat ID — send /start to your bot first','err');
+    else toast('Telegram: '+d.description,'err');
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+async function sendTelegramAlert(msg){
+  if(!S.tgToken||!S.tgChatId)return;
+  try{
+    const url=`https://api.telegram.org/bot${S.tgToken}/sendMessage?`+
+      `chat_id=${encodeURIComponent(S.tgChatId)}`+
+      `&text=${encodeURIComponent(msg)}`+
+      `&parse_mode=HTML`;
+    await fetch(url);
+  }catch(e){console.warn('Telegram alert failed:',e);}
+}
+function exportData(){
+  const d={property:S.prop?.name,units:S.units,readings:S.readings.map(r=>({...r,photoData:undefined})),exported:new Date().toISOString()};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download='metriq_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('✓ Exported');
+}
+function clearAll(){if(!confirm('Delete ALL readings?'))return;S.readings=[];saveR();refreshAll();toast('Cleared');}
+
+// ═══════════════════════════════════════════
+//  REPORT GENERATION
+// ═══════════════════════════════════════════
+function openReportModal(){
+  // Populate unit checkboxes
+  const el=document.getElementById('rptUnitList');
+  el.innerHTML=S.units.map(u=>`
+    <label style="display:flex;align-items:center;gap:5px;font-size:calc(12px * var(--fs));color:var(--tx2);cursor:pointer;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:4px 9px;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
+      <input type="checkbox" class="rptUnit" value="${u.id}" checked style="accent-color:var(--am);width:14px;height:14px"> ${u.number}
+    </label>`).join('');
+  document.getElementById('rptAllUnits').checked=true;
+  openM('mReport');
+}
+function toggleAllUnits(checked){
+  document.querySelectorAll('.rptUnit').forEach(cb=>cb.checked=checked);
+}
+
+function generateReport(){
+  const days   = document.getElementById('rptPeriod').value;
+  const elec   = document.getElementById('rptElec').checked;
+  const water  = document.getElementById('rptWater').checked;
+  const gas    = document.getElementById('rptGas').checked;
+  const unitIds= [...document.querySelectorAll('.rptUnit:checked')].map(cb=>cb.value);
+  const mTypes = MDEFS.filter(m=>(m.type==='electricity'&&elec)||(m.type==='water'&&water)||(m.type==='gas'&&gas));
+  if(!unitIds.length||!mTypes.length){toast('Select at least one unit and meter','err');return;}
+
+  const cutoff = days==='all' ? new Date(0) : (() => { const d=new Date(); d.setDate(d.getDate()-parseInt(days)); return d; })();
+  const reportDate = new Date().toLocaleDateString('en-SG',{day:'numeric',month:'long',year:'numeric'});
+  const periodLabel = days==='all' ? 'All time' : `Last ${days} days (to ${reportDate})`;
+  const units = S.units.filter(u=>unitIds.includes(u.id));
+
+  // ── build data per unit per meter ──
+  const unitData = units.map(u=>{
+    const meters = mTypes.map(md=>{
+      const all = getMR(u.id,md.type);
+      const inPeriod = all.filter(r=>new Date(r.date)>=cutoff);
+      if(inPeriod.length<2) return {md,total:null,avg:null,trend:null,readings:inPeriod};
+      const total = parseFloat(inPeriod[inPeriod.length-1].reading)-parseFloat(inPeriod[0].reading);
+      const span  = Math.max(1,dBetween(inPeriod[0].date,inPeriod[inPeriod.length-1].date));
+      const avg   = total/span;
+      // Trend vs preceding period
+      const pts=[];
+      for(let i=1;i<all.length;i++){const d=Math.max(1,dBetween(all[i-1].date,all[i].date));const c=parseFloat(all[i].reading)-parseFloat(all[i-1].reading);if(c>=0)pts.push(c/d);}
+      const tr = pts.length>=4 ? assessTrend(inPeriod.length>=5?inPeriod:all) : null;
+      return {md,total,avg,trend:tr,readings:inPeriod};
+    });
+    return {u,meters};
+  });
+
+  // ── property-level summary ──
+  const propSummary = mTypes.map(md=>{
+    let propTotal=0,propUnits=0;
+    units.forEach(u=>{
+      const m=unitData.find(d=>d.u.id===u.id)?.meters.find(m=>m.md.type===md.type);
+      if(m?.total!=null){propTotal+=m.total;propUnits++;}
+    });
+    return {md,total:propUnits>0?propTotal:null,unitCount:propUnits};
+  });
+
+  // ── generate insights ──
+  function insight(ud){
+    const issues=[],goods=[];
+    ud.meters.forEach(m=>{
+      if(!m.trend)return;
+      if(m.trend.lv==='critical')issues.push(`${m.md.icon} ${m.md.label}: ${m.trend.txt}`);
+      else if(m.trend.lv==='high')issues.push(`${m.md.icon} ${m.md.label}: elevated — ${m.trend.txt}`);
+      else if(m.trend.lv==='low')issues.push(`${m.md.icon} ${m.md.label}: unusually low — ${m.trend.txt}`);
+      else goods.push(`${m.md.icon} ${m.md.label} normal`);
+    });
+    if(!issues.length&&!goods.length)return'Insufficient data for trend assessment.';
+    let s='';
+    if(issues.length)s+=`⚠ Concerns: ${issues.join('; ')}. `;
+    if(goods.length&&!issues.length)s+=`✓ All meters within normal range.`;
+    else if(goods.length)s+=`Normal: ${goods.join(', ')}.`;
+    return s.trim();
+  }
+
+  // ── build HTML for print window ──
+  const accentColor = '#d97706';
+  const rows = unitData.map(ud=>{
+    const mCells = mTypes.map(md=>{
+      const m=ud.meters.find(x=>x.md.type===md.type);
+      if(!m||m.total==null) return `<td style="text-align:center;color:#aaa;font-size:12px">—</td><td style="text-align:center;color:#aaa;font-size:12px">—</td>`;
+      const trendColor = !m.trend?'#666':m.trend.lv==='critical'?'#dc2626':m.trend.lv==='high'?'#ca8a04':m.trend.lv==='low'?'#2563eb':'#059669';
+      const trendIcon  = !m.trend?'':m.trend.icon;
+      return `<td style="text-align:right;font-weight:600">${m.total.toFixed(md.dec)}</td><td style="text-align:center;color:${trendColor}">${trendIcon}</td>`;
+    }).join('');
+    const ins=insight(ud);
+    const insColor=ins.includes('⚠')?'#7f1d1d':ins.includes('✓')?'#052e16':'#1c1917';
+    const insBg  =ins.includes('⚠')?'#fef2f2':ins.includes('✓')?'#f0fdf4':'#fafaf9';
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">${ud.u.number}</td>
+      <td style="color:#555;font-size:11px">${ud.u.desc||''}</td>
+      ${mCells}
+      <td style="font-size:11px;color:${insColor};background:${insBg};border-radius:4px;padding:4px 6px">${ins}</td>
+    </tr>`;
+  }).join('');
+
+  const mHeaders = mTypes.map(md=>`<th colspan="2" style="text-align:center;background:#fef9c3;border-bottom:2px solid ${accentColor}">${md.icon} ${md.label} (${md.unit})</th>`).join('');
+  const mSubHeaders = mTypes.map(()=>`<th style="text-align:right;font-size:10px;color:#666">Total</th><th style="text-align:center;font-size:10px;color:#666">Trend</th>`).join('');
+
+  const summaryRows = propSummary.map(s=>s.total!=null?`
+    <tr><td style="font-weight:600">${s.md.icon} ${s.md.label}</td>
+    <td style="text-align:right;font-weight:700;font-size:18px">${s.total.toFixed(s.md.dec)} ${s.md.unit}</td>
+    <td style="color:#666;font-size:12px">across ${s.unitCount} unit${s.unitCount!==1?'s':''}</td></tr>`:'').join('');
+
+  // Overall property insight
+  const critCount = unitData.filter(ud=>ud.meters.some(m=>m.trend?.lv==='critical')).length;
+  const highCount = unitData.filter(ud=>ud.meters.some(m=>m.trend?.lv==='high')).length;
+  const goodCount = unitData.filter(ud=>ud.meters.every(m=>!m.trend||m.trend.lv==='normal')).length;
+  let propInsight='';
+  if(critCount)propInsight+=`<span style="color:#dc2626;font-weight:600">${critCount} unit${critCount>1?'s':''} flagged critical — immediate review recommended.</span> `;
+  if(highCount)propInsight+=`<span style="color:#ca8a04">${highCount} unit${highCount>1?'s':''} showing elevated consumption.</span> `;
+  if(goodCount&&!critCount&&!highCount)propInsight+=`<span style="color:#059669">All ${goodCount} monitored units operating within normal parameters.</span>`;
+  else if(goodCount)propInsight+=`<span style="color:#059669">${goodCount} unit${goodCount>1?'s':''} normal.</span>`;
+  if(!propInsight)propInsight='<span style="color:#666">Insufficient trend data — more readings needed.</span>';
+
+  // ── build consumption bar chart data (SVG) for each meter type ──
+  function svgBar(data,labels,color,unit){
+    if(!data.length)return'';
+    const max=Math.max(...data,0.001);
+    const W=520,H=90,pad=30,barW=Math.min(36,Math.floor((W-pad*2)/data.length)-4);
+    const bars=data.map((v,i)=>{
+      const h=Math.round((v/max)*(H-20));
+      const x=pad+i*(W-pad*2)/data.length+(((W-pad*2)/data.length)-barW)/2;
+      const y=H-10-h;
+      const col=v===max?color:'#f3d87a';
+      return`<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${col}" rx="2"/>
+      <text x="${x+barW/2}" y="${H-1}" font-size="8" fill="#888" text-anchor="middle">${labels[i]}</text>
+      ${h>14?`<text x="${x+barW/2}" y="${y-3}" font-size="8" fill="#555" text-anchor="middle">${v.toFixed(1)}</text>`:''}`;
+    }).join('');
+    return`<svg width="${W}" height="${H+10}" style="display:block;margin:6px 0">${bars}</svg>`;
+  }
+
+  // Build bar chart per meter type (top-N units by consumption)
+  const chartSections = mTypes.map(md=>{
+    const unitConsumptions = unitData.map(ud=>{
+      const m=ud.meters.find(x=>x.md.type===md.type);
+      return{label:ud.u.number,val:m?.total??0};
+    }).filter(x=>x.val>0).sort((a,b)=>b.val-a.val).slice(0,12);
+    if(!unitConsumptions.length)return'';
+    const svg=svgBar(unitConsumptions.map(x=>x.val),unitConsumptions.map(x=>x.label),accentColor,md.unit);
+    return`<h2>${md.icon} ${md.label} — Consumption by Unit (${md.unit})</h2>${svg}`;
+  }).join('');
+
+  // Flagged units section
+  const flaggedUnits = unitData.filter(ud=>ud.meters.some(m=>m.trend&&m.trend.lv!=='normal'));
+  const flaggedSection = flaggedUnits.length ? `
+    <h2>⚠ Flagged Units — Requires Attention</h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Description</th><th>Meter</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody>${flaggedUnits.flatMap(ud=>ud.meters.filter(m=>m.trend&&m.trend.lv!=='normal').map(m=>{
+        const col=m.trend.lv==='critical'?'#dc2626':'#ca8a04';
+        const bg=m.trend.lv==='critical'?'#fef2f2':'#fffbeb';
+        return`<tr style="background:${bg}">
+          <td style="font-weight:700;color:${col}">${ud.u.number}</td>
+          <td style="font-size:11px;color:#555">${ud.u.desc||''}</td>
+          <td>${m.md.icon} ${m.md.label}</td>
+          <td style="color:${col};font-weight:600">${m.trend.icon} ${m.trend.lbl}</td>
+          <td style="font-size:11px">${m.trend.txt}</td>
+        </tr>`;
+      })).join('')}
+      </tbody>
+    </table>` : `<h2>Flagged Units</h2><div style="padding:10px;background:#f0fdf4;border-radius:6px;color:#059669;font-size:13px">✓ No units flagged — all within normal operating parameters.</div>`;
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>MetrIQ Report — ${S.prop?.name} — ${reportDate}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:28px 32px}
+    h1{font-size:22px;font-weight:700;color:${accentColor};letter-spacing:1px}
+    h2{font-size:14px;font-weight:700;color:#1a1a1a;margin:22px 0 8px;border-bottom:2px solid ${accentColor};padding-bottom:4px}
+    .meta{font-size:11px;color:#666;margin:3px 0}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+    .scard{border:1px solid #e5e7eb;border-radius:8px;padding:12px 16px;background:#fffbeb}
+    .scard .num{font-size:22px;font-weight:700;color:${accentColor}}
+    .scard .lbl{font-size:11px;color:#666;margin-top:2px}
+    .prop-insight{background:#fffbeb;border:1.5px solid ${accentColor};border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;line-height:1.6}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+    th{background:#f9fafb;padding:6px 8px;text-align:left;border:1px solid #e5e7eb;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+    td{padding:6px 8px;border:1px solid #f0f0f0;vertical-align:top}
+    tr:nth-child(even) td{background:#fafafa}
+    .footer{margin-top:24px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:10px}
+    @media print{body{padding:14px 18px}button{display:none}.page-break{page-break-before:always}}
+  </style></head><body>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+    <div>
+      <h1>⚡ MetrIQ — Property Meter Report</h1>
+      <div class="meta"><strong>${S.prop?.icon||''} ${S.prop?.name||'Property'}</strong></div>
+      <div class="meta">Period: ${periodLabel}</div>
+      <div class="meta">Generated: ${reportDate} · ${units.length} units · ${mTypes.map(m=>m.label).join(', ')}</div>
+    </div>
+    <button onclick="window.print()" style="padding:8px 18px;background:${accentColor};color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">🖨 Print / Save PDF</button>
+  </div>
+
+  <h2>Property Overview</h2>
+  <div class="prop-insight"><strong>Overall Assessment:</strong> ${propInsight}</div>
+  <div class="summary-grid">
+    ${propSummary.filter(s=>s.total!=null).map(s=>`
+    <div class="scard">
+      <div class="num">${s.total.toFixed(s.md.dec)}<span style="font-size:13px;font-weight:400;color:#888"> ${s.md.unit}</span></div>
+      <div class="lbl">${s.md.icon} ${s.md.label} · ${s.unitCount} units</div>
+    </div>`).join('')}
+  </div>
+
+  ${flaggedSection}
+
+  ${chartSections}
+
+  <h2>Full Unit Detail</h2>
+  <table>
+    <thead>
+      <tr><th rowspan="2">Unit</th><th rowspan="2">Description</th>${mHeaders}<th rowspan="2">Assessment</th></tr>
+      <tr>${mSubHeaders}</tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+
+  <h2>Trend Guide</h2>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:6px">
+    <span>🟢 Normal — stable within expected range</span>
+    <span>🟡 Elevated — +30% to +100% above avg</span>
+    <span>🔴 Critical — sudden spike, sharp drop, or +100% above avg</span>
+    <span>🔵 Low — −40%+ below avg, check meter/supply</span>
+  </div>
+
+  <div class="footer">MetrIQ v16 · Smart Meter Management · ${new Date().toISOString()}</div>
+  </body></html>`;
+
+  closeM('mReport');
+  const w=window.open('','_blank','width=960,height=750');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),700);
+}
+
+// ── END REPORT ──
+function refreshAll(){
+  updateHeader();updateUSBs();
+  renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
+  if(!CH.mini)initMC(); // ← must init chart BEFORE renderDashboard calls updateMC
+  renderDashboard();renderHistory();renderUnitSettings();
+}
+
+// ═══════════════════════════════════════════
+//  MODALS + TOAST
+// ═══════════════════════════════════════════
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
+let tT;
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(tT);tT=setTimeout(()=>{t.className='';},2600);}
+
+// ═══════════════════════════════════════════
+//  SERVICE WORKER
+// ═══════════════════════════════════════════
+if('serviceWorker' in navigator){
+  const sw=`const C='mq4-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/'])));self.skipWaiting();});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'}))).catch(()=>{});
+}
+
+init();
+</script>
+</body>
+</html>
