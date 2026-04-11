@@ -311,32 +311,31 @@ select.fi option{background:var(--sf)}
 <div id="loginScreen">
   <div class="ll">⚡ MetrIQ</div>
   <div class="lt">Smart Meter Reader</div>
-  <div id="propList" class="pg"></div>
-  <div id="pinScreen">
-    <div class="ppn" id="pinPropName"></div>
-    <div class="ppl">Enter PIN to continue</div>
-    <div class="pds"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div></div>
-    <div class="pe" id="pinErr"></div>
-    <div class="pp">
-      <button class="pb" onclick="pk('1')">1</button><button class="pb" onclick="pk('2')">2</button><button class="pb" onclick="pk('3')">3</button>
-      <button class="pb" onclick="pk('4')">4</button><button class="pb" onclick="pk('5')">5</button><button class="pb" onclick="pk('6')">6</button>
-      <button class="pb" onclick="pk('7')">7</button><button class="pb" onclick="pk('8')">8</button><button class="pb" onclick="pk('9')">9</button>
-      <button class="pb emp"></button><button class="pb" onclick="pk('0')">0</button><button class="pb del" onclick="pdel()">⌫</button>
+  <div id="loginForm" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px">
+    <div class="fg"><div class="fl">Email</div><input class="fi ft" type="email" id="loginEmail" placeholder="you@example.com" inputmode="email" autocomplete="email"></div>
+    <div class="fg"><div class="fl">Password</div><input class="fi ft" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
+    <div id="loginErr" style="font-size:calc(12px * var(--fs));color:var(--rd);text-align:center;min-height:18px"></div>
+    <button class="fab" id="loginBtn" onclick="doLogin()" style="font-size:calc(14px * var(--fs))">Sign In</button>
+    <div id="loginOfflineHint" style="display:none;text-align:center;font-size:calc(11px * var(--fs));color:var(--tx3)">
+      No backend configured — using <strong style="color:var(--am)">offline/demo mode</strong>
+      <br><span style="font-size:calc(10px * var(--fs))">Configure backend URL in Settings</span>
     </div>
-    <button class="pbk" onclick="backToProp()">← Back</button>
   </div>
-  <div class="lver">v16</div>
+  <div class="lver">v17</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v16</span></div>
+    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v17</span></div>
     <div class="hc">
       <div class="hp" id="hdrProp"></div>
       <div class="hu" id="hdrUnit"></div>
     </div>
-    <button class="sochip" onclick="logout()">🔒 Sign Out</button>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+      <span id="roleChip" style="font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--amg);border:1px solid var(--am);color:var(--am)"></span>
+      <button class="sochip" onclick="logout()">🔒 Sign Out</button>
+    </div>
   </div>
 
   <div id="screens">
@@ -444,8 +443,21 @@ select.fi option{background:var(--sf)}
         </div>
       </div>
       <div class="card">
+        <div class="stitle" style="margin-bottom:11px">☁️ Backend (Google Sheets)</div>
+        <div class="fg" style="margin-bottom:11px">
+          <div class="fl">Apps Script URL</div>
+          <input class="fi ft" type="url" id="backendUrl" placeholder="https://script.google.com/macros/s/…/exec">
+          <div class="fhint" style="margin-top:4px">Deploy <strong style="color:var(--am)">Code.gs</strong> as a Web App → paste URL here</div>
+        </div>
+        <div class="si" style="padding-top:0;border:none">
+          <div><div class="ssub" id="backendStatus">Not configured — offline mode</div></div>
+          <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="testBackend()">Test</button>
+        </div>
+        <button class="btn btp wf" onclick="saveBackend()">Save Backend URL</button>
+      </div>
+      <div class="card">
         <div class="stitle" style="margin-bottom:4px">Property Access</div>
-        <div class="si"><div><div class="slbl" id="setPropName">—</div><div class="ssub">Currently signed in</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="openChangePIN()">Change PIN</button></div>
+        <div class="si"><div><div class="slbl" id="setPropName">—</div><div class="ssub" id="setUserRole">—</div></div></div>
       </div>
       <div class="card">
         <div class="stitle" style="margin-bottom:11px">AI Provider</div>
@@ -500,15 +512,38 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v16 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v17 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
+
+    <!-- ADMIN (role-gated) -->
+    <div class="screen" id="screen-admin">
+      <div class="card">
+        <div class="stitle" style="margin-bottom:11px">👥 User Management</div>
+        <div id="adminUserList" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="height:9px"></div>
+        <button class="btn btg wf" onclick="openAddUser()">+ Add User</button>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:11px">🏢 Properties</div>
+        <div id="adminPropList" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="height:9px"></div>
+        <button class="btn btg wf" onclick="openAddProp()">+ Add Property</button>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:4px">☁️ Sync Status</div>
+        <div class="si"><div><div class="slbl">Pending uploads</div><div class="ssub" id="syncPending">—</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="forcSync()">Sync Now</button></div>
+        <div class="si"><div><div class="slbl">Last synced</div><div class="ssub" id="syncLastTime">—</div></div></div>
+      </div>
+    </div>
+
   </div>
 
   <nav id="nav">
     <button class="nb active" data-s="dash"      onclick="go('dash')">     <span class="ni">🏠</span>Home</button>
-    <button class="nb"        data-s="capture"   onclick="startCapture()"> <span class="ni">📷</span>Capture</button>
+    <button class="nb" id="navCapture" data-s="capture"   onclick="startCapture()"> <span class="ni">📷</span>Capture</button>
     <button class="nb"        data-s="history"   onclick="go('history')">  <span class="ni">📋</span>History</button>
     <button class="nb"        data-s="analytics" onclick="go('analytics')"><span class="ni">📊</span>Analytics</button>
+    <button class="nb" id="navAdmin"   data-s="admin"     onclick="go('admin')" style="display:none"><span class="ni">🛡️</span>Admin</button>
     <button class="nb"        data-s="settings"  onclick="go('settings')"> <span class="ni">⚙️</span>Settings</button>
   </nav>
 </div>
@@ -616,6 +651,47 @@ select.fi option{background:var(--sf)}
   </div>
 </div>
 
+<!-- Add/Edit User Modal -->
+<div class="ov" id="mAddUser">
+  <div class="modal"><div class="mh"></div><div class="mt" id="mAddUserTitle">Add User</div>
+    <input type="hidden" id="auIsEdit">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><div class="fl">Email</div><input class="fi ft" type="email" id="auEmail" placeholder="user@example.com"></div>
+      <div class="fg"><div class="fl">Password</div><input class="fi ft" type="password" id="auPassword" placeholder="Leave blank to keep existing"></div>
+      <div class="fg"><div class="fl">Full Name</div><input class="fi ft" id="auName" placeholder="e.g. John Tan"></div>
+      <div class="fg"><div class="fl">Role</div>
+        <select class="fi" id="auRole">
+          <option value="inspector">Inspector — view + capture readings</option>
+          <option value="manager">Manager — view + reports</option>
+          <option value="admin">Admin — full access</option>
+        </select>
+      </div>
+      <div class="fg"><div class="fl">Properties Access</div>
+        <div id="auPropChecks" style="display:flex;flex-direction:column;gap:7px;padding:8px 0"></div>
+      </div>
+      <div class="brow">
+        <button class="btn btg" onclick="closeM('mAddUser')">Cancel</button>
+        <button class="btn btp" onclick="submitUser()">Save User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Property Modal -->
+<div class="ov" id="mAddProp">
+  <div class="modal"><div class="mh"></div><div class="mt">Add Property</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><div class="fl">Property Name</div><input class="fi ft" id="apName" placeholder="e.g. VivoCity"></div>
+      <div class="fg"><div class="fl">Address</div><input class="fi ft" id="apAddr" placeholder="e.g. 1 HarbourFront Walk"></div>
+      <div class="fg"><div class="fl">Icon (emoji)</div><input class="fi ft" id="apIcon" placeholder="🏢" maxlength="4" style="font-size:22px"></div>
+      <div class="brow">
+        <button class="btn btg" onclick="closeM('mAddProp')">Cancel</button>
+        <button class="btn btp" onclick="submitProp()">Save Property</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -637,6 +713,21 @@ const STEPS=[
   {t:'Select Unit',      s:'Which unit and meter type are you reading?'},
   {t:'Capture & Save',   s:'Add photo → crop → extract → verify → save'},
 ];
+const ROLES={admin:'Admin',manager:'Manager',inspector:'Inspector'};
+
+// ── BACKEND API ────────────────────────────────────────────────────
+const API={
+  async call(action, body={}, method='POST'){
+    const url=S.backendUrl; if(!url) return null;
+    try{
+      const res=await fetch(url+(method==='GET'?`?action=${action}&token=${S.session?.token||''}`:''),{
+        method,headers:{'Content-Type':'application/json'},
+        body:method==='POST'?JSON.stringify({...body,action,token:S.session?.token||''}):undefined
+      });
+      return await res.json();
+    }catch(e){console.warn('API error:',e.message);return null;}
+  }
+};
 
 // ═══════════════════════════════════════════
 //  STORAGE
@@ -656,15 +747,21 @@ const DB={
 // ═══════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════
-let S={prop:null,units:[],readings:[],activeUnit:null,activeMeter:'electricity',
+let S={
+  prop:null,units:[],readings:[],activeUnit:null,activeMeter:'electricity',
   aiProv:'groq',groqKey:'',orKey:'',gemKey:'',claKey:'',dark:true,fs:1,
-  tgToken:'',tgChatId:'',
-  alertCfg:{onSave:false,onHigh:true,onCritical:true,onGradRise:false,onGradFall:false,onLow:false}};
+  tgToken:'8619143537:AAE0tmCRMFrkkxwChtHwEqw1CBj0sU8EQcE',
+  tgChatId:'1012649171',
+  alertCfg:{onSave:false,onHigh:true,onCritical:true,onGradRise:false,onGradFall:false,onLow:false},
+  backendUrl:'',
+  session:null,   // {token, user:{email,name,role,propIds[]}}
+  syncQueue:[],   // [{type,payload,ts}] — pending backend uploads
+  lastSync:null,
+};
 let anlScope='building', anlPeriodType='CY', anlYear=new Date().getFullYear();
-let cap={step:0,uid:null,mt:'electricity',photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null};
+let cap={step:0,uid:null,mt:'electricity',photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
 let CH={mini:null,anlMain:null,anlMulti:null};
 let apd=7;
-let pe='',pp=null;
 // Crop tool state
 let CR={img:null,box:{x:.05,y:.2,w:.9,h:.6},drag:null,canvas:null,ctx:null};
 
@@ -735,77 +832,115 @@ function genDemo(pid){
 //  INIT
 // ═══════════════════════════════════════════
 async function init(){
-  const [ap,gk,ok,gmk,ck,dk,fk,tgt,tgc,ac]=await Promise.all([
-    DB.get('aiProv'),DB.get('groqKey'),DB.get('orKey'),DB.get('gemKey'),DB.get('claKey'),DB.get('dark'),DB.get('fs'),
-    DB.get('tgToken'),DB.get('tgChatId'),DB.get('alertCfg')
+  const [ap,gk,ok,gmk,ck,dk,fk,tgt,tgc,ac,bu,sq]=await Promise.all([
+    DB.get('aiProv'),DB.get('groqKey'),DB.get('orKey'),DB.get('gemKey'),DB.get('claKey'),
+    DB.get('dark'),DB.get('fs'),DB.get('tgToken'),DB.get('tgChatId'),DB.get('alertCfg'),
+    DB.get('backendUrl'),DB.get('syncQueue')
   ]);
-  if(ap!==null)S.aiProv=ap;if(gk!==null)S.groqKey=gk;if(ok!==null)S.orKey=ok;
-  if(gmk!==null)S.gemKey=gmk;if(ck!==null)S.claKey=ck;if(dk!==null)S.dark=dk;if(fk!==null)S.fs=fk;
-  if(tgt!==null)S.tgToken=tgt;if(tgc!==null)S.tgChatId=tgc;
+  if(ap!==null)S.aiProv=ap; if(gk!==null)S.groqKey=gk; if(ok!==null)S.orKey=ok;
+  if(gmk!==null)S.gemKey=gmk; if(ck!==null)S.claKey=ck; if(dk!==null)S.dark=dk; if(fk!==null)S.fs=fk;
+  if(tgt!==null)S.tgToken=tgt; if(tgc!==null)S.tgChatId=tgc;
   if(ac!==null)S.alertCfg={...S.alertCfg,...ac};
-  applyTheme(S.dark);applyFont(S.fs,false);
-  const sp=sessionStorage.getItem('mq4_prop');
-  if(sp){const p=PROPS.find(x=>x.id===sp);if(p){await loginAs(p);return;}}
-  renderPropList();
+  if(bu)S.backendUrl=bu;
+  if(sq)S.syncQueue=sq;
+  applyTheme(S.dark); applyFont(S.fs,false);
+  // Restore session
+  const sess=sessionStorage.getItem('mq4_session');
+  if(sess){
+    S.session=JSON.parse(sess);
+    await loginAs(S.session);
+    return;
+  }
+  showLoginScreen();
 }
 
 // ═══════════════════════════════════════════
-//  LOGIN
+//  LOGIN — email + password, backend or offline
 // ═══════════════════════════════════════════
-function renderPropList(){
-  document.getElementById('propList').innerHTML=PROPS.map(p=>`
-    <div class="pc" onclick="selProp('${p.id}')"><div class="pi">${p.icon}</div>
-      <div><div class="pn">${p.name}</div><div class="pa">${p.addr}</div></div></div>`).join('');
-  document.getElementById('propList').style.display='flex';
-  document.getElementById('pinScreen').classList.remove('show');
+function showLoginScreen(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginErr').textContent='';
+  document.getElementById('loginBtn').textContent='Sign In';
+  document.getElementById('loginBtn').disabled=false;
+  document.getElementById('loginOfflineHint').style.display=S.backendUrl?'none':'block';
 }
-function selProp(id){
-  pp=PROPS.find(p=>p.id===id);pe='';upd();
-  document.getElementById('pinPropName').textContent=pp.icon+' '+pp.name;
-  document.getElementById('pinErr').textContent='';
-  document.getElementById('propList').style.display='none';
-  document.getElementById('pinScreen').classList.add('show');
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password=document.getElementById('loginPassword').value;
+  if(!email){document.getElementById('loginErr').textContent='Enter your email';return;}
+  document.getElementById('loginBtn').textContent='Signing in…';
+  document.getElementById('loginBtn').disabled=true;
+  document.getElementById('loginErr').textContent='';
+  if(S.backendUrl){
+    const res=await API.call('auth',{email,password});
+    if(res?.ok){S.session=res;sessionStorage.setItem('mq4_session',JSON.stringify(res));await loginAs(res);return;}
+    document.getElementById('loginErr').textContent=res?.error||'Sign in failed — check credentials';
+    document.getElementById('loginBtn').textContent='Sign In';
+    document.getElementById('loginBtn').disabled=false;
+    return;
+  }
+  // Offline / demo mode
+  const demoSession={ok:true,token:'offline',user:{email,name:email.split('@')[0],role:'admin',propIds:['p1','p2','p3']}};
+  S.session=demoSession;
+  sessionStorage.setItem('mq4_session',JSON.stringify(demoSession));
+  await loginAs(demoSession);
 }
-function backToProp(){pe='';upd();renderPropList();}
-function pk(d){if(pe.length>=4)return;pe+=d;upd();if(pe.length===4)setTimeout(chkPin,120);}
-function pdel(){pe=pe.slice(0,-1);upd();document.getElementById('pinErr').textContent='';}
-function upd(st=''){for(let i=0;i<4;i++){const d=document.getElementById('pd'+i);d.classList.toggle('on',i<pe.length);d.classList.toggle('err',st==='err'&&i<pe.length);}}
-async function chkPin(){
-  const stored=await DB.get('pin_'+pp.id)||pp.pin;
-  if(pe===stored){sessionStorage.setItem('mq4_prop',pp.id);await loginAs(pp);}
-  else{upd('err');document.getElementById('pinErr').textContent='Incorrect PIN';setTimeout(()=>{pe='';upd();document.getElementById('pinErr').textContent='';},1200);}
-}
-async function loginAs(prop){
-  S.prop=prop;
-  let u=await DB.get('units_'+prop.id),r=await DB.get('readings_'+prop.id);
-  if(!u||!u.length){const d=genDemo(prop.id);u=d.units;r=d.readings;await DB.set('units_'+prop.id,u);await DB.set('readings_'+prop.id,r);}
+async function loginAs(sess){
+  S.session=sess;
+  const user=sess.user,role=user.role;
+  let props=PROPS;
+  if(S.backendUrl&&sess.token!=='offline'){
+    const rd=await API.call('syncDown',{});
+    if(rd?.ok){
+      if(rd.props?.length)props=rd.props;
+      const byPropU={};(rd.units||[]).forEach(u=>{(byPropU[u.propId]=byPropU[u.propId]||[]).push(u);});
+      for(const[pid,us]of Object.entries(byPropU))await DB.set('units_'+pid,us);
+      const byProp={};(rd.readings||[]).forEach(r=>{(byProp[r.propId]=byProp[r.propId]||[]).push(r);});
+      for(const[pid,rds]of Object.entries(byProp))await DB.set('readings_'+pid,rds);
+      S.lastSync=new Date().toISOString();
+    }
+  }
+  const allowedProps=role==='admin'?props:props.filter(p=>user.propIds?.includes(p.id));
+  if(!allowedProps.length){document.getElementById('loginErr').textContent='No properties assigned';document.getElementById('loginBtn').textContent='Sign In';document.getElementById('loginBtn').disabled=false;return;}
+  S.prop=allowedProps[0];
+  let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
+  if(!u||!u.length){const d=genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
   S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;S.activeMeter='electricity';
-  // settings inputs
   document.getElementById('aiProv').value=S.aiProv;document.getElementById('groqKey').value=S.groqKey;
   document.getElementById('orKey').value=S.orKey;document.getElementById('gemKey').value=S.gemKey;
-  document.getElementById('claKey').value=S.claKey;document.getElementById('setPropName').textContent=prop.icon+' '+prop.name;
+  document.getElementById('claKey').value=S.claKey;
   document.getElementById('fontSlider').value=S.fs;document.getElementById('themeToggle').classList.toggle('on',S.dark);
-  document.getElementById('tgToken').value=S.tgToken||'';
-  document.getElementById('tgChatId').value=S.tgChatId||'';
-  // Alert config checkboxes
-  document.getElementById('acOnSave').checked     =S.alertCfg.onSave;
-  document.getElementById('acOnCritical').checked =S.alertCfg.onCritical;
-  document.getElementById('acOnHigh').checked     =S.alertCfg.onHigh;
-  document.getElementById('acOnGradRise').checked =S.alertCfg.onGradRise;
-  document.getElementById('acOnGradFall').checked =S.alertCfg.onGradFall;
-  document.getElementById('acOnLow').checked      =S.alertCfg.onLow;
+  document.getElementById('tgToken').value=S.tgToken||'';document.getElementById('tgChatId').value=S.tgChatId||'';
+  document.getElementById('backendUrl').value=S.backendUrl||'';
+  document.getElementById('setPropName').textContent=(S.prop?.icon||'')+' '+S.prop?.name;
+  document.getElementById('setUserRole').textContent=user.name+' · '+(ROLES[role]||role);
+  document.getElementById('acOnSave').checked=S.alertCfg.onSave;
+  document.getElementById('acOnCritical').checked=S.alertCfg.onCritical;
+  document.getElementById('acOnHigh').checked=S.alertCfg.onHigh;
+  document.getElementById('acOnGradRise').checked=S.alertCfg.onGradRise;
+  document.getElementById('acOnGradFall').checked=S.alertCfg.onGradFall;
+  document.getElementById('acOnLow').checked=S.alertCfg.onLow;
   onProvChange();
+  applyRoleUI(role);
   document.getElementById('loginScreen').classList.add('hidden');
   setTimeout(()=>document.getElementById('loginScreen').style.display='none',350);
   document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeM(o.id);}));
-  refreshAll();
+  go('dash');refreshAll();
+  setTimeout(processSyncQueue,2000);
+}
+function applyRoleUI(role){
+  const chip=document.getElementById('roleChip');
+  if(chip){chip.textContent=ROLES[role]||role;chip.style.background=role==='admin'?'var(--rdd)':role==='manager'?'var(--bld)':'var(--gnd)';chip.style.borderColor=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';chip.style.color=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';}
+  document.getElementById('navAdmin').style.display=role==='admin'?'':'none';
+  const capNav=document.getElementById('navCapture');if(capNav)capNav.style.display=role==='manager'?'none':'';
+  const fab=document.querySelector('.fab');if(fab)fab.style.display=role==='manager'?'none':'';
 }
 function logout(){
-  sessionStorage.removeItem('mq4_prop');S.prop=null;S.units=[];S.readings=[];S.activeUnit=null;
+  sessionStorage.removeItem('mq4_session');S.session=null;S.prop=null;S.units=[];S.readings=[];S.activeUnit=null;
   ['mini','anlMain','anlMulti'].forEach(k=>{if(CH[k]){CH[k].destroy();CH[k]=null;}});
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('loginScreen').classList.remove('hidden');
-  renderPropList();
+  document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';
+  showLoginScreen();
 }
 
 // ═══════════════════════════════════════════
@@ -843,11 +978,12 @@ function applyFont(step,save=true){
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  document.getElementById('screen-'+id).classList.add('active');
+  document.getElementById('screen-'+id)?.classList.add('active');
   document.querySelector(`.nb[data-s="${id}"]`)?.classList.add('active');
   if(id==='analytics')setTimeout(renderAnalytics,40);
   if(id==='history'){renderMTabs('mTabsHist','history');renderHistory();}
   if(id==='settings')renderUnitSettings();
+  if(id==='admin')renderAdminScreen();
 }
 
 // ═══════════════════════════════════════════
@@ -1656,6 +1792,10 @@ async function saveReading(){
     <div class="acons">${md.unit} · ${md.icon} ${md.label}${cons!==null?` · +${cons} over ${days}d`:''}</div>
     ${tr?`<div class="tbadge ${tr.cls}"><div class="tico">${tr.icon}</div><div><strong>${tr.lbl}</strong><br><span style="font-weight:400;font-size:calc(11px * var(--fs))">${tr.txt}</span></div></div>`:`<div style="color:var(--tx2);font-size:calc(13px * var(--fs));padding:8px 0">✓ Saved. Trend analysis available after 5+ readings.</div>`}`;
   toast('✓ Reading saved!','ok');go('dash');setTimeout(()=>openM('mAssess'),300);
+  // Queue background sync to Google Sheets (non-blocking — stays snappy)
+  queueSync('reading',{...r,photoData:undefined});
+  if(photoThumb) queueSync('image',{readingId:r.id,propId:r.propId,imageBase64:photoThumb.split(',')[1],mimeType:'image/jpeg'});
+  setTimeout(processSyncQueue,500);
   // Telegram alerts based on user config
   if(S.tgToken&&S.tgChatId){
     const u2=S.units.find(x=>x.id===cap.uid);
@@ -2251,7 +2391,7 @@ function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MetrIQ v16 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MetrIQ v17 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2262,10 +2402,166 @@ function generateReport(){
 }
 
 // ── END REPORT ──
+
+// ═══════════════════════════════════════════
+//  BACKEND SETTINGS
+// ═══════════════════════════════════════════
+function saveBackend(){
+  S.backendUrl=document.getElementById('backendUrl').value.trim().replace(/\/+$/,'');
+  DB.set('backendUrl',S.backendUrl);
+  toast('✓ Backend URL saved','ok');
+  document.getElementById('loginOfflineHint').style.display=S.backendUrl?'none':'block';
+}
+async function testBackend(){
+  const url=document.getElementById('backendUrl').value.trim();
+  if(!url){toast('Enter backend URL first','err');return;}
+  toast('Testing…');
+  try{
+    const res=await fetch(url+'?action=ping',{method:'GET'});
+    const d=await res.json();
+    // Any response (even unknown action) means the script is reachable
+    toast('✓ Backend reachable!','ok');
+    document.getElementById('backendStatus').textContent='✓ Connected';
+  }catch(e){
+    toast('Cannot reach backend — check URL','err');
+    document.getElementById('backendStatus').textContent='✗ Unreachable';
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SYNC MANAGER — offline-first background sync
+// ═══════════════════════════════════════════
+function queueSync(type, payload){
+  S.syncQueue.push({type,payload,ts:Date.now()});
+  DB.set('syncQueue',S.syncQueue);
+  updateSyncStatus();
+}
+function updateSyncStatus(){
+  const p=document.getElementById('syncPending');if(p)p.textContent=S.syncQueue.length+' item'+(S.syncQueue.length!==1?'s':'');
+  const lt=document.getElementById('syncLastTime');if(lt)lt.textContent=S.lastSync?fDate(S.lastSync.slice(0,10))+' '+S.lastSync.slice(11,16):'Never';
+}
+async function processSyncQueue(){
+  if(!S.backendUrl||!S.session?.token||S.session.token==='offline')return;
+  if(!S.syncQueue.length){updateSyncStatus();return;}
+  const queue=[...S.syncQueue];
+  for(const item of queue){
+    let ok=false;
+    if(item.type==='reading'){
+      const res=await API.call('pushReading',{reading:item.payload});
+      ok=res?.ok||res?.duplicate;
+    } else if(item.type==='image'){
+      const res=await API.call('pushImage',item.payload);
+      if(res?.ok&&res.url){
+        // Update the reading's imageUrl in localStorage
+        const r=S.readings.find(x=>x.id===item.payload.readingId);
+        if(r){r.imageUrl=res.url;saveR();}
+        ok=true;
+      }
+    }
+    if(ok) S.syncQueue=S.syncQueue.filter(x=>x.ts!==item.ts);
+  }
+  if(!S.syncQueue.length) S.lastSync=new Date().toISOString();
+  DB.set('syncQueue',S.syncQueue);
+  updateSyncStatus();
+}
+function forcSync(){toast('Syncing…');processSyncQueue().then(()=>toast('✓ Sync complete','ok'));}
+
+// ═══════════════════════════════════════════
+//  ADMIN — user management
+// ═══════════════════════════════════════════
+async function renderAdminScreen(){
+  updateSyncStatus();
+  // Users
+  const el=document.getElementById('adminUserList');
+  if(!el)return;
+  if(!S.backendUrl||S.session?.token==='offline'){
+    el.innerHTML='<div style="color:var(--tx3);font-size:13px">Configure backend URL to manage users</div>';
+  } else {
+    el.innerHTML='<div style="color:var(--tx3);font-size:13px">Loading…</div>';
+    const res=await API.call('getUsers',{});
+    if(res?.ok){
+      el.innerHTML=res.users.map(u=>`
+        <div class="si" style="padding:10px 0">
+          <div style="flex:1;min-width:0">
+            <div class="slbl">${u.name||u.email}</div>
+            <div class="ssub">${u.email} · <span style="color:${u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)'}">${ROLES[u.role]||u.role}</span> · ${u.active?'Active':'Inactive'}</div>
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">Edit</button>
+            <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="removeUser('${u.email}')">Remove</button>
+          </div>
+        </div>`).join('')||'<div style="color:var(--tx3);font-size:13px">No users</div>';
+    } else {
+      el.innerHTML='<div style="color:var(--rd);font-size:13px">Failed to load users</div>';
+    }
+  }
+  // Properties
+  const ep=document.getElementById('adminPropList');
+  if(ep) ep.innerHTML=PROPS.map(p=>`
+    <div class="si" style="padding:8px 0">
+      <div style="flex:1"><div class="slbl">${p.icon} ${p.name}</div><div class="ssub">${p.addr}</div></div>
+    </div>`).join('');
+}
+function openAddUser(){
+  document.getElementById('mAddUserTitle').textContent='Add User';
+  document.getElementById('auIsEdit').value='';
+  ['auEmail','auPassword','auName'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('auRole').value='inspector';
+  renderPropChecks([]);
+  openM('mAddUser');
+}
+function openEditUser(u){
+  document.getElementById('mAddUserTitle').textContent='Edit User';
+  document.getElementById('auIsEdit').value=u.email;
+  document.getElementById('auEmail').value=u.email;
+  document.getElementById('auPassword').value='';
+  document.getElementById('auName').value=u.name||'';
+  document.getElementById('auRole').value=u.role||'inspector';
+  renderPropChecks((u.propIds||'').split(','));
+  openM('mAddUser');
+}
+function renderPropChecks(selected){
+  document.getElementById('auPropChecks').innerHTML=PROPS.map(p=>`
+    <label style="display:flex;align-items:center;gap:8px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer">
+      <input type="checkbox" class="auPropCb" value="${p.id}" ${selected.includes(p.id)?'checked':''} style="accent-color:var(--am);width:16px;height:16px"> ${p.icon} ${p.name}
+    </label>`).join('');
+}
+async function submitUser(){
+  const email=document.getElementById('auEmail').value.trim().toLowerCase();
+  const password=document.getElementById('auPassword').value.trim();
+  const name=document.getElementById('auName').value.trim();
+  const role=document.getElementById('auRole').value;
+  const propIds=[...document.querySelectorAll('.auPropCb:checked')].map(c=>c.value);
+  if(!email){toast('Email required','err');return;}
+  const res=await API.call('saveUser',{user:{email,password,name,role,propIds,active:true}});
+  if(res?.ok){closeM('mAddUser');toast('✓ User saved','ok');renderAdminScreen();}
+  else toast(res?.error||'Failed to save user','err');
+}
+async function removeUser(email){
+  if(!confirm(`Remove user ${email}?`))return;
+  const res=await API.call('deleteUser',{email});
+  if(res?.ok){toast('User removed','ok');renderAdminScreen();}
+  else toast(res?.error||'Failed','err');
+}
+function openAddProp(){
+  ['apName','apAddr','apIcon'].forEach(id=>document.getElementById(id).value='');
+  openM('mAddProp');
+}
+async function submitProp(){
+  const name=document.getElementById('apName').value.trim();
+  const addr=document.getElementById('apAddr').value.trim();
+  const icon=document.getElementById('apIcon').value.trim()||'🏢';
+  if(!name){toast('Name required','err');return;}
+  const id='p_'+Date.now();
+  const res=await API.call('saveProperty',{prop:{id,name,addr,icon}});
+  if(res?.ok){closeM('mAddProp');toast('✓ Property saved','ok');renderAdminScreen();}
+  else toast(res?.error||'Saved locally — sync when online','ok');
+}
+
 function refreshAll(){
   updateHeader();updateUSBs();
   renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
-  if(!CH.mini)initMC(); // ← must init chart BEFORE renderDashboard calls updateMC
+  if(!CH.mini)initMC();
   renderDashboard();renderHistory();renderUnitSettings();
 }
 
@@ -2285,7 +2581,10 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'}))).catch(()=>{});
 }
 
-init();
+init().then(()=>{
+  // Fallback: ensure login screen is visible if not already logged in
+  if(!S.session) showLoginScreen();
+});
 </script>
 </body>
 </html>
