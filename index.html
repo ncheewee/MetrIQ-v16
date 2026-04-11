@@ -311,14 +311,20 @@ select.fi option{background:var(--sf)}
 <div id="loginScreen">
   <div class="ll">⚡ MetrIQ</div>
   <div class="lt">Smart Meter Reader</div>
-  <div id="loginForm" style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px">
-    <div class="fg"><div class="fl">Email</div><input class="fi ft" type="email" id="loginEmail" placeholder="you@example.com" inputmode="email" autocomplete="email"></div>
-    <div class="fg"><div class="fl">Password</div><input class="fi ft" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
-    <div id="loginErr" style="font-size:calc(12px * var(--fs));color:var(--rd);text-align:center;min-height:18px"></div>
-    <button class="fab" id="loginBtn" onclick="doLogin()" style="font-size:calc(14px * var(--fs))">Sign In</button>
-    <div id="loginOfflineHint" style="display:none;text-align:center;font-size:calc(11px * var(--fs));color:var(--tx3)">
-      No backend configured — using <strong style="color:var(--am)">offline/demo mode</strong>
-      <br><span style="font-size:calc(10px * var(--fs))">Configure backend URL in Settings</span>
+  <div id="loginForm" style="width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;gap:0">
+    <div class="pds" style="margin-bottom:16px">
+      <div class="pd" id="lpd0"></div><div class="pd" id="lpd1"></div><div class="pd" id="lpd2"></div>
+      <div class="pd" id="lpd3"></div><div class="pd" id="lpd4"></div><div class="pd" id="lpd5"></div>
+    </div>
+    <div id="loginErr" style="font-size:calc(12px * var(--fs));color:var(--rd);text-align:center;min-height:18px;margin-bottom:8px"></div>
+    <div class="pp" style="width:100%">
+      <button class="pb" onclick="lpk('1')">1</button><button class="pb" onclick="lpk('2')">2</button><button class="pb" onclick="lpk('3')">3</button>
+      <button class="pb" onclick="lpk('4')">4</button><button class="pb" onclick="lpk('5')">5</button><button class="pb" onclick="lpk('6')">6</button>
+      <button class="pb" onclick="lpk('7')">7</button><button class="pb" onclick="lpk('8')">8</button><button class="pb" onclick="lpk('9')">9</button>
+      <button class="pb emp"></button><button class="pb" onclick="lpk('0')">0</button><button class="pb del" onclick="ldel()">⌫</button>
+    </div>
+    <div style="margin-top:16px;font-size:calc(11px * var(--fs));color:var(--tx3);text-align:center;line-height:1.6">
+      Admin: <strong style="color:var(--am)">111111</strong> · Manager: <strong style="color:var(--am)">222222</strong> · Inspector: <strong style="color:var(--am)">333333</strong>
     </div>
   </div>
   <div class="lver">v17</div>
@@ -443,17 +449,12 @@ select.fi option{background:var(--sf)}
         </div>
       </div>
       <div class="card">
-        <div class="stitle" style="margin-bottom:11px">☁️ Backend (Google Sheets)</div>
-        <div class="fg" style="margin-bottom:11px">
-          <div class="fl">Apps Script URL</div>
-          <input class="fi ft" type="url" id="backendUrl" placeholder="https://script.google.com/macros/s/…/exec">
-          <div class="fhint" style="margin-top:4px">Deploy <strong style="color:var(--am)">Code.gs</strong> as a Web App → paste URL here</div>
-        </div>
+        <div class="stitle" style="margin-bottom:11px">☁️ Backend</div>
         <div class="si" style="padding-top:0;border:none">
-          <div><div class="ssub" id="backendStatus">Not configured — offline mode</div></div>
+          <div><div class="ssub" id="backendStatus">Google Sheets backend active</div></div>
           <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="testBackend()">Test</button>
         </div>
-        <button class="btn btp wf" onclick="saveBackend()">Save Backend URL</button>
+        <div style="font-size:calc(11px * var(--fs));color:var(--tx3)">Backend URL is pre-configured. Contact admin to change.</div>
       </div>
       <div class="card">
         <div class="stitle" style="margin-bottom:4px">Property Access</div>
@@ -656,9 +657,8 @@ select.fi option{background:var(--sf)}
   <div class="modal"><div class="mh"></div><div class="mt" id="mAddUserTitle">Add User</div>
     <input type="hidden" id="auIsEdit">
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="fg"><div class="fl">Email</div><input class="fi ft" type="email" id="auEmail" placeholder="user@example.com"></div>
-      <div class="fg"><div class="fl">Password</div><input class="fi ft" type="password" id="auPassword" placeholder="Leave blank to keep existing"></div>
       <div class="fg"><div class="fl">Full Name</div><input class="fi ft" id="auName" placeholder="e.g. John Tan"></div>
+      <div class="fg"><div class="fl">6-Digit PIN</div><input class="fi" type="password" id="auPin" placeholder="••••••" inputmode="numeric" maxlength="6"><div class="fhint" style="margin-top:4px">Leave blank to keep existing PIN</div></div>
       <div class="fg"><div class="fl">Role</div>
         <select class="fi" id="auRole">
           <option value="inspector">Inspector — view + capture readings</option>
@@ -715,14 +715,23 @@ const STEPS=[
 ];
 const ROLES={admin:'Admin',manager:'Manager',inspector:'Inspector'};
 
+// ── HARD-CODED BACKEND ─────────────────────────────────────────────
+const BACKEND_URL='https://script.google.com/macros/s/AKfycbz4KEsm_nhWoICjOdhNrd9AzKIU9Evynpn1AAHbsnQaOaIE5nEpHdYFGVZnTUGxEjtW2w/exec';
+
+// ── MOCK USERS (PIN-based, admin can edit via backend) ─────────────
+const LOCAL_USERS=[
+  {pin:'111111',name:'Admin',     role:'admin',    propIds:['p1','p2','p3']},
+  {pin:'222222',name:'Manager',   role:'manager',  propIds:['p1','p2','p3']},
+  {pin:'333333',name:'Inspector', role:'inspector',propIds:['p1']},
+];
+
 // ── BACKEND API ────────────────────────────────────────────────────
 const API={
-  async call(action, body={}, method='POST'){
-    const url=S.backendUrl; if(!url) return null;
+  async call(action, body={}){
     try{
-      const res=await fetch(url+(method==='GET'?`?action=${action}&token=${S.session?.token||''}`:''),{
-        method,headers:{'Content-Type':'application/json'},
-        body:method==='POST'?JSON.stringify({...body,action,token:S.session?.token||''}):undefined
+      const res=await fetch(BACKEND_URL,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({...body,action,token:S.session?.token||''})
       });
       return await res.json();
     }catch(e){console.warn('API error:',e.message);return null;}
@@ -753,9 +762,9 @@ let S={
   tgToken:'8619143537:AAE0tmCRMFrkkxwChtHwEqw1CBj0sU8EQcE',
   tgChatId:'1012649171',
   alertCfg:{onSave:false,onHigh:true,onCritical:true,onGradRise:false,onGradFall:false,onLow:false},
-  backendUrl:'',
-  session:null,   // {token, user:{email,name,role,propIds[]}}
-  syncQueue:[],   // [{type,payload,ts}] — pending backend uploads
+  backendUrl:BACKEND_URL,
+  session:null,
+  syncQueue:[],
   lastSync:null,
 };
 let anlScope='building', anlPeriodType='CY', anlYear=new Date().getFullYear();
@@ -855,36 +864,51 @@ async function init(){
 }
 
 // ═══════════════════════════════════════════
-//  LOGIN — email + password, backend or offline
+//  LOGIN — 6-digit PIN
 // ═══════════════════════════════════════════
+let lpe=''; // login pin entry
 function showLoginScreen(){
+  lpe='';lupd();
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginScreen').classList.remove('hidden');
   document.getElementById('loginErr').textContent='';
-  document.getElementById('loginBtn').textContent='Sign In';
-  document.getElementById('loginBtn').disabled=false;
-  document.getElementById('loginOfflineHint').style.display=S.backendUrl?'none':'block';
 }
+function lupd(err=false){
+  for(let i=0;i<6;i++){
+    const d=document.getElementById('lpd'+i);
+    if(!d)continue;
+    d.classList.toggle('on',i<lpe.length);
+    d.classList.toggle('err',err&&i<lpe.length);
+  }
+}
+function lpk(digit){
+  if(lpe.length>=6)return;
+  lpe+=digit; lupd();
+  if(lpe.length===6)setTimeout(doLogin,120);
+}
+function ldel(){lpe=lpe.slice(0,-1);lupd();document.getElementById('loginErr').textContent='';}
 async function doLogin(){
-  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password=document.getElementById('loginPassword').value;
-  if(!email){document.getElementById('loginErr').textContent='Enter your email';return;}
-  document.getElementById('loginBtn').textContent='Signing in…';
-  document.getElementById('loginBtn').disabled=true;
-  document.getElementById('loginErr').textContent='';
-  if(S.backendUrl){
-    const res=await API.call('auth',{email,password});
-    if(res?.ok){S.session=res;sessionStorage.setItem('mq4_session',JSON.stringify(res));await loginAs(res);return;}
-    document.getElementById('loginErr').textContent=res?.error||'Sign in failed — check credentials';
-    document.getElementById('loginBtn').textContent='Sign In';
-    document.getElementById('loginBtn').disabled=false;
+  // Check against LOCAL_USERS first (always works, even offline)
+  const localUser=LOCAL_USERS.find(u=>u.pin===lpe);
+  if(localUser){
+    const sess={ok:true,token:'local_'+lpe,user:{name:localUser.name,role:localUser.role,propIds:localUser.propIds}};
+    S.session=sess;
+    sessionStorage.setItem('mq4_session',JSON.stringify(sess));
+    await loginAs(sess);
     return;
   }
-  // Offline / demo mode
-  const demoSession={ok:true,token:'offline',user:{email,name:email.split('@')[0],role:'admin',propIds:['p1','p2','p3']}};
-  S.session=demoSession;
-  sessionStorage.setItem('mq4_session',JSON.stringify(demoSession));
-  await loginAs(demoSession);
+  // If no local match, try backend (for users added via admin)
+  const res=await API.call('authPin',{pin:lpe});
+  if(res?.ok){
+    S.session=res;
+    sessionStorage.setItem('mq4_session',JSON.stringify(res));
+    await loginAs(res);
+    return;
+  }
+  // Wrong PIN
+  lupd(true);
+  document.getElementById('loginErr').textContent='Incorrect PIN';
+  setTimeout(()=>{lpe='';lupd();document.getElementById('loginErr').textContent='';},1200);
 }
 async function loginAs(sess){
   S.session=sess;
@@ -902,7 +926,7 @@ async function loginAs(sess){
     }
   }
   const allowedProps=role==='admin'?props:props.filter(p=>user.propIds?.includes(p.id));
-  if(!allowedProps.length){document.getElementById('loginErr').textContent='No properties assigned';document.getElementById('loginBtn').textContent='Sign In';document.getElementById('loginBtn').disabled=false;return;}
+  if(!allowedProps.length){document.getElementById('loginErr').textContent='No properties assigned';lpe='';lupd();return;}
   S.prop=allowedProps[0];
   let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
   if(!u||!u.length){const d=genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
@@ -939,7 +963,6 @@ function applyRoleUI(role){
 function logout(){
   sessionStorage.removeItem('mq4_session');S.session=null;S.prop=null;S.units=[];S.readings=[];S.activeUnit=null;
   ['mini','anlMain','anlMulti'].forEach(k=>{if(CH[k]){CH[k].destroy();CH[k]=null;}});
-  document.getElementById('loginEmail').value='';document.getElementById('loginPassword').value='';
   showLoginScreen();
 }
 
@@ -2413,18 +2436,14 @@ function saveBackend(){
   document.getElementById('loginOfflineHint').style.display=S.backendUrl?'none':'block';
 }
 async function testBackend(){
-  const url=document.getElementById('backendUrl').value.trim();
-  if(!url){toast('Enter backend URL first','err');return;}
   toast('Testing…');
   try{
-    const res=await fetch(url+'?action=ping',{method:'GET'});
-    const d=await res.json();
-    // Any response (even unknown action) means the script is reachable
+    const res=await fetch(BACKEND_URL+'?action=ping');
     toast('✓ Backend reachable!','ok');
     document.getElementById('backendStatus').textContent='✓ Connected';
   }catch(e){
-    toast('Cannot reach backend — check URL','err');
-    document.getElementById('backendStatus').textContent='✗ Unreachable';
+    toast('Cannot reach backend','err');
+    document.getElementById('backendStatus').textContent='✗ Unreachable — check network';
   }
 }
 
@@ -2471,31 +2490,23 @@ function forcSync(){toast('Syncing…');processSyncQueue().then(()=>toast('✓ S
 // ═══════════════════════════════════════════
 async function renderAdminScreen(){
   updateSyncStatus();
-  // Users
   const el=document.getElementById('adminUserList');
   if(!el)return;
-  if(!S.backendUrl||S.session?.token==='offline'){
-    el.innerHTML='<div style="color:var(--tx3);font-size:13px">Configure backend URL to manage users</div>';
-  } else {
-    el.innerHTML='<div style="color:var(--tx3);font-size:13px">Loading…</div>';
-    const res=await API.call('getUsers',{});
-    if(res?.ok){
-      el.innerHTML=res.users.map(u=>`
-        <div class="si" style="padding:10px 0">
-          <div style="flex:1;min-width:0">
-            <div class="slbl">${u.name||u.email}</div>
-            <div class="ssub">${u.email} · <span style="color:${u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)'}">${ROLES[u.role]||u.role}</span> · ${u.active?'Active':'Inactive'}</div>
-          </div>
-          <div style="display:flex;gap:5px;flex-shrink:0">
-            <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">Edit</button>
-            <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="removeUser('${u.email}')">Remove</button>
-          </div>
-        </div>`).join('')||'<div style="color:var(--tx3);font-size:13px">No users</div>';
-    } else {
-      el.innerHTML='<div style="color:var(--rd);font-size:13px">Failed to load users</div>';
-    }
-  }
-  // Properties
+  // Show local users; supplement with backend if available
+  let users=[...LOCAL_USERS];
+  const res=await API.call('getUsers',{});
+  if(res?.ok&&res.users?.length) users=res.users;
+  el.innerHTML=users.map(u=>`
+    <div class="si" style="padding:10px 0">
+      <div style="flex:1;min-width:0">
+        <div class="slbl">${u.name}</div>
+        <div class="ssub"><span style="color:${u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)'}">${ROLES[u.role]||u.role}</span> · PIN: ${u.pin?'••••••':'(backend)'}</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">Edit</button>
+        <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="removeUser('${u.name}')">Remove</button>
+      </div>
+    </div>`).join('')||'<div style="color:var(--tx3);font-size:13px">No users</div>';
   const ep=document.getElementById('adminPropList');
   if(ep) ep.innerHTML=PROPS.map(p=>`
     <div class="si" style="padding:8px 0">
@@ -2505,19 +2516,18 @@ async function renderAdminScreen(){
 function openAddUser(){
   document.getElementById('mAddUserTitle').textContent='Add User';
   document.getElementById('auIsEdit').value='';
-  ['auEmail','auPassword','auName'].forEach(id=>document.getElementById(id).value='');
+  ['auName','auPin'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('auRole').value='inspector';
   renderPropChecks([]);
   openM('mAddUser');
 }
 function openEditUser(u){
   document.getElementById('mAddUserTitle').textContent='Edit User';
-  document.getElementById('auIsEdit').value=u.email;
-  document.getElementById('auEmail').value=u.email;
-  document.getElementById('auPassword').value='';
+  document.getElementById('auIsEdit').value=u.name;
   document.getElementById('auName').value=u.name||'';
+  document.getElementById('auPin').value='';
   document.getElementById('auRole').value=u.role||'inspector';
-  renderPropChecks((u.propIds||'').split(','));
+  renderPropChecks((u.propIds||'').split(',').filter(Boolean));
   openM('mAddUser');
 }
 function renderPropChecks(selected){
@@ -2527,21 +2537,29 @@ function renderPropChecks(selected){
     </label>`).join('');
 }
 async function submitUser(){
-  const email=document.getElementById('auEmail').value.trim().toLowerCase();
-  const password=document.getElementById('auPassword').value.trim();
   const name=document.getElementById('auName').value.trim();
+  const pin=document.getElementById('auPin').value.trim();
   const role=document.getElementById('auRole').value;
   const propIds=[...document.querySelectorAll('.auPropCb:checked')].map(c=>c.value);
-  if(!email){toast('Email required','err');return;}
-  const res=await API.call('saveUser',{user:{email,password,name,role,propIds,active:true}});
+  if(!name){toast('Name required','err');return;}
+  if(pin&&!/^\d{6}$/.test(pin)){toast('PIN must be exactly 6 digits','err');return;}
+  // Save to backend
+  const res=await API.call('saveUser',{user:{name,pin,role,propIds,active:true}});
   if(res?.ok){closeM('mAddUser');toast('✓ User saved','ok');renderAdminScreen();}
-  else toast(res?.error||'Failed to save user','err');
+  else{
+    // Fallback: update LOCAL_USERS in memory for offline
+    const idx=LOCAL_USERS.findIndex(u=>u.name===name);
+    const u={pin:pin||LOCAL_USERS[idx]?.pin||'000000',name,role,propIds};
+    if(idx>=0)LOCAL_USERS[idx]=u; else LOCAL_USERS.push(u);
+    closeM('mAddUser');toast('✓ User saved (offline)','ok');renderAdminScreen();
+  }
 }
-async function removeUser(email){
-  if(!confirm(`Remove user ${email}?`))return;
-  const res=await API.call('deleteUser',{email});
-  if(res?.ok){toast('User removed','ok');renderAdminScreen();}
-  else toast(res?.error||'Failed','err');
+async function removeUser(name){
+  if(!confirm(`Remove user "${name}"?`))return;
+  const res=await API.call('deleteUser',{name});
+  const idx=LOCAL_USERS.findIndex(u=>u.name===name);
+  if(idx>=0)LOCAL_USERS.splice(idx,1);
+  toast('User removed','ok');renderAdminScreen();
 }
 function openAddProp(){
   ['apName','apAddr','apIcon'].forEach(id=>document.getElementById(id).value='');
