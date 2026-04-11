@@ -942,7 +942,7 @@ async function loginAs(sess){
   document.getElementById('claKey').value=S.claKey;
   document.getElementById('fontSlider').value=S.fs;document.getElementById('themeToggle').classList.toggle('on',S.dark);
   document.getElementById('tgToken').value=S.tgToken||'';document.getElementById('tgChatId').value=S.tgChatId||'';
-  document.getElementById('backendUrl').value=S.backendUrl||'';
+  const buel=document.getElementById('backendUrl'); if(buel)buel.value=S.backendUrl||'';
   document.getElementById('setPropName').textContent=(S.prop?.icon||'')+' '+S.prop?.name;
   document.getElementById('setUserRole').textContent=user.name+' · '+(ROLES[role]||role);
   document.getElementById('acOnSave').checked=S.alertCfg.onSave;
@@ -2436,10 +2436,12 @@ function generateReport(){
 //  BACKEND SETTINGS
 // ═══════════════════════════════════════════
 function saveBackend(){
-  S.backendUrl=document.getElementById('backendUrl').value.trim().replace(/\/+$/,'');
+  const el=document.getElementById('backendUrl');
+  S.backendUrl=el?el.value.trim().replace(/\/+$/,''):BACKEND_URL;
   DB.set('backendUrl',S.backendUrl);
   toast('✓ Backend URL saved','ok');
-  document.getElementById('loginOfflineHint').style.display=S.backendUrl?'none':'block';
+  const hint=document.getElementById('loginOfflineHint');
+  if(hint)hint.style.display=S.backendUrl?'none':'block';
 }
 async function testBackend(){
   toast('Testing…');
