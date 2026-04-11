@@ -726,13 +726,19 @@ const LOCAL_USERS=[
 ];
 
 // ── BACKEND API ────────────────────────────────────────────────────
+// Apps Script web apps redirect POST→GET, stripping the body.
+// Solution: send everything as GET query params — fully supported by doGet.
 const API={
   async call(action, body={}){
     try{
-      const res=await fetch(BACKEND_URL,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({...body,action,token:S.session?.token||''})
+      const params=new URLSearchParams({
+        action,
+        token:S.session?.token||'',
+        ...Object.fromEntries(
+          Object.entries(body).map(([k,v])=>[k, typeof v==='object'?JSON.stringify(v):v])
+        )
       });
+      const res=await fetch(`${BACKEND_URL}?${params}`);
       return await res.json();
     }catch(e){console.warn('API error:',e.message);return null;}
   }
