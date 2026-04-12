@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="MetrIQ">
 <title>MetrIQ</title>
 <link rel="manifest" href="data:application/json,{%22name%22:%22MetrIQ%22,%22short_name%22:%22MetrIQ%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c0f%22,%22theme_color%22:%22%230c0c0f%22}">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500&display=swap');
 /* ── THEME ── */
 :root{
   --bg:#0c0c0f;--sf:#141418;--sf2:#1c1c22;
@@ -327,13 +327,13 @@ select.fi option{background:var(--sf)}
       Admin: <strong style="color:var(--am)">111111</strong> · Manager: <strong style="color:var(--am)">222222</strong> · Inspector: <strong style="color:var(--am)">333333</strong>
     </div>
   </div>
-  <div class="lver">v18</div>
+  <div class="lver">v19</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v18</span></div>
+    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v19</span></div>
     <div class="hc">
       <div class="hp" id="hdrProp"></div>
       <div class="hu" id="hdrUnit"></div>
@@ -448,7 +448,7 @@ select.fi option{background:var(--sf)}
           <div class="sw wf"><span style="font-size:12px">A</span><input type="range" id="fontSlider" min="1" max="4" step="1" value="1" oninput="applyFont(parseInt(this.value))"><span style="font-size:17px">A</span><span class="swv" id="fontLbl">100%</span></div>
         </div>
       </div>
-      <div class="card">
+      <div class="card" id="setCardBackend">
         <div class="stitle" style="margin-bottom:11px">☁️ Backend</div>
         <div class="si" style="padding-top:0;border:none">
           <div><div class="ssub" id="backendStatus">Google Sheets backend active</div></div>
@@ -460,7 +460,7 @@ select.fi option{background:var(--sf)}
         <div class="stitle" style="margin-bottom:4px">Property Access</div>
         <div class="si"><div><div class="slbl" id="setPropName">—</div><div class="ssub" id="setUserRole">—</div></div></div>
       </div>
-      <div class="card">
+      <div class="card" id="setCardAI">
         <div class="stitle" style="margin-bottom:11px">AI Provider</div>
         <div class="fg" style="margin-bottom:11px"><div class="fl">Provider</div><select class="fi" id="aiProv" onchange="onProvChange()"><option value="groq">⚡ Groq — Llama 4 Vision (Free, Fast)</option><option value="openrouter">🔀 OpenRouter — Llama Vision (Free)</option><option value="gemini">🔵 Google Gemini Flash (Free)</option><option value="claude">🟠 Anthropic Claude (Paid)</option><option value="none">✏️ None — Manual entry</option></select></div>
         <div id="gGroq"   class="fg" style="margin-bottom:11px"><div class="fl">Groq API Key</div><input class="fi ft" type="password" id="groqKey" placeholder="gsk_…"><div class="fhint" style="margin-top:4px">Free at <strong style="color:var(--am)">console.groq.com</strong> → API Keys</div></div>
@@ -469,7 +469,7 @@ select.fi option{background:var(--sf)}
         <div id="gClaude" class="fg" style="display:none;margin-bottom:11px"><div class="fl">Anthropic Key</div><input class="fi ft" type="password" id="claKey" placeholder="sk-ant-…"></div>
         <button class="btn btp wf" onclick="saveSettings()">Save Settings</button>
       </div>
-      <div class="card">
+      <div class="card" id="setCardTelegram">
         <div class="stitle" style="margin-bottom:11px">🔔 Telegram Alerts</div>
         <div class="fg" style="margin-bottom:11px">
           <div class="fl">Bot Token</div>
@@ -480,6 +480,40 @@ select.fi option{background:var(--sf)}
           <div class="fl">Your Chat ID</div>
           <input class="fi ft" type="text" id="tgChatId" placeholder="987654321" inputmode="numeric">
           <div class="fhint" style="margin-top:4px">From <strong style="color:var(--am)">@userinfobot</strong> on Telegram → send any message</div>
+        </div>
+        <!-- Telegram Setup Guide -->
+        <div id="tgGuideWrap" style="margin-bottom:11px">
+          <button onclick="toggleTgGuide()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--am);font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;letter-spacing:1px;cursor:pointer;padding:4px 0">
+            <span id="tgGuideArrow">▸</span> HOW TO SET UP TELEGRAM ALERTS
+          </button>
+          <div id="tgGuide" style="display:none;margin-top:10px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:13px;flex-direction:column;gap:11px">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:2px">3-step setup</div>
+            <!-- Step 1 -->
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--amg);border:1px solid var(--am);color:var(--am);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx);margin-bottom:2px">Create a bot via @BotFather</div>
+                <div style="font-size:calc(12px * var(--fs));color:var(--tx2);line-height:1.5">Open Telegram → search <strong style="color:var(--am)">@BotFather</strong> → send <code style="background:var(--sf);padding:1px 5px;border-radius:3px;font-size:11px">/newbot</code> → follow prompts → copy the <strong style="color:var(--am)">HTTP API token</strong> (looks like <code style="background:var(--sf);padding:1px 5px;border-radius:3px;font-size:11px">7123456789:AAFxxx…</code>)</div>
+              </div>
+            </div>
+            <!-- Step 2 -->
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--amg);border:1px solid var(--am);color:var(--am);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx);margin-bottom:2px">Start your new bot</div>
+                <div style="font-size:calc(12px * var(--fs));color:var(--tx2);line-height:1.5">Search your new bot by its username → tap <strong style="color:var(--am)">START</strong>. This is required — Telegram won't deliver messages until you've initiated the chat.</div>
+              </div>
+            </div>
+            <!-- Step 3 -->
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--amg);border:1px solid var(--am);color:var(--am);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+              <div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx);margin-bottom:2px">Get your Chat ID</div>
+                <div style="font-size:calc(12px * var(--fs));color:var(--tx2);line-height:1.5">Search <strong style="color:var(--am)">@userinfobot</strong> → send any message → it replies with your <strong style="color:var(--am)">Id</strong> (e.g. <code style="background:var(--sf);padding:1px 5px;border-radius:3px;font-size:11px">987654321</code>). Paste that into Chat ID above.</div>
+              </div>
+            </div>
+            <div style="font-size:calc(11px * var(--fs));color:var(--tx3);border-top:1px solid var(--bd);padding-top:9px">💡 Use <strong style="color:var(--tx2)">Send Test</strong> below to verify your setup before saving.</div>
+          </div>
         </div>
         <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:9px">Alert Triggers</div>
         <div class="alert-opts">
@@ -495,19 +529,19 @@ select.fi option{background:var(--sf)}
           <button class="btn btp" style="flex:1" onclick="saveTelegram()">Save</button>
         </div>
       </div>
-      <div class="card">
+      <div class="card" id="setCardData">
         <div class="stitle" style="margin-bottom:4px">Data</div>
         <div class="si">
           <div><div class="slbl">Management Report</div><div class="ssub">PDF — selected units, meters, period</div></div>
           <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="openReportModal()">Generate</button>
         </div>
-        <div class="si">
+        <div class="si" id="btnExportData">
           <div><div class="slbl">Export Raw Data</div><div class="ssub">Download as JSON</div></div>
           <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="exportData()">Export</button>
         </div>
-        <div class="si"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
+        <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v18 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v19 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -732,7 +766,7 @@ const STEPS=[
 const ROLES={admin:'Admin',manager:'Manager',inspector:'Inspector'};
 
 // ── HARD-CODED BACKEND ─────────────────────────────────────────────
-const BACKEND_URL='https://script.google.com/macros/s/AKfycbz4KEsm_nhWoICjOdhNrd9AzKIU9Evynpn1AAHbsnQaOaIE5nEpHdYFGVZnTUGxEjtW2w/exec';
+const BACKEND_URL='https://script.google.com/macros/s/AKfycbxS0FwB25oi5f7sSsa6FOqEaWkgoCArmIotGYAuOSLXovYe-ioFIyq1m6ANjMvEH1DP/exec';
 
 // ── MOCK USERS (PIN-based, admin can edit via backend) ─────────────
 const LOCAL_USERS=[
@@ -976,11 +1010,54 @@ async function loginAs(sess){
   setTimeout(processSyncQueue,2000);
 }
 function applyRoleUI(role){
+  // ── Role chip colour ──
   const chip=document.getElementById('roleChip');
-  if(chip){chip.textContent=ROLES[role]||role;chip.style.background=role==='admin'?'var(--rdd)':role==='manager'?'var(--bld)':'var(--gnd)';chip.style.borderColor=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';chip.style.color=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';}
+  if(chip){
+    chip.textContent=ROLES[role]||role;
+    chip.style.background=role==='admin'?'var(--rdd)':role==='manager'?'var(--bld)':'var(--gnd)';
+    chip.style.borderColor=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';
+    chip.style.color=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';
+  }
+
+  // ── Nav: Admin tab (admin only) ──
   document.getElementById('navAdmin').style.display=role==='admin'?'':'none';
-  const capNav=document.getElementById('navCapture');if(capNav)capNav.style.display=role==='manager'?'none':'';
-  const fab=document.querySelector('.fab');if(fab)fab.style.display=role==='manager'?'none':'';
+
+  // ── Nav: Capture tab + FAB (hidden for manager) ──
+  const capNav=document.getElementById('navCapture');
+  if(capNav)capNav.style.display=role==='manager'?'none':'';
+  const fab=document.querySelector('.fab');
+  if(fab)fab.style.display=role==='manager'?'none':'';
+
+  // ── Settings: Backend card (admin only) ──
+  const cardBackend=document.getElementById('setCardBackend');
+  if(cardBackend)cardBackend.style.display=role==='admin'?'':'none';
+
+  // ── Settings: AI Provider card (admin only) ──
+  const cardAI=document.getElementById('setCardAI');
+  if(cardAI)cardAI.style.display=role==='admin'?'':'none';
+
+  // ── Settings: Telegram card (admin + manager; inspector = read-only alerts, no config) ──
+  const cardTg=document.getElementById('setCardTelegram');
+  if(cardTg)cardTg.style.display=role==='inspector'?'none':'';
+
+  // ── Settings: Data card — export + report for admin/manager; inspector excluded ──
+  const cardData=document.getElementById('setCardData');
+  if(cardData)cardData.style.display=role==='inspector'?'none':'';
+
+  // ── Within Data card: hide Clear + Export for manager (view/report only) ──
+  // Manager sees Report only; admin sees all three
+  const btnExport=document.getElementById('btnExportData');
+  const btnClear=document.getElementById('btnClearData');
+  if(btnExport)btnExport.style.display=role==='admin'?'':'none';
+  if(btnClear)btnClear.style.display=role==='admin'?'':'none';
+}
+
+function toggleTgGuide(){
+  const guide=document.getElementById('tgGuide');
+  const arrow=document.getElementById('tgGuideArrow');
+  const open=guide.style.display==='flex';
+  guide.style.display=open?'none':'flex';
+  arrow.textContent=open?'▸':'▾';
 }
 function logout(){
   sessionStorage.removeItem('mq4_session');S.session=null;S.prop=null;S.units=[];S.readings=[];S.activeUnit=null;
@@ -2397,7 +2474,7 @@ function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MetrIQ v18 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MetrIQ v19 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
