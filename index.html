@@ -327,13 +327,13 @@ select.fi option{background:var(--sf)}
       Admin: <strong style="color:var(--am)">111111</strong> · Manager: <strong style="color:var(--am)">222222</strong> · Inspector: <strong style="color:var(--am)">333333</strong>
     </div>
   </div>
-  <div class="lver">v17</div>
+  <div class="lver">v18</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v17</span></div>
+    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v18</span></div>
     <div class="hc">
       <div class="hp" id="hdrProp"></div>
       <div class="hu" id="hdrUnit"></div>
@@ -496,12 +496,6 @@ select.fi option{background:var(--sf)}
         </div>
       </div>
       <div class="card">
-        <div class="stitle" style="margin-bottom:4px">Units & Meters</div>
-        <div id="unitSettList"></div>
-        <div style="height:9px"></div>
-        <button class="btn btg wf" onclick="openAddUnit()">+ Add Unit</button>
-      </div>
-      <div class="card">
         <div class="stitle" style="margin-bottom:4px">Data</div>
         <div class="si">
           <div><div class="slbl">Management Report</div><div class="ssub">PDF — selected units, meters, period</div></div>
@@ -513,27 +507,46 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v17 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v18 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
     <div class="screen" id="screen-admin">
-      <div class="card">
-        <div class="stitle" style="margin-bottom:11px">👥 User Management</div>
-        <div id="adminUserList" style="display:flex;flex-direction:column;gap:8px"></div>
-        <div style="height:9px"></div>
-        <button class="btn btg wf" onclick="openAddUser()">+ Add User</button>
+      <!-- Admin tabs -->
+      <div style="display:flex;gap:0;background:var(--sf2);border-radius:var(--rs);padding:3px;flex-shrink:0">
+        <button class="mtab active" id="atab-users"  onclick="switchAdminTab('users')" ><span>👥</span>Users</button>
+        <button class="mtab"        id="atab-props"  onclick="switchAdminTab('props')" ><span>🏢</span>Properties</button>
+        <button class="mtab"        id="atab-sync"   onclick="switchAdminTab('sync')"  ><span>☁️</span>Sync</button>
       </div>
-      <div class="card">
-        <div class="stitle" style="margin-bottom:11px">🏢 Properties</div>
-        <div id="adminPropList" style="display:flex;flex-direction:column;gap:8px"></div>
-        <div style="height:9px"></div>
-        <button class="btn btg wf" onclick="openAddProp()">+ Add Property</button>
+
+      <!-- Users tab -->
+      <div id="adminTab-users">
+        <div class="card">
+          <div class="stitle" style="margin-bottom:11px">👥 Users</div>
+          <div id="adminUserList" style="display:flex;flex-direction:column;gap:2px"></div>
+          <div style="height:9px"></div>
+          <button class="btn btg wf" onclick="openAddUser()">+ Add User</button>
+        </div>
       </div>
-      <div class="card">
-        <div class="stitle" style="margin-bottom:4px">☁️ Sync Status</div>
-        <div class="si"><div><div class="slbl">Pending uploads</div><div class="ssub" id="syncPending">—</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="forcSync()">Sync Now</button></div>
-        <div class="si"><div><div class="slbl">Last synced</div><div class="ssub" id="syncLastTime">—</div></div></div>
+
+      <!-- Properties tab (hidden by default) -->
+      <div id="adminTab-props" style="display:none">
+        <div class="card">
+          <div class="stitle" style="margin-bottom:11px">🏢 Properties, Units &amp; Meters</div>
+          <div id="adminPropList" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div style="height:9px"></div>
+          <button class="btn btg wf" onclick="openAddProp()">+ Add Property</button>
+        </div>
+      </div>
+
+      <!-- Sync tab (hidden by default) -->
+      <div id="adminTab-sync" style="display:none">
+        <div class="card">
+          <div class="stitle" style="margin-bottom:4px">☁️ Sync Status</div>
+          <div class="si"><div><div class="slbl">Pending uploads</div><div class="ssub" id="syncPending">—</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="forcSync()">Sync Now</button></div>
+          <div class="si"><div><div class="slbl">Last synced</div><div class="ssub" id="syncLastTime">—</div></div></div>
+          <div class="si"><div><div class="slbl">Backend</div><div class="ssub" id="backendStatus">Checking…</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="testBackend()">Test</button></div>
+        </div>
       </div>
     </div>
 
@@ -559,27 +572,6 @@ select.fi option{background:var(--sf)}
     </div>
     <input type="search" class="usrch" id="upSearch" placeholder="🔍  Search by unit number or description…" oninput="filterUP()">
     <div class="upl" id="upList"></div>
-  </div>
-</div>
-
-<div class="ov" id="mAddUnit">
-  <div class="modal"><div class="mh"></div><div class="mt">Add Unit</div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="fg"><div class="fl">Unit Number</div><input class="fi ft" id="nuNum" placeholder="e.g. #01-23" maxlength="20"></div>
-      <div class="fg"><div class="fl">Description (optional)</div><input class="fi ft" id="nuDesc" placeholder="e.g. Ground Floor Retail" maxlength="40"></div>
-      <div class="brow"><button class="btn btg" onclick="closeM('mAddUnit')">Cancel</button><button class="btn btp" onclick="addUnit()">Add Unit</button></div>
-    </div>
-  </div>
-</div>
-
-<div class="ov" id="mRenameUnit">
-  <div class="modal"><div class="mh"></div><div class="mt">Rename Unit</div>
-    <input type="hidden" id="rnUnitId">
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="fg"><div class="fl">Unit Number</div><input class="fi ft" id="rnNum" maxlength="20"></div>
-      <div class="fg"><div class="fl">Description</div><input class="fi ft" id="rnDesc" maxlength="40"></div>
-      <div class="brow"><button class="btn btg" onclick="closeM('mRenameUnit')">Cancel</button><button class="btn btp" onclick="confirmRename()">Save</button></div>
-    </div>
   </div>
 </div>
 
@@ -677,16 +669,40 @@ select.fi option{background:var(--sf)}
   </div>
 </div>
 
-<!-- Add Property Modal -->
+<!-- Add/Edit Property Modal -->
 <div class="ov" id="mAddProp">
-  <div class="modal"><div class="mh"></div><div class="mt">Add Property</div>
+  <div class="modal"><div class="mh"></div><div class="mt" id="mAddPropTitle">Add Property</div>
+    <input type="hidden" id="apId">
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="fg"><div class="fl">Property Name</div><input class="fi ft" id="apName" placeholder="e.g. VivoCity"></div>
       <div class="fg"><div class="fl">Address</div><input class="fi ft" id="apAddr" placeholder="e.g. 1 HarbourFront Walk"></div>
-      <div class="fg"><div class="fl">Icon (emoji)</div><input class="fi ft" id="apIcon" placeholder="🏢" maxlength="4" style="font-size:22px"></div>
+      <div class="fg"><div class="fl">Icon (emoji)</div><input class="fi" id="apIcon" placeholder="🏢" maxlength="4" style="font-size:22px;width:70px"></div>
       <div class="brow">
         <button class="btn btg" onclick="closeM('mAddProp')">Cancel</button>
         <button class="btn btp" onclick="submitProp()">Save Property</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Unit Modal -->
+<div class="ov" id="mAddUnit">
+  <div class="modal"><div class="mh"></div><div class="mt" id="mAddUnitTitle">Add Unit</div>
+    <input type="hidden" id="auPropId">
+    <input type="hidden" id="auUnitId">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="fg"><div class="fl">Unit Number</div><input class="fi ft" id="nuNum" placeholder="e.g. #02-07"></div>
+      <div class="fg"><div class="fl">Description</div><input class="fi ft" id="nuDesc" placeholder="e.g. Level 2 Office"></div>
+      <div class="fg"><div class="fl">Meter Types</div>
+        <div style="display:flex;flex-direction:column;gap:7px;padding:6px 0">
+          <label style="display:flex;align-items:center;gap:8px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer"><input type="checkbox" class="nuMeter" value="electricity" checked style="accent-color:var(--am);width:16px;height:16px"> ⚡ Electricity (kWh)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer"><input type="checkbox" class="nuMeter" value="water"       style="accent-color:var(--am);width:16px;height:16px"> 💧 Water (m³)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer"><input type="checkbox" class="nuMeter" value="gas"         style="accent-color:var(--am);width:16px;height:16px"> 🔥 Gas (m³)</label>
+        </div>
+      </div>
+      <div class="brow">
+        <button class="btn btg" onclick="closeM('mAddUnit')">Cancel</button>
+        <button class="btn btp" onclick="submitUnit()">Save Unit</button>
       </div>
     </div>
   </div>
@@ -1011,8 +1027,8 @@ function go(id){
   document.querySelector(`.nb[data-s="${id}"]`)?.classList.add('active');
   if(id==='analytics')setTimeout(renderAnalytics,40);
   if(id==='history'){renderMTabs('mTabsHist','history');renderHistory();}
-  if(id==='settings')renderUnitSettings();
-  if(id==='admin')renderAdminScreen();
+  if(id==='settings'){}  // settings is static
+  if(id==='admin'){switchAdminTab('users');}
 }
 
 // ═══════════════════════════════════════════
@@ -1031,7 +1047,7 @@ function renderUPList(q){
   const f=S.units.filter(u=>u.number.toLowerCase().includes(lc)||(u.desc||'').toLowerCase().includes(lc));
   const el=document.getElementById('upList');
   if(!f.length){
-    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No units match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit()">+ Add New Unit</button>`;
+    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No units match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Unit</button>`;
     return;
   }
   el.innerHTML=f.map(u=>{
@@ -1042,7 +1058,7 @@ function renderUPList(q){
       <div style="font-size:20px;width:36px;height:36px;background:var(--sf);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">🏢</div>
       <div style="flex:1;min-width:0"><div class="upi-num">${u.number}${cur?' ✓':''}</div><div class="upi-desc">${u.desc||'—'}</div></div>
       <div class="upi-meta">${cnt} rdgs<br>${ld}</div></div>`;
-  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit()">+ Add New Unit</button>`;
+  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Unit</button>`;
 }
 function pickUnit(id){
   S.activeUnit=id;closeM('mUnitPicker');
@@ -1099,45 +1115,6 @@ function setMeter(type,screen){
 // ═══════════════════════════════════════════
 function saveU(){DB.set('units_'+S.prop.id,S.units);}
 function saveR(){DB.set('readings_'+S.prop.id,S.readings);}
-function openAddUnit(){openM('mAddUnit');document.getElementById('nuNum').value='';document.getElementById('nuDesc').value='';}
-function addUnit(){
-  const n=document.getElementById('nuNum').value.trim(),d=document.getElementById('nuDesc').value.trim();
-  if(!n){toast('Enter a unit number','err');return;}
-  const u={id:'u_'+Date.now(),propId:S.prop.id,number:n,desc:d};
-  S.units.push(u);S.activeUnit=u.id;saveU();closeM('mAddUnit');refreshAll();toast('✓ Unit added');
-}
-function openRenameUnit(id){
-  const u=S.units.find(x=>x.id===id);if(!u)return;
-  document.getElementById('rnUnitId').value=id;document.getElementById('rnNum').value=u.number;document.getElementById('rnDesc').value=u.desc||'';
-  openM('mRenameUnit');
-}
-function confirmRename(){
-  const id=document.getElementById('rnUnitId').value,n=document.getElementById('rnNum').value.trim();
-  if(!n){toast('Enter unit number','err');return;}
-  const u=S.units.find(x=>x.id===id);if(!u)return;
-  u.number=n;u.desc=document.getElementById('rnDesc').value.trim();
-  saveU();closeM('mRenameUnit');refreshAll();toast('✓ Renamed');
-}
-function delUnit(id){
-  const u=S.units.find(x=>x.id===id);
-  if(!confirm(`Remove "${u?.number}"? All its readings will be deleted.`))return;
-  S.units=S.units.filter(x=>x.id!==id);S.readings=S.readings.filter(r=>r.unitId!==id);
-  if(S.activeUnit===id)S.activeUnit=S.units[0]?.id||null;
-  saveU();saveR();refreshAll();toast('Unit removed');
-}
-function renderUnitSettings(){
-  const el=document.getElementById('unitSettList');if(!el)return;
-  if(!S.units.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:8px 0">No units added</div>';return;}
-  el.innerHTML=S.units.map(u=>{
-    const cnt=S.readings.filter(r=>r.unitId===u.id).length;
-    return`<div class="si">
-      <div style="flex:1;min-width:0"><div class="slbl">${u.number}</div><div class="ssub">${u.desc||''} · ${cnt} readings</div></div>
-      <div style="display:flex;gap:5px;flex-shrink:0">
-        <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick="openRenameUnit('${u.id}')">Rename</button>
-        <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="delUnit('${u.id}')">Remove</button>
-      </div></div>`;
-  }).join('');
-}
 
 // ═══════════════════════════════════════════
 //  HELPERS
@@ -1311,7 +1288,7 @@ function preprocess(dataUrl){
 //  CAPTURE
 // ═══════════════════════════════════════════
 function startCapture(){
-  if(!S.units.length){toast('Add a unit first','err');openAddUnit();return;}
+  if(!S.units.length){toast('Add a unit first — go to Admin → Properties','err');return;}
   cap={step:0,uid:S.activeUnit||S.units[0].id,mt:S.activeMeter,photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
   if(S.units.length===1)cap.step=1;
   renderStep();go('capture');
@@ -2420,7 +2397,7 @@ function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MetrIQ v17 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MetrIQ v18 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2494,31 +2471,41 @@ async function processSyncQueue(){
 function forcSync(){toast('Syncing…');processSyncQueue().then(()=>toast('✓ Sync complete','ok'));}
 
 // ═══════════════════════════════════════════
-//  ADMIN — user management
+//  ADMIN — tabbed CRUD
 // ═══════════════════════════════════════════
+function switchAdminTab(tab){
+  ['users','props','sync'].forEach(t=>{
+    document.getElementById('atab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('adminTab-'+t).style.display=t===tab?'':'none';
+  });
+  if(tab==='users') renderAdminUsers();
+  if(tab==='props') renderAdminProps();
+  if(tab==='sync')  updateSyncStatus();
+}
+
 async function renderAdminScreen(){
   updateSyncStatus();
-  const el=document.getElementById('adminUserList');
-  if(!el)return;
-  // Show local users; supplement with backend if available
+  renderAdminUsers();  // default tab
+}
+
+// ── USERS ──────────────────────────────────
+async function renderAdminUsers(){
+  const el=document.getElementById('adminUserList'); if(!el)return;
+  el.innerHTML='<div style="color:var(--tx3);font-size:12px;padding:4px 0">Loading…</div>';
   let users=[...LOCAL_USERS];
   const res=await API.call('getUsers',{});
   if(res?.ok&&res.users?.length) users=res.users;
+  if(!users.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px">No users</div>';return;}
   el.innerHTML=users.map(u=>`
-    <div class="si" style="padding:10px 0">
+    <div class="si" style="padding:9px 0;border-bottom:1px solid var(--bd)">
       <div style="flex:1;min-width:0">
         <div class="slbl">${u.name}</div>
-        <div class="ssub"><span style="color:${u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)'}">${ROLES[u.role]||u.role}</span> · PIN: ${u.pin?'••••••':'(backend)'}</div>
+        <div class="ssub"><span style="color:${u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)'}">${ROLES[u.role]||u.role}</span></div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0">
-        <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick="openEditUser(${JSON.stringify(u).replace(/"/g,'&quot;')})">Edit</button>
-        <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="removeUser('${u.name}')">Remove</button>
+        <button class="btn btg" style="padding:5px 10px;font-size:11px" onclick='openEditUser(${JSON.stringify(u)})'>Edit</button>
+        <button class="btn btd" style="padding:5px 10px;font-size:11px" onclick="removeUser('${u.name}')">Remove</button>
       </div>
-    </div>`).join('')||'<div style="color:var(--tx3);font-size:13px">No users</div>';
-  const ep=document.getElementById('adminPropList');
-  if(ep) ep.innerHTML=PROPS.map(p=>`
-    <div class="si" style="padding:8px 0">
-      <div style="flex:1"><div class="slbl">${p.icon} ${p.name}</div><div class="ssub">${p.addr}</div></div>
     </div>`).join('');
 }
 function openAddUser(){
@@ -2530,12 +2517,14 @@ function openAddUser(){
   openM('mAddUser');
 }
 function openEditUser(u){
+  if(typeof u==='string') u=JSON.parse(u);
   document.getElementById('mAddUserTitle').textContent='Edit User';
   document.getElementById('auIsEdit').value=u.name;
   document.getElementById('auName').value=u.name||'';
   document.getElementById('auPin').value='';
   document.getElementById('auRole').value=u.role||'inspector';
-  renderPropChecks((u.propIds||'').split(',').filter(Boolean));
+  const pids=Array.isArray(u.propIds)?u.propIds:(u.propIds||'').toString().split(',').filter(Boolean);
+  renderPropChecks(pids);
   openM('mAddUser');
 }
 function renderPropChecks(selected){
@@ -2550,45 +2539,176 @@ async function submitUser(){
   const role=document.getElementById('auRole').value;
   const propIds=[...document.querySelectorAll('.auPropCb:checked')].map(c=>c.value);
   if(!name){toast('Name required','err');return;}
-  if(pin&&!/^\d{6}$/.test(pin)){toast('PIN must be exactly 6 digits','err');return;}
-  // Save to backend
+  if(pin&&!/^\d{6}$/.test(pin)){toast('PIN must be 6 digits','err');return;}
+  if(!pin&&!document.getElementById('auIsEdit').value){toast('PIN required for new user','err');return;}
+  const btn=document.querySelector('#mAddUser .btp');if(btn){btn.textContent='Saving…';btn.disabled=true;}
   const res=await API.call('saveUser',{user:{name,pin,role,propIds,active:true}});
-  if(res?.ok){closeM('mAddUser');toast('✓ User saved','ok');renderAdminScreen();}
-  else{
-    // Fallback: update LOCAL_USERS in memory for offline
+  if(btn){btn.textContent='Save User';btn.disabled=false;}
+  if(res?.ok){
+    // Update LOCAL_USERS in memory too
     const idx=LOCAL_USERS.findIndex(u=>u.name===name);
-    const u={pin:pin||LOCAL_USERS[idx]?.pin||'000000',name,role,propIds};
-    if(idx>=0)LOCAL_USERS[idx]=u; else LOCAL_USERS.push(u);
-    closeM('mAddUser');toast('✓ User saved (offline)','ok');renderAdminScreen();
+    const lu={pin:pin||LOCAL_USERS[idx]?.pin||'',name,role,propIds};
+    if(idx>=0)LOCAL_USERS[idx]=lu; else LOCAL_USERS.push(lu);
+    closeM('mAddUser');toast('✓ User saved','ok');renderAdminUsers();
+  } else {
+    toast(res?.error||'Backend unreachable — saved locally','err');
+    const idx=LOCAL_USERS.findIndex(u=>u.name===name);
+    const lu={pin:pin||LOCAL_USERS[idx]?.pin||'000000',name,role,propIds};
+    if(idx>=0)LOCAL_USERS[idx]=lu; else LOCAL_USERS.push(lu);
+    closeM('mAddUser');renderAdminUsers();
   }
 }
 async function removeUser(name){
   if(!confirm(`Remove user "${name}"?`))return;
-  const res=await API.call('deleteUser',{name});
+  await API.call('deleteUser',{name});
   const idx=LOCAL_USERS.findIndex(u=>u.name===name);
   if(idx>=0)LOCAL_USERS.splice(idx,1);
-  toast('User removed','ok');renderAdminScreen();
+  toast('User removed','ok');renderAdminUsers();
 }
+
+// ── PROPERTIES + UNITS ─────────────────────
+function renderAdminProps(){
+  const el=document.getElementById('adminPropList'); if(!el)return;
+  el.innerHTML=PROPS.map(p=>`
+    <div style="border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sf2)">
+        <div style="font-size:20px">${p.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="slbl">${p.name}</div>
+          <div class="ssub">${p.addr||''}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btg" style="padding:5px 9px;font-size:11px" onclick='openEditProp(${JSON.stringify(p)})'>Edit</button>
+          <button class="btn btd" style="padding:5px 9px;font-size:11px" onclick="removeProp('${p.id}')">Remove</button>
+        </div>
+      </div>
+      <div style="padding:8px 12px 10px">
+        <div style="font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Units</div>
+        <div id="unitList-${p.id}">${renderUnitRows(p.id)}</div>
+        <button class="btn btg" style="margin-top:6px;padding:5px 12px;font-size:11px;width:100%" onclick="openAddUnit('${p.id}')">+ Add Unit</button>
+      </div>
+    </div>`).join('');
+}
+function renderUnitRows(pid){
+  const units=(S.prop?.id===pid?S.units:[])||[];
+  if(!units.length) return '<div style="color:var(--tx3);font-size:12px;padding:4px 0">No units yet</div>';
+  return units.map(u=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
+      <div style="flex:1;min-width:0">
+        <span class="slbl" style="font-size:calc(12px * var(--fs))">${u.number}</span>
+        <span class="ssub" style="margin-left:6px">${u.desc||''}</span>
+      </div>
+      <button class="btn btg" style="padding:3px 8px;font-size:10px" onclick='openEditUnit("${pid}",${JSON.stringify(u)})'>Edit</button>
+      <button class="btn btd" style="padding:3px 8px;font-size:10px" onclick="removeUnit('${pid}','${u.id}')">✕</button>
+    </div>`).join('');
+}
+
+// Property CRUD
 function openAddProp(){
-  ['apName','apAddr','apIcon'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mAddPropTitle').textContent='Add Property';
+  document.getElementById('apId').value='';
+  ['apName','apAddr'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('apIcon').value='🏢';
+  openM('mAddProp');
+}
+function openEditProp(p){
+  if(typeof p==='string') p=JSON.parse(p);
+  document.getElementById('mAddPropTitle').textContent='Edit Property';
+  document.getElementById('apId').value=p.id;
+  document.getElementById('apName').value=p.name||'';
+  document.getElementById('apAddr').value=p.addr||'';
+  document.getElementById('apIcon').value=p.icon||'🏢';
   openM('mAddProp');
 }
 async function submitProp(){
   const name=document.getElementById('apName').value.trim();
   const addr=document.getElementById('apAddr').value.trim();
   const icon=document.getElementById('apIcon').value.trim()||'🏢';
+  const existingId=document.getElementById('apId').value;
   if(!name){toast('Name required','err');return;}
-  const id='p_'+Date.now();
-  const res=await API.call('saveProperty',{prop:{id,name,addr,icon}});
-  if(res?.ok){closeM('mAddProp');toast('✓ Property saved','ok');renderAdminScreen();}
-  else toast(res?.error||'Saved locally — sync when online','ok');
+  const id=existingId||'p_'+Date.now();
+  // Update PROPS in memory
+  const idx=PROPS.findIndex(p=>p.id===id);
+  const prop={id,name,addr,icon};
+  if(idx>=0) PROPS[idx]=prop; else PROPS.push(prop);
+  await DB.set('props_cache',PROPS);
+  const res=await API.call('saveProperty',{prop});
+  closeM('mAddProp');
+  toast(res?.ok?'✓ Property saved':'✓ Saved locally','ok');
+  renderAdminProps();
+}
+async function removeProp(id){
+  if(!confirm('Remove this property and all its units?'))return;
+  const idx=PROPS.findIndex(p=>p.id===id);
+  if(idx>=0) PROPS.splice(idx,1);
+  await DB.set('props_cache',PROPS);
+  await API.call('saveProperty',{prop:{id,_delete:true}});
+  toast('Property removed','ok'); renderAdminProps();
+}
+
+// Unit CRUD
+function openAddUnit(pid){
+  document.getElementById('mAddUnitTitle').textContent='Add Unit';
+  document.getElementById('auPropId').value=pid||S.prop?.id||'';
+  document.getElementById('auUnitId').value='';
+  document.getElementById('nuNum').value='';
+  document.getElementById('nuDesc').value='';
+  document.querySelectorAll('.nuMeter').forEach(cb=>{ cb.checked=cb.value==='electricity'; });
+  openM('mAddUnit');
+}
+function openEditUnit(pid, u){
+  if(typeof u==='string') u=JSON.parse(u);
+  document.getElementById('mAddUnitTitle').textContent='Edit Unit';
+  document.getElementById('auPropId').value=pid;
+  document.getElementById('auUnitId').value=u.id;
+  document.getElementById('nuNum').value=u.number||'';
+  document.getElementById('nuDesc').value=u.desc||'';
+  const meters=u.meters||['electricity'];
+  document.querySelectorAll('.nuMeter').forEach(cb=>{ cb.checked=meters.includes(cb.value); });
+  openM('mAddUnit');
+}
+async function submitUnit(){
+  const num=document.getElementById('nuNum').value.trim();
+  const desc=document.getElementById('nuDesc').value.trim();
+  const pid=document.getElementById('auPropId').value||S.prop?.id;
+  const existingId=document.getElementById('auUnitId').value;
+  const meters=[...document.querySelectorAll('.nuMeter:checked')].map(c=>c.value);
+  if(!num){toast('Unit number required','err');return;}
+  if(!meters.length){toast('Select at least one meter type','err');return;}
+  const id=existingId||'u_'+pid+'_'+Date.now();
+  const unit={id,propId:pid,number:num,desc,meters};
+  // Update in-memory units if this is the current property
+  if(S.prop?.id===pid){
+    const idx=S.units.findIndex(u=>u.id===id);
+    if(idx>=0) S.units[idx]=unit; else S.units.push(unit);
+    saveU(); // persist locally
+    if(!existingId){ S.activeUnit=id; }
+  }
+  await API.call('saveUnit',{unit});
+  closeM('mAddUnit');
+  toast('✓ Unit saved','ok');
+  refreshAll();
+  renderAdminProps(); // refresh the nested unit list
+}
+async function removeUnit(pid, uid){
+  if(!confirm('Remove this unit?'))return;
+  if(S.prop?.id===pid){
+    S.units=S.units.filter(u=>u.id!==uid);
+    S.readings=S.readings.filter(r=>r.unitId!==uid);
+    if(S.activeUnit===uid) S.activeUnit=S.units[0]?.id||null;
+    saveU(); saveR();
+    refreshAll();
+  }
+  await API.call('deleteUnit',{unitId:uid});
+  toast('Unit removed','ok');
+  renderAdminProps();
 }
 
 function refreshAll(){
   updateHeader();updateUSBs();
   renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
   if(!CH.mini)initMC();
-  renderDashboard();renderHistory();renderUnitSettings();
+  renderDashboard();renderHistory();
 }
 
 // ═══════════════════════════════════════════
