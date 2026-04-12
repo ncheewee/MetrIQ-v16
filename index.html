@@ -323,7 +323,8 @@ select.fi option{background:var(--sf)}
       <button class="pb" onclick="lpk('7')">7</button><button class="pb" onclick="lpk('8')">8</button><button class="pb" onclick="lpk('9')">9</button>
       <button class="pb emp"></button><button class="pb" onclick="lpk('0')">0</button><button class="pb del" onclick="ldel()">⌫</button>
     </div>
-    <div style="margin-top:16px;font-size:calc(11px * var(--fs));color:var(--tx3);text-align:center;line-height:1.6">
+    <button onclick="doLogin()" style="margin-top:14px;width:100%;padding:14px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;opacity:1;transition:opacity .15s" ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
+    <div style="margin-top:14px;font-size:calc(11px * var(--fs));color:var(--tx3);text-align:center;line-height:1.6">
       Admin: <strong style="color:var(--am)">111111</strong> · Manager: <strong style="color:var(--am)">222222</strong> · Inspector: <strong style="color:var(--am)">333333</strong>
     </div>
   </div>
@@ -590,7 +591,7 @@ select.fi option{background:var(--sf)}
     <button class="nb active" data-s="dash"      onclick="go('dash')">     <span class="ni">🏠</span>Home</button>
     <button class="nb" id="navCapture" data-s="capture"   onclick="startCapture()"> <span class="ni">📷</span>Capture</button>
     <button class="nb"        data-s="history"   onclick="go('history')">  <span class="ni">📋</span>History</button>
-    <button class="nb"        data-s="analytics" onclick="go('analytics')"><span class="ni">📊</span>Analytics</button>
+    <button class="nb" id="navAnalytics" data-s="analytics" onclick="go('analytics')"><span class="ni">📊</span>Analytics</button>
     <button class="nb" id="navAdmin"   data-s="admin"     onclick="go('admin')" style="display:none"><span class="ni">🛡️</span>Admin</button>
     <button class="nb"        data-s="settings"  onclick="go('settings')"> <span class="ni">⚙️</span>Settings</button>
   </nav>
@@ -1027,6 +1028,10 @@ function applyRoleUI(role){
   if(capNav)capNav.style.display=role==='manager'?'none':'';
   const fab=document.querySelector('.fab');
   if(fab)fab.style.display=role==='manager'?'none':'';
+
+  // ── Nav: Analytics tab (hidden for inspector) ──
+  const anlNav=document.getElementById('navAnalytics');
+  if(anlNav)anlNav.style.display=role==='inspector'?'none':'';
 
   // ── Settings: Backend card (admin only) ──
   const cardBackend=document.getElementById('setCardBackend');
