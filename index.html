@@ -37,11 +37,11 @@ body.light{
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Barlow',sans-serif;overflow:hidden;transition:background .2s,color .2s}
 
 /* ── LOGIN ── */
-#loginScreen{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:60px 20px 32px;transition:opacity .3s}
+#loginScreen{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 20px 24px;overflow-y:auto;transition:opacity .3s}
 #loginScreen.hidden{opacity:0;pointer-events:none}
-.ll{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:38px;letter-spacing:3px;color:var(--am);margin-bottom:4px}
-.lt{font-size:calc(12px * var(--fs));color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
-.lver{position:fixed;bottom:20px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tx3);letter-spacing:1px}
+.ll{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:34px;letter-spacing:3px;color:var(--am);margin-bottom:2px;flex-shrink:0}
+.lt{font-size:calc(11px * var(--fs));color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;flex-shrink:0}
+.lver{text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tx3);letter-spacing:1px;margin-top:12px;flex-shrink:0}
 .pg{display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px}
 .pc{display:flex;align-items:center;gap:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:15px;cursor:pointer;transition:all .2s}
 .pc:active{border-color:var(--am);background:var(--amg)}
@@ -52,13 +52,13 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Barlow',
 #pinScreen.show{display:flex}
 .ppn{font-family:'Rajdhani',sans-serif;font-size:calc(18px * var(--fs));font-weight:600;margin-bottom:4px;text-align:center}
 .ppl{font-size:calc(13px * var(--fs));color:var(--tx2);margin-bottom:18px}
-.pds{display:flex;gap:14px;margin-bottom:20px}
-.pd{width:16px;height:16px;border-radius:50%;border:2px solid var(--bd2);transition:all .15s}
+.pds{display:flex;gap:14px;margin-bottom:14px}
+.pd{width:15px;height:15px;border-radius:50%;border:2px solid var(--bd2);transition:all .15s}
 .pd.on{background:var(--am);border-color:var(--am)}
 .pd.err{background:var(--rd);border-color:var(--rd)}
 .pe{font-size:calc(13px * var(--fs));color:var(--rd);margin-top:-14px;margin-bottom:12px;height:18px;text-align:center}
-.pp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
-.pb{height:58px;border-radius:var(--rs);background:var(--sf);border:1px solid var(--bd);font-family:'Rajdhani',sans-serif;font-size:calc(22px * var(--fs));font-weight:600;color:var(--tx);cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
+.pp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.pb{height:52px;border-radius:var(--rs);background:var(--sf);border:1px solid var(--bd);font-family:'Rajdhani',sans-serif;font-size:calc(21px * var(--fs));font-weight:600;color:var(--tx);cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
 .pb:active{background:var(--amg);border-color:var(--am);transform:scale(.95)}
 .pb.del{color:var(--tx2)}.pb.emp{background:none;border:none;cursor:default}
 .pbk{margin-top:14px;background:none;border:none;color:var(--tx3);font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:500;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
@@ -311,26 +311,39 @@ select.fi option{background:var(--sf)}
 <div id="loginScreen">
   <div class="ll">⚡ MetrIQ</div>
   <div class="lt">Smart Meter Reader</div>
-  <div id="loginForm" style="width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;gap:0">
-    <!-- Name selector -->
-    <div style="width:100%;margin-bottom:18px">
-      <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:7px;text-align:center">Who are you?</div>
-      <div id="loginNameList" style="display:flex;flex-direction:column;gap:7px"></div>
+  <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:0">
+
+    <!-- Name dropdown -->
+    <div style="margin-bottom:14px">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Sign in as</div>
+      <select id="loginNameSelect" class="fi" onchange="selectLoginUser(this.value)"
+        style="font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:600;padding:11px 13px;width:100%;cursor:pointer">
+        <option value="">— Select your name —</option>
+      </select>
     </div>
-    <!-- PIN dots -->
-    <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;text-align:center">Enter PIN</div>
-    <div class="pds" style="margin-bottom:10px">
+
+    <!-- PIN label + dots -->
+    <div style="font-family:'Rajdhani',sans-serif;font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:8px">PIN</div>
+    <div class="pds" style="justify-content:center">
       <div class="pd" id="lpd0"></div><div class="pd" id="lpd1"></div><div class="pd" id="lpd2"></div>
       <div class="pd" id="lpd3"></div><div class="pd" id="lpd4"></div><div class="pd" id="lpd5"></div>
     </div>
-    <div id="loginErr" style="font-size:calc(12px * var(--fs));color:var(--rd);text-align:center;min-height:18px;margin-bottom:8px"></div>
-    <div class="pp" style="width:100%">
+
+    <!-- Error -->
+    <div id="loginErr" style="font-size:calc(11px * var(--fs));color:var(--rd);text-align:center;min-height:16px;margin-bottom:8px"></div>
+
+    <!-- Keypad -->
+    <div class="pp">
       <button class="pb" onclick="lpk('1')">1</button><button class="pb" onclick="lpk('2')">2</button><button class="pb" onclick="lpk('3')">3</button>
       <button class="pb" onclick="lpk('4')">4</button><button class="pb" onclick="lpk('5')">5</button><button class="pb" onclick="lpk('6')">6</button>
       <button class="pb" onclick="lpk('7')">7</button><button class="pb" onclick="lpk('8')">8</button><button class="pb" onclick="lpk('9')">9</button>
       <button class="pb emp"></button><button class="pb" onclick="lpk('0')">0</button><button class="pb del" onclick="ldel()">⌫</button>
     </div>
-    <button id="loginBtn" onclick="doLogin()" style="margin-top:14px;width:100%;padding:14px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;opacity:1;transition:opacity .15s" ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
+
+    <!-- Sign In -->
+    <button id="loginBtn" onclick="doLogin()"
+      style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
+      ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
   <div class="lver">v20</div>
 </div>
@@ -922,7 +935,7 @@ async function init(){
 }
 
 // ═══════════════════════════════════════════
-//  LOGIN — name select + 6-digit PIN
+//  LOGIN — name dropdown + 6-digit PIN
 // ═══════════════════════════════════════════
 let lpe='', lSelectedUser=null;
 
@@ -931,8 +944,9 @@ function showLoginScreen(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginScreen').classList.remove('hidden');
   document.getElementById('loginErr').textContent='';
-  renderLoginNames();
-  // Background-fetch users to keep name list fresh
+  const sel=document.getElementById('loginNameSelect');
+  if(sel)sel.value='';
+  populateLoginSelect();
   fetchLoginUsers();
 }
 
@@ -940,41 +954,28 @@ async function fetchLoginUsers(){
   try{
     const res=await API.call('getUsers',{});
     if(res?.ok&&res.users?.length){
-      const names=res.users.map(u=>({name:u.name,role:u.role}));
-      await DB.set('login_users_cache',names);
-      renderLoginNames();
+      await DB.set('login_users_cache',res.users.map(u=>({name:u.name,role:u.role})));
+      populateLoginSelect();
     }
   }catch(e){}
 }
 
-function renderLoginNames(){
-  const el=document.getElementById('loginNameList');if(!el)return;
-  // Merge LOCAL_USERS with cached backend users
+function populateLoginSelect(){
+  const sel=document.getElementById('loginNameSelect');if(!sel)return;
   DB.get('login_users_cache').then(cached=>{
-    const backendUsers=cached||[];
     const merged={};
     LOCAL_USERS.forEach(u=>merged[u.name]={name:u.name,role:u.role});
-    backendUsers.forEach(u=>merged[u.name]={name:u.name,role:u.role});
-    const all=Object.values(merged);
-    el.innerHTML=all.map(u=>{
-      const sel=lSelectedUser===u.name;
-      const roleCol=u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)';
-      return`<button onclick="selectLoginUser('${u.name}')" style="display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:${sel?'var(--amg)':'var(--sf)'};border:1px solid ${sel?'var(--am)':'var(--bd)'};border-radius:var(--rs);cursor:pointer;transition:all .15s;text-align:left">
-        <div style="width:34px;height:34px;border-radius:50%;background:${sel?'var(--am)':'var(--sf2)'};display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;color:${sel?'#000':'var(--tx2)'};flex-shrink:0">${u.name.charAt(0).toUpperCase()}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:600;color:${sel?'var(--am)':'var(--tx)'}">${u.name}</div>
-          <div style="font-size:calc(11px * var(--fs));color:${roleCol};margin-top:1px">${ROLES[u.role]||u.role}</div>
-        </div>
-        ${sel?'<span style="color:var(--am);font-size:18px">✓</span>':''}
-      </button>`;
-    }).join('');
+    (cached||[]).forEach(u=>merged[u.name]={name:u.name,role:u.role});
+    const current=sel.value;
+    sel.innerHTML='<option value="">— Select your name —</option>'+
+      Object.values(merged).map(u=>`<option value="${u.name}">${u.name} · ${ROLES[u.role]||u.role}</option>`).join('');
+    if(current)sel.value=current;
   });
 }
 
 function selectLoginUser(name){
-  lSelectedUser=name; lpe=''; lupd();
+  lSelectedUser=name||null; lpe=''; lupd();
   document.getElementById('loginErr').textContent='';
-  renderLoginNames();
 }
 
 function lupd(err=false){
@@ -985,45 +986,26 @@ function lupd(err=false){
     d.classList.toggle('err',err&&i<lpe.length);
   }
 }
-function lpk(digit){
-  if(lpe.length>=6)return;
-  lpe+=digit; lupd();
-  // No auto-submit — user must tap Sign In
-}
+function lpk(digit){if(lpe.length>=6)return;lpe+=digit;lupd();}
 function ldel(){lpe=lpe.slice(0,-1);lupd();document.getElementById('loginErr').textContent='';}
 
 async function doLogin(){
-  if(!lSelectedUser){
-    document.getElementById('loginErr').textContent='Select your name first';
-    return;
-  }
-  if(lpe.length<6){
-    document.getElementById('loginErr').textContent='Enter your 6-digit PIN';
-    return;
-  }
-  // Show loading state on button
+  if(!lSelectedUser){document.getElementById('loginErr').textContent='Select your name first';return;}
+  if(lpe.length<6){document.getElementById('loginErr').textContent='Enter your 6-digit PIN';return;}
   const btn=document.getElementById('loginBtn');
   if(btn){btn.textContent='SIGNING IN…';btn.disabled=true;btn.style.opacity='.7';}
   document.getElementById('loginErr').textContent='';
-
-  // Check LOCAL_USERS first (offline-capable)
   const localUser=LOCAL_USERS.find(u=>u.name===lSelectedUser&&u.pin===lpe);
   if(localUser){
     const sess={ok:true,token:'local_'+lpe,user:{name:localUser.name,role:localUser.role,propIds:localUser.propIds}};
-    S.session=sess;
-    sessionStorage.setItem('mq4_session',JSON.stringify(sess));
-    await loginAs(sess);
-    resetLoginBtn();return;
+    S.session=sess;sessionStorage.setItem('mq4_session',JSON.stringify(sess));
+    await loginAs(sess);resetLoginBtn();return;
   }
-  // Backend auth — passes name for exact match
   const res=await API.call('authPin',{pin:lpe,name:lSelectedUser});
   if(res?.ok){
-    S.session=res;
-    sessionStorage.setItem('mq4_session',JSON.stringify(res));
-    await loginAs(res);
-    resetLoginBtn();return;
+    S.session=res;sessionStorage.setItem('mq4_session',JSON.stringify(res));
+    await loginAs(res);resetLoginBtn();return;
   }
-  // Wrong PIN
   lupd(true);
   document.getElementById('loginErr').textContent=res?.error||'Incorrect PIN';
   setTimeout(()=>{lpe='';lupd();document.getElementById('loginErr').textContent='';},1400);
