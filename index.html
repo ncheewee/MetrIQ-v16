@@ -974,9 +974,28 @@ async function loginAs(sess){
   if(S.backendUrl&&sess.token!=='offline'){
     const rd=await API.call('syncDown',{});
     if(rd?.ok){
-      if(rd.props?.length)props=rd.props;
-      const byPropU={};(rd.units||[]).forEach(u=>{(byPropU[u.propId]=byPropU[u.propId]||[]).push(u);});
-      for(const[pid,us]of Object.entries(byPropU))await DB.set('units_'+pid,us);
+      if(rd.props?.length){
+        props=rd.props;
+        // ── Update global PROPS so admin panel + prop checks see live data ──
+        PROPS.length=0;rd.props.forEach(p=>PROPS.push(p));
+        await DB.set('props_cache',PROPS);
+      }
+      // If backend returned no units, auto-trigger setup to seed them
+      if(!rd.units?.length){
+        const sr=await API.call('setup',{});
+        if(sr?.ok){
+          // Re-sync after seeding
+          const rd2=await API.call('syncDown',{});
+          if(rd2?.ok){
+            if(rd2.props?.length){PROPS.length=0;rd2.props.forEach(p=>PROPS.push(p));}
+            const byPropU2={};(rd2.units||[]).forEach(u=>{(byPropU2[u.propId]=byPropU2[u.propId]||[]).push(u);});
+            for(const[pid,us]of Object.entries(byPropU2))await DB.set('units_'+pid,us);
+          }
+        }
+      } else {
+        const byPropU={};(rd.units||[]).forEach(u=>{(byPropU[u.propId]=byPropU[u.propId]||[]).push(u);});
+        for(const[pid,us]of Object.entries(byPropU))await DB.set('units_'+pid,us);
+      }
       const byProp={};(rd.readings||[]).forEach(r=>{(byProp[r.propId]=byProp[r.propId]||[]).push(r);});
       for(const[pid,rds]of Object.entries(byProp))await DB.set('readings_'+pid,rds);
       S.lastSync=new Date().toISOString();
@@ -2649,8 +2668,16 @@ async function removeUser(name){
 }
 
 // ── PROPERTIES + UNITS ─────────────────────
-function renderAdminProps(){
+async function renderAdminProps(){
   const el=document.getElementById('adminPropList'); if(!el)return;
+  // Load units for ALL properties from DB (not just active property)
+  const allUnits={};
+  await Promise.all(PROPS.map(async p=>{
+    let u=await DB.get('units_'+p.id);
+    // Fall back to S.units if this is the active property
+    if(!u&&S.prop?.id===p.id) u=S.units;
+    allUnits[p.id]=u||[];
+  }));
   el.innerHTML=PROPS.map(p=>`
     <div style="border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden">
       <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sf2)">
@@ -2665,14 +2692,13 @@ function renderAdminProps(){
         </div>
       </div>
       <div style="padding:8px 12px 10px">
-        <div style="font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Units</div>
-        <div id="unitList-${p.id}">${renderUnitRows(p.id)}</div>
+        <div style="font-size:calc(10px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:6px">Units (${(allUnits[p.id]||[]).length})</div>
+        <div id="unitList-${p.id}">${renderUnitRows(p.id, allUnits[p.id]||[])}</div>
         <button class="btn btg" style="margin-top:6px;padding:5px 12px;font-size:11px;width:100%" onclick="openAddUnit('${p.id}')">+ Add Unit</button>
       </div>
     </div>`).join('');
 }
-function renderUnitRows(pid){
-  const units=(S.prop?.id===pid?S.units:[])||[];
+function renderUnitRows(pid, units){
   if(!units.length) return '<div style="color:var(--tx3);font-size:12px;padding:4px 0">No units yet</div>';
   return units.map(u=>`
     <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd)">
@@ -2759,11 +2785,15 @@ async function submitUnit(){
   if(!meters.length){toast('Select at least one meter type','err');return;}
   const id=existingId||'u_'+pid+'_'+Date.now();
   const unit={id,propId:pid,number:num,desc,meters};
+  // Always persist to DB for this property
+  const existingUnits=await DB.get('units_'+pid)||[];
+  const uidx=existingUnits.findIndex(u=>u.id===id);
+  if(uidx>=0) existingUnits[uidx]=unit; else existingUnits.push(unit);
+  await DB.set('units_'+pid,existingUnits);
   // Update in-memory units if this is the current property
   if(S.prop?.id===pid){
     const idx=S.units.findIndex(u=>u.id===id);
     if(idx>=0) S.units[idx]=unit; else S.units.push(unit);
-    saveU(); // persist locally
     if(!existingId){ S.activeUnit=id; }
   }
   await API.call('saveUnit',{unit});
@@ -2774,11 +2804,15 @@ async function submitUnit(){
 }
 async function removeUnit(pid, uid){
   if(!confirm('Remove this unit?'))return;
+  // Remove from DB for this property
+  const existingUnits=await DB.get('units_'+pid)||[];
+  await DB.set('units_'+pid, existingUnits.filter(u=>u.id!==uid));
+  // Update in-memory state if this is the active property
   if(S.prop?.id===pid){
     S.units=S.units.filter(u=>u.id!==uid);
     S.readings=S.readings.filter(r=>r.unitId!==uid);
     if(S.activeUnit===uid) S.activeUnit=S.units[0]?.id||null;
-    saveU(); saveR();
+    saveR();
     refreshAll();
   }
   await API.call('deleteUnit',{unitId:uid});
