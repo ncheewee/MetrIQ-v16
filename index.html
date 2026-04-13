@@ -312,7 +312,14 @@ select.fi option{background:var(--sf)}
   <div class="ll">⚡ MetrIQ</div>
   <div class="lt">Smart Meter Reader</div>
   <div id="loginForm" style="width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;gap:0">
-    <div class="pds" style="margin-bottom:16px">
+    <!-- Name selector -->
+    <div style="width:100%;margin-bottom:18px">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:7px;text-align:center">Who are you?</div>
+      <div id="loginNameList" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+    <!-- PIN dots -->
+    <div style="font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:10px;text-align:center">Enter PIN</div>
+    <div class="pds" style="margin-bottom:10px">
       <div class="pd" id="lpd0"></div><div class="pd" id="lpd1"></div><div class="pd" id="lpd2"></div>
       <div class="pd" id="lpd3"></div><div class="pd" id="lpd4"></div><div class="pd" id="lpd5"></div>
     </div>
@@ -323,18 +330,15 @@ select.fi option{background:var(--sf)}
       <button class="pb" onclick="lpk('7')">7</button><button class="pb" onclick="lpk('8')">8</button><button class="pb" onclick="lpk('9')">9</button>
       <button class="pb emp"></button><button class="pb" onclick="lpk('0')">0</button><button class="pb del" onclick="ldel()">⌫</button>
     </div>
-    <button onclick="doLogin()" style="margin-top:14px;width:100%;padding:14px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;opacity:1;transition:opacity .15s" ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
-    <div style="margin-top:14px;font-size:calc(11px * var(--fs));color:var(--tx3);text-align:center;line-height:1.6">
-      Admin: <strong style="color:var(--am)">111111</strong> · Manager: <strong style="color:var(--am)">222222</strong> · Inspector: <strong style="color:var(--am)">333333</strong>
-    </div>
+    <button id="loginBtn" onclick="doLogin()" style="margin-top:14px;width:100%;padding:14px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;opacity:1;transition:opacity .15s" ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v19</div>
+  <div class="lver">v20</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v19</span></div>
+    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v20</span></div>
     <div class="hc">
       <div class="hp" id="hdrProp"></div>
       <div class="hu" id="hdrUnit"></div>
@@ -542,7 +546,7 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v19 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v20 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -650,16 +654,11 @@ select.fi option{background:var(--sf)}
       </div>
       <div class="fg">
         <div class="fl">Meters</div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="rptMeterChecks">
+          ${ACTIVE_MDEFS.map(md=>`
           <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
-            <input type="checkbox" id="rptElec" checked style="accent-color:var(--am);width:16px;height:16px"> ⚡ Electricity
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
-            <input type="checkbox" id="rptWater" checked style="accent-color:var(--am);width:16px;height:16px"> 💧 Water
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
-            <input type="checkbox" id="rptGas" checked style="accent-color:var(--am);width:16px;height:16px"> 🔥 Gas
-          </label>
+            <input type="checkbox" class="rptMeterCb" value="${md.type}" checked style="accent-color:var(--am);width:16px;height:16px"> ${md.icon} ${md.label}
+          </label>`).join('')}
         </div>
       </div>
       <div class="fg">
@@ -755,10 +754,12 @@ const PROPS=[
   {id:'p3',name:'Harbourfront Centre',addr:'1 Maritime Square, S099253',icon:'🏢',pin:'1234'},
 ];
 const MDEFS=[
-  {type:'electricity',icon:'⚡',label:'Electricity',unit:'kWh',dec:1},
-  {type:'water',      icon:'💧',label:'Water',       unit:'m³', dec:2},
-  {type:'gas',        icon:'🔥',label:'Gas',         unit:'m³', dec:3},
+  {type:'electricity',icon:'⚡',label:'Electricity',unit:'kWh',dec:1,hidden:true},
+  {type:'water',      icon:'💧',label:'Water',       unit:'m³', dec:2,hidden:false},
+  {type:'gas',        icon:'🔥',label:'Gas',         unit:'m³', dec:3,hidden:true},
 ];
+// Active meters for UI — change hidden flags above to enable/disable meter types
+const ACTIVE_MDEFS=MDEFS.filter(m=>!m.hidden);
 const FSC=[1.35,1.5,1.65,1.85], FLB=['100%','110%','120%','135%'];
 const STEPS=[
   {t:'Select Unit',      s:'Which unit and meter type are you reading?'},
@@ -921,15 +922,61 @@ async function init(){
 }
 
 // ═══════════════════════════════════════════
-//  LOGIN — 6-digit PIN
+//  LOGIN — name select + 6-digit PIN
 // ═══════════════════════════════════════════
-let lpe=''; // login pin entry
+let lpe='', lSelectedUser=null;
+
 function showLoginScreen(){
-  lpe='';lupd();
+  lpe=''; lSelectedUser=null; lupd();
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginScreen').classList.remove('hidden');
   document.getElementById('loginErr').textContent='';
+  renderLoginNames();
+  // Background-fetch users to keep name list fresh
+  fetchLoginUsers();
 }
+
+async function fetchLoginUsers(){
+  try{
+    const res=await API.call('getUsers',{});
+    if(res?.ok&&res.users?.length){
+      const names=res.users.map(u=>({name:u.name,role:u.role}));
+      await DB.set('login_users_cache',names);
+      renderLoginNames();
+    }
+  }catch(e){}
+}
+
+function renderLoginNames(){
+  const el=document.getElementById('loginNameList');if(!el)return;
+  // Merge LOCAL_USERS with cached backend users
+  DB.get('login_users_cache').then(cached=>{
+    const backendUsers=cached||[];
+    const merged={};
+    LOCAL_USERS.forEach(u=>merged[u.name]={name:u.name,role:u.role});
+    backendUsers.forEach(u=>merged[u.name]={name:u.name,role:u.role});
+    const all=Object.values(merged);
+    el.innerHTML=all.map(u=>{
+      const sel=lSelectedUser===u.name;
+      const roleCol=u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)';
+      return`<button onclick="selectLoginUser('${u.name}')" style="display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:${sel?'var(--amg)':'var(--sf)'};border:1px solid ${sel?'var(--am)':'var(--bd)'};border-radius:var(--rs);cursor:pointer;transition:all .15s;text-align:left">
+        <div style="width:34px;height:34px;border-radius:50%;background:${sel?'var(--am)':'var(--sf2)'};display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:15px;color:${sel?'#000':'var(--tx2)'};flex-shrink:0">${u.name.charAt(0).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:600;color:${sel?'var(--am)':'var(--tx)'}">${u.name}</div>
+          <div style="font-size:calc(11px * var(--fs));color:${roleCol};margin-top:1px">${ROLES[u.role]||u.role}</div>
+        </div>
+        ${sel?'<span style="color:var(--am);font-size:18px">✓</span>':''}
+      </button>`;
+    }).join('');
+  });
+}
+
+function selectLoginUser(name){
+  lSelectedUser=name; lpe=''; lupd();
+  document.getElementById('loginErr').textContent='';
+  renderLoginNames();
+}
+
 function lupd(err=false){
   for(let i=0;i<6;i++){
     const d=document.getElementById('lpd'+i);
@@ -941,31 +988,50 @@ function lupd(err=false){
 function lpk(digit){
   if(lpe.length>=6)return;
   lpe+=digit; lupd();
-  if(lpe.length===6)setTimeout(doLogin,120);
+  // No auto-submit — user must tap Sign In
 }
 function ldel(){lpe=lpe.slice(0,-1);lupd();document.getElementById('loginErr').textContent='';}
+
 async function doLogin(){
-  // Check against LOCAL_USERS first (always works, even offline)
-  const localUser=LOCAL_USERS.find(u=>u.pin===lpe);
+  if(!lSelectedUser){
+    document.getElementById('loginErr').textContent='Select your name first';
+    return;
+  }
+  if(lpe.length<6){
+    document.getElementById('loginErr').textContent='Enter your 6-digit PIN';
+    return;
+  }
+  // Show loading state on button
+  const btn=document.getElementById('loginBtn');
+  if(btn){btn.textContent='SIGNING IN…';btn.disabled=true;btn.style.opacity='.7';}
+  document.getElementById('loginErr').textContent='';
+
+  // Check LOCAL_USERS first (offline-capable)
+  const localUser=LOCAL_USERS.find(u=>u.name===lSelectedUser&&u.pin===lpe);
   if(localUser){
     const sess={ok:true,token:'local_'+lpe,user:{name:localUser.name,role:localUser.role,propIds:localUser.propIds}};
     S.session=sess;
     sessionStorage.setItem('mq4_session',JSON.stringify(sess));
     await loginAs(sess);
-    return;
+    resetLoginBtn();return;
   }
-  // If no local match, try backend (for users added via admin)
-  const res=await API.call('authPin',{pin:lpe});
+  // Backend auth — passes name for exact match
+  const res=await API.call('authPin',{pin:lpe,name:lSelectedUser});
   if(res?.ok){
     S.session=res;
     sessionStorage.setItem('mq4_session',JSON.stringify(res));
     await loginAs(res);
-    return;
+    resetLoginBtn();return;
   }
   // Wrong PIN
   lupd(true);
-  document.getElementById('loginErr').textContent='Incorrect PIN';
-  setTimeout(()=>{lpe='';lupd();document.getElementById('loginErr').textContent='';},1200);
+  document.getElementById('loginErr').textContent=res?.error||'Incorrect PIN';
+  setTimeout(()=>{lpe='';lupd();document.getElementById('loginErr').textContent='';},1400);
+  resetLoginBtn();
+}
+function resetLoginBtn(){
+  const btn=document.getElementById('loginBtn');
+  if(btn){btn.textContent='SIGN IN →';btn.disabled=false;btn.style.opacity='1';}
 }
 async function loginAs(sess){
   S.session=sess;
@@ -1006,7 +1072,7 @@ async function loginAs(sess){
   S.prop=allowedProps[0];
   let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
   if(!u||!u.length){const d=genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
-  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;S.activeMeter='electricity';
+  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;S.activeMeter=ACTIVE_MDEFS[0].type;
   document.getElementById('aiProv').value=S.aiProv;document.getElementById('groqKey').value=S.groqKey;
   document.getElementById('orKey').value=S.orKey;document.getElementById('gemKey').value=S.gemKey;
   document.getElementById('claKey').value=S.claKey;
@@ -1197,7 +1263,7 @@ function updateHeader(){
 // ═══════════════════════════════════════════
 function renderMTabs(elId,screen){
   const el=document.getElementById(elId);if(!el)return;
-  el.innerHTML=MDEFS.map(md=>`
+  el.innerHTML=ACTIVE_MDEFS.map(md=>`
     <button class="mtab${S.activeMeter===md.type?' active':''}" onclick="setMeter('${md.type}','${screen}')">
       <span>${md.icon}</span>${md.label}</button>`).join('');
 }
@@ -1390,7 +1456,7 @@ function preprocess(dataUrl){
 // ═══════════════════════════════════════════
 function startCapture(){
   if(!S.units.length){toast('Add a unit first — go to Admin → Properties','err');return;}
-  cap={step:0,uid:S.activeUnit||S.units[0].id,mt:S.activeMeter,photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
+  cap={step:0,uid:S.activeUnit||S.units[0].id,mt:ACTIVE_MDEFS[0].type,photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
   if(S.units.length===1)cap.step=1;
   renderStep();go('capture');
 }
@@ -1412,7 +1478,7 @@ function renderStep(){
         <div style="display:flex;align-items:center;gap:11px">
           <div style="font-size:22px;width:38px;height:38px;background:var(--sf2);border-radius:8px;display:flex;align-items:center;justify-content:center">🏢</div>
           <div><div style="font-family:'Rajdhani',sans-serif;font-size:calc(16px * var(--fs));font-weight:700">${u.number}</div><div style="font-size:calc(12px * var(--fs));color:var(--tx2)">${u.desc||''}</div></div>
-          <div style="display:flex;gap:5px;margin-left:auto">${MDEFS.map(md=>`<button style="padding:4px 8px;border-radius:5px;border:1px solid ${cap.mt===md.type&&cap.uid===u.id?'var(--am)':'var(--bd)'};background:${cap.mt===md.type&&cap.uid===u.id?'var(--amg)':'var(--sf2)'};font-size:13px;cursor:pointer" onclick="event.stopPropagation();selUM('${u.id}','${md.type}')">${md.icon}</button>`).join('')}</div>
+          <div style="display:flex;gap:5px;margin-left:auto">${ACTIVE_MDEFS.map(md=>`<button style="padding:4px 8px;border-radius:5px;border:1px solid ${cap.mt===md.type&&cap.uid===u.id?'var(--am)':'var(--bd)'};background:${cap.mt===md.type&&cap.uid===u.id?'var(--amg)':'var(--sf2)'};font-size:13px;cursor:pointer" onclick="event.stopPropagation();selUM('${u.id}','${md.type}')">${md.icon}</button>`).join('')}</div>
         </div></div>`;}).join('')}</div>`;
 
   } else if(s===1){
@@ -1901,7 +1967,22 @@ async function saveReading(){
   toast('✓ Reading saved!','ok');go('dash');setTimeout(()=>openM('mAssess'),300);
   // Queue background sync to Google Sheets (non-blocking — stays snappy)
   queueSync('reading',{...r,photoData:undefined});
-  if(photoThumb) queueSync('image',{readingId:r.id,propId:r.propId,imageBase64:photoThumb.split(',')[1],mimeType:'image/jpeg'});
+  if(photoThumb){
+    const capUnit=S.units.find(x=>x.id===cap.uid);
+    queueSync('image',{
+      readingId:r.id,
+      propId:r.propId,
+      propName:S.prop?.name||'',
+      unitId:r.unitId,
+      unitNumber:capUnit?.number||'',
+      unitDesc:capUnit?.desc||'',
+      meterType:cap.mt,
+      date:r.date,
+      time:r.time,
+      imageBase64:photoThumb.split(',')[1],
+      mimeType:'image/jpeg'
+    });
+  }
   setTimeout(processSyncQueue,500);
   // Telegram alerts based on user config
   if(S.tgToken&&S.tgChatId){
@@ -2291,11 +2372,9 @@ function toggleAllUnits(checked){
 
 function generateReport(){
   const days   = document.getElementById('rptPeriod').value;
-  const elec   = document.getElementById('rptElec').checked;
-  const water  = document.getElementById('rptWater').checked;
-  const gas    = document.getElementById('rptGas').checked;
+  const selectedMTypes=[...document.querySelectorAll('.rptMeterCb:checked')].map(cb=>cb.value);
+  const mTypes = ACTIVE_MDEFS.filter(m=>selectedMTypes.includes(m.type));
   const unitIds= [...document.querySelectorAll('.rptUnit:checked')].map(cb=>cb.value);
-  const mTypes = MDEFS.filter(m=>(m.type==='electricity'&&elec)||(m.type==='water'&&water)||(m.type==='gas'&&gas));
   if(!unitIds.length||!mTypes.length){toast('Select at least one unit and meter','err');return;}
 
   const cutoff = days==='all' ? new Date(0) : (() => { const d=new Date(); d.setDate(d.getDate()-parseInt(days)); return d; })();
@@ -2498,7 +2577,7 @@ function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MetrIQ v19 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MetrIQ v20 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2545,29 +2624,33 @@ function updateSyncStatus(){
   const p=document.getElementById('syncPending');if(p)p.textContent=S.syncQueue.length+' item'+(S.syncQueue.length!==1?'s':'');
   const lt=document.getElementById('syncLastTime');if(lt)lt.textContent=S.lastSync?fDate(S.lastSync.slice(0,10))+' '+S.lastSync.slice(11,16):'Never';
 }
+let _syncRunning=false;
 async function processSyncQueue(){
+  if(_syncRunning)return;          // ← prevent concurrent runs = no duplicate uploads
   if(!S.backendUrl||!S.session?.token||S.session.token==='offline')return;
   if(!S.syncQueue.length){updateSyncStatus();return;}
-  const queue=[...S.syncQueue];
-  for(const item of queue){
-    let ok=false;
-    if(item.type==='reading'){
-      const res=await API.call('pushReading',{reading:item.payload});
-      ok=res?.ok||res?.duplicate;
-    } else if(item.type==='image'){
-      const res=await API.call('pushImage',item.payload);
-      if(res?.ok&&res.url){
-        // Update the reading's imageUrl in localStorage
-        const r=S.readings.find(x=>x.id===item.payload.readingId);
-        if(r){r.imageUrl=res.url;saveR();}
-        ok=true;
+  _syncRunning=true;
+  try{
+    const queue=[...S.syncQueue];
+    for(const item of queue){
+      let ok=false;
+      if(item.type==='reading'){
+        const res=await API.call('pushReading',{reading:item.payload});
+        ok=res?.ok||res?.duplicate;
+      } else if(item.type==='image'){
+        const res=await API.call('pushImage',item.payload);
+        if(res?.ok&&res.url){
+          const r=S.readings.find(x=>x.id===item.payload.readingId);
+          if(r){r.imageUrl=res.url;saveR();}
+          ok=true;
+        }
       }
+      if(ok) S.syncQueue=S.syncQueue.filter(x=>x.ts!==item.ts);
     }
-    if(ok) S.syncQueue=S.syncQueue.filter(x=>x.ts!==item.ts);
-  }
-  if(!S.syncQueue.length) S.lastSync=new Date().toISOString();
-  DB.set('syncQueue',S.syncQueue);
-  updateSyncStatus();
+    if(!S.syncQueue.length) S.lastSync=new Date().toISOString();
+    DB.set('syncQueue',S.syncQueue);
+    updateSyncStatus();
+  }finally{_syncRunning=false;}
 }
 function forcSync(){toast('Syncing…');processSyncQueue().then(()=>toast('✓ Sync complete','ok'));}
 
