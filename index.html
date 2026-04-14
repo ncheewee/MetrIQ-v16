@@ -315,6 +315,15 @@ select.fi option{background:var(--sf)}
 #toast.err{border-color:var(--rd);color:var(--rd)}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
 .wf{width:100%}
+
+/* ── METER CHIPS (home screen) ── */
+.mchips{display:flex;gap:8px;flex-wrap:wrap}
+.mchip{flex:1;min-width:72px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 8px;border-radius:var(--r);border:1.5px solid var(--bd);background:var(--sf);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:calc(13px * var(--fs));font-weight:600;color:var(--tx2);transition:all .2s;letter-spacing:.5px;-webkit-tap-highlight-color:transparent}
+.mchip-ico{font-size:26px;line-height:1}
+.mchip.active{border-color:var(--am);background:var(--amg);color:var(--am);box-shadow:0 0 12px var(--amg)}
+.mchip:active{opacity:.7}
+/* ── USER NAME IN HEADER ── */
+.uname-chip{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx2);letter-spacing:.5px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -357,14 +366,15 @@ select.fi option{background:var(--sf)}
       style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
       ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v21</div>
+  <div class="lver">v22</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v21</span></div>
-    <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;margin-left:auto">
+    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v22</span></div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
+      <span id="userNameDisp" class="uname-chip"></span>
       <span id="roleChip" style="font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--amg);border:1px solid var(--am);color:var(--am)"></span>
       <button class="sochip" onclick="logout()">🔒 Sign Out</button>
     </div>
@@ -382,15 +392,15 @@ select.fi option{background:var(--sf)}
         </button>
         <button class="psel" onclick="openUnitPicker()">
           <span class="psel-ico">📍</span>
-          <div class="psel-body"><div class="psel-lbl">Unit</div><div class="psel-val" id="pselUnitD">—</div></div>
+          <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitD">—</div></div>
           <span class="psel-arr">▾</span>
         </button>
       </div>
-      <div class="mtabs" id="mTabsDash"></div>
+      <div id="mChipsDash" class="mchips"></div>
       <div class="card">
         <div class="clbl">Latest Reading</div>
         <div class="dnum" id="dNum">— — —</div>
-        <div class="dunit" id="dUnit">Select a unit above</div>
+        <div class="dunit" id="dUnit">Select a zone above</div>
         <div class="ddate" id="dDate"></div>
       </div>
       <div class="srow">
@@ -403,7 +413,7 @@ select.fi option{background:var(--sf)}
         <div class="stitle">Consumption Trend</div>
         <div class="cw" style="margin-top:10px"><canvas id="miniChart"></canvas></div>
       </div>
-      <button class="fab" onclick="startCapture()"><span style="font-size:19px">📷</span> CAPTURE READING</button>
+      <button class="fab" id="dashFAB" onclick="startCapture()"><span style="font-size:19px">📷</span> CAPTURE READING</button>
     </div>
 
     <!-- CAPTURE -->
@@ -423,7 +433,7 @@ select.fi option{background:var(--sf)}
         </button>
         <button class="psel" onclick="openUnitPicker()">
           <span class="psel-ico">📍</span>
-          <div class="psel-body"><div class="psel-lbl">Unit</div><div class="psel-val" id="pselUnitH">—</div></div>
+          <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitH">—</div></div>
           <span class="psel-arr">▾</span>
         </button>
       </div>
@@ -448,7 +458,7 @@ select.fi option{background:var(--sf)}
           </button>
           <button class="psel" onclick="openUnitPicker()">
             <span class="psel-ico">📍</span>
-            <div class="psel-body"><div class="psel-lbl">Unit</div><div class="psel-val" id="pselUnitA">—</div></div>
+            <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitA">—</div></div>
             <span class="psel-arr">▾</span>
           </button>
         </div>
@@ -586,7 +596,7 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v21 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v22 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -633,7 +643,6 @@ select.fi option{background:var(--sf)}
 
   <nav id="nav">
     <button class="nb active" data-s="dash"      onclick="go('dash')">     <span class="ni">🏠</span>Home</button>
-    <button class="nb" id="navCapture" data-s="capture"   onclick="startCapture()"> <span class="ni">📷</span>Capture</button>
     <button class="nb"        data-s="history"   onclick="go('history')">  <span class="ni">📋</span>History</button>
     <button class="nb" id="navAnalytics" data-s="analytics" onclick="go('analytics')"><span class="ni">📊</span>Analytics</button>
     <button class="nb" id="navAdmin"   data-s="admin"     onclick="go('admin')" style="display:none"><span class="ni">🛡️</span>Admin</button>
@@ -645,11 +654,11 @@ select.fi option{background:var(--sf)}
 <div class="ov" id="mUnitPicker">
   <div class="modal">
     <div class="mh"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div class="mt" style="margin-bottom:0">Select Unit</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="mt" style="margin-bottom:0">Select Zone</div>
       <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx3)" id="upCount"></span>
     </div>
-    <input type="search" class="usrch" id="upSearch" placeholder="🔍  Search by unit number or description…" oninput="filterUP()">
+    <input type="search" class="usrch" id="upSearch" placeholder="🔍  Search by zone number or description…" oninput="filterUP()">
     <div class="upl" id="upList"></div>
   </div>
 </div>
@@ -703,12 +712,7 @@ select.fi option{background:var(--sf)}
       </div>
       <div class="fg">
         <div class="fl">Meters</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="rptMeterChecks">
-          ${ACTIVE_MDEFS.map(md=>`
-          <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
-            <input type="checkbox" class="rptMeterCb" value="${md.type}" checked style="accent-color:var(--am);width:16px;height:16px"> ${md.icon} ${md.label}
-          </label>`).join('')}
-        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="rptMeterChecks"></div>
       </div>
       <div class="fg">
         <div class="fl">Units</div>
@@ -759,7 +763,6 @@ select.fi option{background:var(--sf)}
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="fg"><div class="fl">Property Name</div><input class="fi ft" id="apName" placeholder="e.g. VivoCity"></div>
       <div class="fg"><div class="fl">Address</div><input class="fi ft" id="apAddr" placeholder="e.g. 1 HarbourFront Walk"></div>
-      <div class="fg"><div class="fl">Icon (emoji)</div><input class="fi" id="apIcon" placeholder="🏢" maxlength="4" style="font-size:22px;width:70px"></div>
       <div class="brow">
         <button class="btn btg" onclick="closeM('mAddProp')">Cancel</button>
         <button class="btn btp" onclick="submitProp()">Save Property</button>
@@ -1095,13 +1098,22 @@ async function loginAs(sess){
   S.prop=allowedProps[0];
   let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
   if(!u||!u.length){const d=genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
-  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;S.activeMeter=ACTIVE_MDEFS[0].type;
+  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;
+  // Set activeMeter to first meter available for the first unit
+  if(S.activeUnit){
+    const fu=S.units.find(x=>x.id===S.activeUnit);
+    const fmt=Array.isArray(fu?.meters)?fu.meters:(fu?.meters||'electricity').split(',');
+    S.activeMeter=fmt[0]||ACTIVE_MDEFS[0].type;
+  } else { S.activeMeter=ACTIVE_MDEFS[0].type; }
   document.getElementById('aiProv').value=S.aiProv;document.getElementById('groqKey').value=S.groqKey;
   document.getElementById('orKey').value=S.orKey;document.getElementById('gemKey').value=S.gemKey;
   document.getElementById('claKey').value=S.claKey;
   document.getElementById('fontSlider').value=S.fs;document.getElementById('themeToggle').classList.toggle('on',S.dark);
   document.getElementById('tgToken').value=S.tgToken||'';document.getElementById('tgChatId').value=S.tgChatId||'';
   const buel=document.getElementById('backendUrl'); if(buel)buel.value=S.backendUrl||'';
+  // Show logged-in user name in header
+  const uNameEl=document.getElementById('userNameDisp');
+  if(uNameEl)uNameEl.textContent=user.name;
   document.getElementById('setPropName').textContent=(S.prop?.icon||'')+' '+S.prop?.name;
   document.getElementById('setUserRole').textContent=user.name+' · '+(ROLES[role]||role);
   document.getElementById('acOnSave').checked=S.alertCfg.onSave;
@@ -1131,15 +1143,13 @@ function applyRoleUI(role){
   // ── Nav: Admin tab (admin only) ──
   document.getElementById('navAdmin').style.display=role==='admin'?'':'none';
 
-  // ── Nav: Capture tab + FAB (hidden for manager) ──
-  const capNav=document.getElementById('navCapture');
-  if(capNav)capNav.style.display=role==='manager'?'none':'';
-  const fab=document.querySelector('.fab');
-  if(fab)fab.style.display=role==='manager'?'none':'';
-
   // ── Nav: Analytics tab (hidden for inspector) ──
   const anlNav=document.getElementById('navAnalytics');
   if(anlNav)anlNav.style.display=role==='inspector'?'none':'';
+
+  // ── Capture FAB on Home (hidden for manager) ──
+  const fab=document.getElementById('dashFAB');
+  if(fab)fab.style.display=role==='manager'?'none':'';
 
   // ── Settings: Backend card (admin only) ──
   const cardBackend=document.getElementById('setCardBackend');
@@ -1149,16 +1159,15 @@ function applyRoleUI(role){
   const cardAI=document.getElementById('setCardAI');
   if(cardAI)cardAI.style.display=role==='admin'?'':'none';
 
-  // ── Settings: Telegram card (admin + manager; inspector = read-only alerts, no config) ──
+  // ── Settings: Telegram card (admin + manager) ──
   const cardTg=document.getElementById('setCardTelegram');
   if(cardTg)cardTg.style.display=role==='inspector'?'none':'';
 
-  // ── Settings: Data card — export + report for admin/manager; inspector excluded ──
+  // ── Settings: Data card (admin + manager) ──
   const cardData=document.getElementById('setCardData');
   if(cardData)cardData.style.display=role==='inspector'?'none':'';
 
-  // ── Within Data card: hide Clear + Export for manager (view/report only) ──
-  // Manager sees Report only; admin sees all three
+  // ── Within Data card: Export + Clear for admin only ──
   const btnExport=document.getElementById('btnExportData');
   const btnClear=document.getElementById('btnClearData');
   if(btnExport)btnExport.style.display=role==='admin'?'':'none';
@@ -1175,6 +1184,7 @@ function toggleTgGuide(){
 function logout(){
   sessionStorage.removeItem('mq4_session');S.session=null;S.prop=null;S.units=[];S.readings=[];S.activeUnit=null;
   ['mini','anlMain','anlMulti'].forEach(k=>{if(CH[k]){CH[k].destroy();CH[k]=null;}});
+  const uNameEl=document.getElementById('userNameDisp');if(uNameEl)uNameEl.textContent='';
   showLoginScreen();
 }
 
@@ -1215,10 +1225,37 @@ function go(id){
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-'+id)?.classList.add('active');
   document.querySelector(`.nb[data-s="${id}"]`)?.classList.add('active');
+  if(id==='dash'){renderMChipsDash();renderDashboard();}
   if(id==='analytics')setTimeout(renderAnalytics,40);
   if(id==='history'){renderMTabs('mTabsHist','history');renderHistory();}
-  if(id==='settings'){}  // settings is static
+  if(id==='settings'){}
   if(id==='admin'){switchAdminTab('users');}
+}
+
+// ═══════════════════════════════════════════
+//  METER CHIPS — home screen
+// ═══════════════════════════════════════════
+function renderMChipsDash(){
+  const el=document.getElementById('mChipsDash');if(!el)return;
+  const u=S.units.find(x=>x.id===S.activeUnit);
+  if(!u){el.innerHTML='';return;}
+  const unitMTypes=Array.isArray(u.meters)?u.meters:(u.meters||'electricity').split(',');
+  const chips=MDEFS.filter(m=>unitMTypes.includes(m.type));
+  if(!chips.length){el.innerHTML='';return;}
+  // Auto-correct activeMeter if not valid for this unit
+  if(!unitMTypes.includes(S.activeMeter))S.activeMeter=chips[0].type;
+  el.innerHTML=chips.map(md=>`
+    <button class="mchip${S.activeMeter===md.type?' active':''}" onclick="setMeterDash('${md.type}')">
+      <span class="mchip-ico">${md.icon}</span>${md.label}
+    </button>`).join('');
+}
+function setMeterDash(type){
+  S.activeMeter=type;
+  renderMChipsDash();
+  renderMTabs('mTabsHist','history');
+  renderMTabs('mTabsAnal','analytics');
+  renderDashboard();
+  renderHistory();
 }
 
 // ═══════════════════════════════════════════
@@ -1226,7 +1263,7 @@ function go(id){
 // ═══════════════════════════════════════════
 function openUnitPicker(){
   document.getElementById('upSearch').value='';
-  document.getElementById('upCount').textContent=S.units.length+' unit'+(S.units.length!==1?'s':'');
+  document.getElementById('upCount').textContent=S.units.length+' zone'+(S.units.length!==1?'s':'');
   renderUPList('');
   openM('mUnitPicker');
   setTimeout(()=>document.getElementById('upSearch').focus(),300);
@@ -1237,7 +1274,7 @@ function renderUPList(q){
   const f=S.units.filter(u=>u.number.toLowerCase().includes(lc)||(u.desc||'').toLowerCase().includes(lc));
   const el=document.getElementById('upList');
   if(!f.length){
-    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No units match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Unit</button>`;
+    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No zones match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Zone</button>`;
     return;
   }
   el.innerHTML=f.map(u=>{
@@ -1248,12 +1285,18 @@ function renderUPList(q){
       <div style="font-size:20px;width:36px;height:36px;background:var(--sf);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">🏢</div>
       <div style="flex:1;min-width:0"><div class="upi-num">${u.number}${cur?' ✓':''}</div><div class="upi-desc">${u.desc||'—'}</div></div>
       <div class="upi-meta">${cnt} rdgs<br>${ld}</div></div>`;
-  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Unit</button>`;
+  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Zone</button>`;
 }
 function pickUnit(id){
-  S.activeUnit=id;closeM('mUnitPicker');
+  S.activeUnit=id;
+  // Reset activeMeter to first available for this unit
+  const u=S.units.find(x=>x.id===id);
+  const unitMTypes=Array.isArray(u?.meters)?u.meters:(u?.meters||'electricity').split(',');
+  if(!unitMTypes.includes(S.activeMeter))S.activeMeter=unitMTypes[0]||ACTIVE_MDEFS[0].type;
+  closeM('mUnitPicker');
   updateUSBs();updateHeader();
-  renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
+  renderMChipsDash();
+  renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
   renderDashboard();renderHistory();
   if(document.getElementById('screen-analytics').classList.contains('active')) renderAnalytics();
 }
@@ -1286,10 +1329,17 @@ async function pickProp(pid){
   // Load units + readings for new property
   let u=await DB.get('units_'+pid),r=await DB.get('readings_'+pid);
   if(!u||!u.length){const d=genDemo(pid);u=d.units;r=d.readings;await DB.set('units_'+pid,u);await DB.set('readings_'+pid,r);}
-  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;S.activeMeter=ACTIVE_MDEFS[0].type;
+  S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;
+  // Reset activeMeter to first available for new property's first unit
+  if(S.activeUnit){
+    const fu=S.units.find(x=>x.id===S.activeUnit);
+    const fmt=Array.isArray(fu?.meters)?fu.meters:(fu?.meters||'electricity').split(',');
+    S.activeMeter=fmt[0]||ACTIVE_MDEFS[0].type;
+  } else { S.activeMeter=ACTIVE_MDEFS[0].type; }
   closeM('mPropPicker');
   updatePselLabels();
-  renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
+  renderMChipsDash();
+  renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
   renderDashboard();renderHistory();
   if(document.getElementById('screen-analytics').classList.contains('active'))renderAnalytics();
   document.getElementById('setPropName').textContent=(S.prop?.icon||'')+' '+S.prop?.name;
@@ -1325,8 +1375,9 @@ function renderMTabs(elId,screen){
 }
 function setMeter(type,screen){
   S.activeMeter=type;
-  ['mTabsDash','mTabsHist','mTabsAnal'].forEach(id=>{
-    const sc=id==='mTabsDash'?'dash':id==='mTabsHist'?'history':'analytics';
+  renderMChipsDash();
+  ['mTabsHist','mTabsAnal'].forEach(id=>{
+    const sc=id==='mTabsHist'?'history':'analytics';
     renderMTabs(id,sc);
   });
   renderDashboard();renderHistory();
@@ -1439,6 +1490,7 @@ function assessTrend(rds){
 //  DASHBOARD
 // ═══════════════════════════════════════════
 function renderDashboard(){
+  renderMChipsDash();
   const u=S.units.find(x=>x.id===S.activeUnit),md=MDEFS.find(m=>m.type===S.activeMeter);
   if(!u||!md){
     ['dNum','dUnit','dDate','sMo','sAv'].forEach(id=>document.getElementById(id).textContent='—');
@@ -2408,6 +2460,14 @@ function clearAll(){if(!confirm('Delete ALL readings?'))return;S.readings=[];sav
 //  REPORT GENERATION
 // ═══════════════════════════════════════════
 function openReportModal(){
+  // Populate meter checkboxes dynamically
+  const mEl=document.getElementById('rptMeterChecks');
+  if(mEl){
+    mEl.innerHTML=ACTIVE_MDEFS.map(md=>`
+      <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--fs));color:var(--tx);cursor:pointer;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
+        <input type="checkbox" class="rptMeterCb" value="${md.type}" checked style="accent-color:var(--am);width:16px;height:16px"> ${md.icon} ${md.label}
+      </label>`).join('');
+  }
   // Populate unit checkboxes
   const el=document.getElementById('rptUnitList');
   el.innerHTML=S.units.map(u=>`
@@ -2628,7 +2688,7 @@ function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MetrIQ v21 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MetrIQ v22 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2747,6 +2807,8 @@ function openAddUser(){
   document.getElementById('mAddUserTitle').textContent='Add User';
   document.getElementById('auIsEdit').value='';
   ['auName','auPin'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('auName').readOnly=false;
+  document.getElementById('auName').style.opacity='';
   document.getElementById('auRole').value='inspector';
   renderPropChecks([]);
   openM('mAddUser');
@@ -2756,6 +2818,8 @@ function openEditUser(u){
   document.getElementById('mAddUserTitle').textContent='Edit User';
   document.getElementById('auIsEdit').value=u.name;
   document.getElementById('auName').value=u.name||'';
+  document.getElementById('auName').readOnly=true;
+  document.getElementById('auName').style.opacity='.5';
   document.getElementById('auPin').value='';
   document.getElementById('auRole').value=u.role||'inspector';
   const pids=Array.isArray(u.propIds)?u.propIds:(u.propIds||'').toString().split(',').filter(Boolean);
@@ -2773,23 +2837,22 @@ async function submitUser(){
   const pin=document.getElementById('auPin').value.trim();
   const role=document.getElementById('auRole').value;
   const propIds=[...document.querySelectorAll('.auPropCb:checked')].map(c=>c.value);
+  const originalName=document.getElementById('auIsEdit').value||name; // for lookup
   if(!name){toast('Name required','err');return;}
   if(pin&&!/^\d{6}$/.test(pin)){toast('PIN must be 6 digits','err');return;}
   if(!pin&&!document.getElementById('auIsEdit').value){toast('PIN required for new user','err');return;}
   const btn=document.querySelector('#mAddUser .btp');if(btn){btn.textContent='Saving…';btn.disabled=true;}
   const res=await API.call('saveUser',{user:{name,pin,role,propIds,active:true}});
   if(btn){btn.textContent='Save User';btn.disabled=false;}
+  // Use originalName to find existing LOCAL_USER (prevents duplicate when editing)
+  const idx=LOCAL_USERS.findIndex(u=>u.name.toLowerCase()===originalName.toLowerCase());
+  const existingPin=idx>=0?LOCAL_USERS[idx].pin:'';
+  const lu={pin:pin||existingPin||'000000',name,role,propIds};
+  if(idx>=0)LOCAL_USERS[idx]=lu; else LOCAL_USERS.push(lu);
   if(res?.ok){
-    // Update LOCAL_USERS in memory too
-    const idx=LOCAL_USERS.findIndex(u=>u.name===name);
-    const lu={pin:pin||LOCAL_USERS[idx]?.pin||'',name,role,propIds};
-    if(idx>=0)LOCAL_USERS[idx]=lu; else LOCAL_USERS.push(lu);
     closeM('mAddUser');toast('✓ User saved','ok');renderAdminUsers();
   } else {
     toast(res?.error||'Backend unreachable — saved locally','err');
-    const idx=LOCAL_USERS.findIndex(u=>u.name===name);
-    const lu={pin:pin||LOCAL_USERS[idx]?.pin||'000000',name,role,propIds};
-    if(idx>=0)LOCAL_USERS[idx]=lu; else LOCAL_USERS.push(lu);
     closeM('mAddUser');renderAdminUsers();
   }
 }
@@ -2850,7 +2913,6 @@ function openAddProp(){
   document.getElementById('mAddPropTitle').textContent='Add Property';
   document.getElementById('apId').value='';
   ['apName','apAddr'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('apIcon').value='🏢';
   openM('mAddProp');
 }
 function openEditProp(p){
@@ -2859,16 +2921,17 @@ function openEditProp(p){
   document.getElementById('apId').value=p.id;
   document.getElementById('apName').value=p.name||'';
   document.getElementById('apAddr').value=p.addr||'';
-  document.getElementById('apIcon').value=p.icon||'🏢';
   openM('mAddProp');
 }
 async function submitProp(){
   const name=document.getElementById('apName').value.trim();
   const addr=document.getElementById('apAddr').value.trim();
-  const icon=document.getElementById('apIcon').value.trim()||'🏢';
   const existingId=document.getElementById('apId').value;
   if(!name){toast('Name required','err');return;}
   const id=existingId||'p_'+Date.now();
+  // Keep existing icon if editing, otherwise default to 🏢
+  const existingProp=PROPS.find(p=>p.id===id);
+  const icon=existingProp?.icon||'🏢';
   // Update PROPS in memory
   const idx=PROPS.findIndex(p=>p.id===id);
   const prop={id,name,addr,icon};
@@ -2956,7 +3019,8 @@ async function removeUnit(pid, uid){
 
 function refreshAll(){
   updateHeader();updateUSBs();
-  renderMTabs('mTabsDash','dash');renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
+  renderMChipsDash();
+  renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
   if(!CH.mini)initMC();
   renderDashboard();renderHistory();
 }
