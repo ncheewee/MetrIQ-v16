@@ -323,8 +323,11 @@ select.fi option{background:var(--sf)}
 .mchip.active{border-color:var(--am);background:var(--amg);color:var(--am);box-shadow:0 0 12px var(--amg)}
 .mchip:active{opacity:.7}
 /* ── USER NAME IN HEADER ── */
-.uname-chip{font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;color:var(--tx2);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px}
-.hdr-right{display:flex;align-items:center;gap:5px;flex-shrink:0;min-width:0;max-width:calc(100% - 80px)}
+.uname-chip{font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;color:var(--tx2);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.hdr-identity{display:flex;flex-direction:column;align-items:flex-end;gap:0;max-width:110px;min-width:0}
+.hdr-name{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;line-height:1.2}
+.hdr-role{font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:1.2}
 </style>
 </head>
 <body>
@@ -367,17 +370,19 @@ select.fi option{background:var(--sf)}
       style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
       ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v23</div>
+  <div class="lver">v24</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v23</span></div>
+    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v24</span></div>
     <div class="hdr-right">
-      <span id="userNameDisp" class="uname-chip"></span>
-      <span id="roleChip" style="font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--amg);border:1px solid var(--am);color:var(--am);white-space:nowrap;flex-shrink:0"></span>
-      <button class="sochip" onclick="logout()" style="padding:4px 8px;font-size:calc(11px * var(--fs));flex-shrink:0">🔒</button>
+      <div class="hdr-identity">
+        <div class="hdr-name" id="userNameDisp"></div>
+        <div class="hdr-role" id="roleChip"></div>
+      </div>
+      <button class="sochip" onclick="logout()" style="padding:5px 10px;font-size:calc(11px * var(--fs));flex-shrink:0">🔒 Out</button>
     </div>
   </div>
 
@@ -392,14 +397,14 @@ select.fi option{background:var(--sf)}
       </button>
       <button class="psel" style="width:100%" onclick="openUnitPicker()">
         <span class="psel-ico">📍</span>
-        <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitD">—</div></div>
+        <div class="psel-body"><div class="psel-lbl">Meter</div><div class="psel-val" id="pselUnitD">—</div></div>
         <span class="psel-arr">▾</span>
       </button>
       <div id="mChipsDash" class="mchips"></div>
       <div class="card">
         <div class="clbl">Latest Reading</div>
         <div class="dnum" id="dNum">— — —</div>
-        <div class="dunit" id="dUnit">Select a zone above</div>
+        <div class="dunit" id="dUnit">Select a meter above</div>
         <div class="ddate" id="dDate"></div>
       </div>
       <div class="srow">
@@ -432,7 +437,7 @@ select.fi option{background:var(--sf)}
         </button>
         <button class="psel" onclick="openUnitPicker()">
           <span class="psel-ico">📍</span>
-          <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitH">—</div></div>
+          <div class="psel-body"><div class="psel-lbl">Meter</div><div class="psel-val" id="pselUnitH">—</div></div>
           <span class="psel-arr">▾</span>
         </button>
       </div>
@@ -442,29 +447,28 @@ select.fi option{background:var(--sf)}
 
     <!-- ANALYTICS -->
     <div class="screen" id="screen-analytics">
-      <!-- Scope -->
+      <!-- 1. Property selector (always visible) -->
+      <button class="psel" style="width:100%" onclick="openPropPicker('analytics')">
+        <span class="psel-ico">🏢</span>
+        <div class="psel-body"><div class="psel-lbl">Property</div><div class="psel-val" id="pselPropA">—</div></div>
+        <span class="psel-arr">▾</span>
+      </button>
+      <!-- 2. Scope toggle -->
       <div class="anl-scope">
         <button class="anl-scope-btn active" id="anlScopeBuilding" onclick="setAnlScope('building')">🏢 Whole Building</button>
-        <button class="anl-scope-btn"        id="anlScopeUnit"     onclick="setAnlScope('unit')">📍 Single Unit</button>
+        <button class="anl-scope-btn"        id="anlScopeUnit"     onclick="setAnlScope('unit')">📍 Single Meter</button>
       </div>
-      <!-- Unit picker row (unit scope only) -->
+      <!-- 3. Meter selector (single-meter scope only) -->
       <div id="anlUnitRow" style="display:none">
-        <div class="psel-row">
-          <button class="psel" onclick="openPropPicker('analytics')">
-            <span class="psel-ico">🏢</span>
-            <div class="psel-body"><div class="psel-lbl">Property</div><div class="psel-val" id="pselPropA">—</div></div>
-            <span class="psel-arr">▾</span>
-          </button>
-          <button class="psel" onclick="openUnitPicker()">
-            <span class="psel-ico">📍</span>
-            <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitA">—</div></div>
-            <span class="psel-arr">▾</span>
-          </button>
-        </div>
+        <button class="psel" style="width:100%" onclick="openUnitPicker()">
+          <span class="psel-ico">📍</span>
+          <div class="psel-body"><div class="psel-lbl">Meter</div><div class="psel-val" id="pselUnitA">—</div></div>
+          <span class="psel-arr">▾</span>
+        </button>
       </div>
-      <!-- FY selector: Last FY / This FY -->
+      <!-- 4. FY selector + meter type tabs -->
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <div class="anl-period" style="flex:1">
+        <div class="anl-period" style="flex-shrink:0">
           <button class="ptab" id="anlFYPrev" onclick="setAnlFY('prev')">FY <span id="anlFYPrevLbl"></span></button>
           <button class="ptab active" id="anlFYCur"  onclick="setAnlFY('cur')">FY <span id="anlFYCurLbl"></span></button>
         </div>
@@ -595,7 +599,7 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v23 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v24 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -654,10 +658,10 @@ select.fi option{background:var(--sf)}
   <div class="modal">
     <div class="mh"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div class="mt" style="margin-bottom:0">Select Zone</div>
+      <div class="mt" style="margin-bottom:0">Select Meter</div>
       <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tx3)" id="upCount"></span>
     </div>
-    <input type="search" class="usrch" id="upSearch" placeholder="🔍  Search by zone number or description…" oninput="filterUP()">
+    <input type="search" class="usrch" id="upSearch" placeholder="🔍  Search…" oninput="filterUP()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
     <div class="upl" id="upList"></div>
   </div>
 </div>
@@ -807,6 +811,7 @@ const PROPS=[
   {id:'p1',name:'VivoCity',           addr:'HarbourFront Walk, S099253',icon:'🏬',pin:'1234'},
   {id:'p2',name:'Festival Walk',      addr:'80 Tat Chee Ave, Kowloon',  icon:'🛍️',pin:'1234'},
   {id:'p3',name:'Harbourfront Centre',addr:'1 Maritime Square, S099253',icon:'🏢',pin:'1234'},
+  {id:'p_test',name:'Test Building',  addr:'1 Test Street, S000001',    icon:'🧪',pin:'1234'},
 ];
 const MDEFS=[
   {type:'electricity',icon:'⚡',label:'Electricity',unit:'kWh',dec:1,hidden:true},
@@ -817,7 +822,7 @@ const MDEFS=[
 const ACTIVE_MDEFS=MDEFS.filter(m=>!m.hidden);
 const FSC=[1.35,1.5,1.65,1.85], FLB=['100%','110%','120%','135%'];
 const STEPS=[
-  {t:'Select Unit',      s:'Which unit and meter type are you reading?'},
+  {t:'Select Meter',     s:'Which meter are you reading?'},
   {t:'Capture & Save',   s:'Add photo → crop → extract → verify → save'},
 ];
 const ROLES={admin:'Admin',manager:'Manager',inspector:'Inspector'};
@@ -827,9 +832,9 @@ const BACKEND_URL='https://script.google.com/macros/s/AKfycbxS0FwB25oi5f7sSsa6FO
 
 // ── MOCK USERS (PIN-based, admin can edit via backend) ─────────────
 const LOCAL_USERS=[
-  {pin:'111111',name:'Admin',     role:'admin',    propIds:['p1','p2','p3']},
-  {pin:'222222',name:'Manager',   role:'manager',  propIds:['p1','p2','p3']},
-  {pin:'333333',name:'Inspector', role:'inspector',propIds:['p1']},
+  {pin:'111111',name:'Admin',     role:'admin',    propIds:['p1','p2','p3','p_test']},
+  {pin:'222222',name:'Manager',   role:'manager',  propIds:['p1','p2','p3','p_test']},
+  {pin:'333333',name:'Inspector', role:'inspector',propIds:['p1','p_test']},
 ];
 
 // ── BACKEND API ────────────────────────────────────────────────────
@@ -895,6 +900,88 @@ let CR={img:null,box:{x:.05,y:.2,w:.9,h:.6},drag:null,canvas:null,ctx:null};
 // ═══════════════════════════════════════════
 //  DEMO DATA
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  SINGAPORE SEASONAL TEST DATA — 24 months water
+// ═══════════════════════════════════════════
+function genTestBuilding(){
+  // Singapore water seasonality (m³/day baseline multiplier by calendar month 0=Jan):
+  // Northeast monsoon (Nov–Jan): heavy rain, lower cooling tower + irrigation usage → lower
+  // Dry spells (Feb–Apr, Jun–Aug): higher demand
+  // Inter-monsoon (May, Oct): moderate
+  // Southwest monsoon (Jul–Sep): moderate rain
+  const sgSeasonalIdx=[
+    0.78, // Jan  — wet NE monsoon
+    0.85, // Feb  — transitional, dry
+    0.92, // Mar  — dry, peak demand ramp
+    0.98, // Apr  — inter-monsoon, warm
+    1.02, // May  — inter-monsoon
+    1.08, // Jun  — dry spell, high cooling
+    1.12, // Jul  — dry spell peak
+    1.10, // Aug  — dry spell, still high
+    1.05, // Sep  — SW monsoon trailing
+    0.97, // Oct  — inter-monsoon
+    0.82, // Nov  — NE monsoon onset
+    0.74, // Dec  — NE monsoon peak (lowest)
+  ];
+
+  const units=[{
+    id:'u_test_w1',propId:'p_test',
+    number:'#WM-01',
+    desc:'Cooling Tower & Common Area',
+    meters:['water']
+  }];
+
+  const readings=[];
+  // Generate readings from 24 months ago to today (~2 readings/month = ~48 readings)
+  const today=new Date();
+  const baseDaily=4.8; // m³/day baseline for a mid-size commercial unit
+  const startReading=2180.00; // starting meter value
+
+  // Generate one reading every ~15 days over 24 months = ~48 readings
+  let currentReading=startReading;
+  const intervalDays=15;
+  const totalDays=24*30;
+  let d=new Date(today);
+  d.setDate(d.getDate()-totalDays);
+
+  // Small trend: slight upward drift over 2 years (+8% total) simulating business growth
+  const totalPeriods=totalDays/intervalDays;
+
+  for(let i=0;i<=totalPeriods;i++){
+    const mo=d.getMonth(); // 0=Jan
+    const seasonal=sgSeasonalIdx[mo];
+    // Gradual growth trend factor
+    const growthFactor=1+(i/totalPeriods)*0.08;
+    // Add realistic day-to-day noise (±6%)
+    const noise=0.94+Math.random()*0.12;
+    const dailyRate=baseDaily*seasonal*growthFactor*noise;
+    const consumption=dailyRate*intervalDays;
+    currentReading+=consumption;
+
+    const dateStr=d.toISOString().split('T')[0];
+    const hour=8+Math.floor(Math.random()*3);
+    const min=Math.floor(Math.random()*60);
+    const timeStr=`${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+
+    readings.push({
+      id:`rd_test_w1_${i}`,
+      propId:'p_test',unitId:'u_test_w1',
+      meterType:'water',
+      reading:currentReading.toFixed(2),
+      date:dateStr,time:timeStr,
+      notes:'',aiConf:'high',
+      savedAt:d.toISOString()
+    });
+
+    // Advance by ~15 days with slight jitter
+    d=new Date(d);
+    d.setDate(d.getDate()+intervalDays+Math.floor(Math.random()*3)-1);
+    if(d>today)break;
+  }
+
+  return{units,readings};
+}
+
 function genDemo(pid){
   const today=new Date('2026-03-20');
   const templates={
@@ -1100,7 +1187,7 @@ async function loginAs(sess){
   if(!allowedProps.length){document.getElementById('loginErr').textContent='No properties assigned';lpe='';lupd();return;}
   S.prop=allowedProps[0];
   let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
-  if(!u||!u.length){const d=genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
+  if(!u||!u.length){const d=S.prop.id==='p_test'?genTestBuilding():genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
   S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;
   // Set activeMeter to first meter available for the first unit
   if(S.activeUnit){
@@ -1134,12 +1221,10 @@ async function loginAs(sess){
   setTimeout(processSyncQueue,2000);
 }
 function applyRoleUI(role){
-  // ── Role chip colour ──
+  // ── Role display in header (stacked under name) ──
   const chip=document.getElementById('roleChip');
   if(chip){
     chip.textContent=ROLES[role]||role;
-    chip.style.background=role==='admin'?'var(--rdd)':role==='manager'?'var(--bld)':'var(--gnd)';
-    chip.style.borderColor=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';
     chip.style.color=role==='admin'?'var(--rd)':role==='manager'?'var(--bl)':'var(--gn)';
   }
 
@@ -1266,10 +1351,10 @@ function setMeterDash(type){
 // ═══════════════════════════════════════════
 function openUnitPicker(){
   document.getElementById('upSearch').value='';
-  document.getElementById('upCount').textContent=S.units.length+' zone'+(S.units.length!==1?'s':'');
+  document.getElementById('upCount').textContent=S.units.length+' meter'+(S.units.length!==1?'s':'');
   renderUPList('');
   openM('mUnitPicker');
-  setTimeout(()=>document.getElementById('upSearch').focus(),300);
+  // NO autofocus — prevents virtual keyboard blocking the list on mobile
 }
 function filterUP(){renderUPList(document.getElementById('upSearch').value);}
 function renderUPList(q){
@@ -1277,7 +1362,7 @@ function renderUPList(q){
   const f=S.units.filter(u=>u.number.toLowerCase().includes(lc)||(u.desc||'').toLowerCase().includes(lc));
   const el=document.getElementById('upList');
   if(!f.length){
-    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No zones match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Zone</button>`;
+    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--tx3);font-size:13px">No meters match "${q}"</div><button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Meter</button>`;
     return;
   }
   el.innerHTML=f.map(u=>{
@@ -1288,7 +1373,7 @@ function renderUPList(q){
       <div style="font-size:20px;width:36px;height:36px;background:var(--sf);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">🏢</div>
       <div style="flex:1;min-width:0"><div class="upi-num">${u.number}${cur?' ✓':''}</div><div class="upi-desc">${u.desc||'—'}</div></div>
       <div class="upi-meta">${cnt} rdgs<br>${ld}</div></div>`;
-  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Zone</button>`;
+  }).join('')+`<button class="upadd" onclick="closeM('mUnitPicker');openAddUnit(S.prop?.id)">+ Add New Meter</button>`;
 }
 function pickUnit(id){
   S.activeUnit=id;
@@ -1331,7 +1416,7 @@ async function pickProp(pid){
   S.prop=prop;
   // Load units + readings for new property
   let u=await DB.get('units_'+pid),r=await DB.get('readings_'+pid);
-  if(!u||!u.length){const d=genDemo(pid);u=d.units;r=d.readings;await DB.set('units_'+pid,u);await DB.set('readings_'+pid,r);}
+  if(!u||!u.length){const d=pid==='p_test'?genTestBuilding():genDemo(pid);u=d.units;r=d.readings;await DB.set('units_'+pid,u);await DB.set('readings_'+pid,r);}
   S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;
   // Reset activeMeter to first available for new property's first unit
   if(S.activeUnit){
@@ -1497,7 +1582,7 @@ function renderDashboard(){
   const u=S.units.find(x=>x.id===S.activeUnit),md=MDEFS.find(m=>m.type===S.activeMeter);
   if(!u||!md){
     ['dNum','dUnit','dDate','sMo','sAv'].forEach(id=>document.getElementById(id).textContent='—');
-    document.getElementById('dNum').textContent='— — —';document.getElementById('dUnit').textContent='Select a unit above';
+    document.getElementById('dNum').textContent='— — —';document.getElementById('dUnit').textContent='Select a meter above';
     document.getElementById('sCt').textContent='0';document.getElementById('trendBanner').innerHTML='';
     updateMC([]);return;
   }
@@ -1958,7 +2043,7 @@ function capBack(){
   renderStep();
 }
 function capNext(){
-  if(cap.step===0){if(!cap.uid){toast('Select a unit','err');return;}cap.step=1;renderStep();return;}
+  if(cap.step===0){if(!cap.uid){toast('Select a meter','err');return;}cap.step=1;renderStep();return;}
   if(cap.step===1){
     if(!cap.extracted&&!cap.manualMode){toast('Extract a reading first','err');return;}
     const v=document.getElementById('confIn')?.value;
@@ -2127,7 +2212,7 @@ async function saveReading(){
 function renderHistory(){
   renderMTabs('mTabsHist','history');
   const list=document.getElementById('histList'),u=S.units.find(x=>x.id===S.activeUnit),md=MDEFS.find(m=>m.type===S.activeMeter);
-  if(!u||!md){list.innerHTML='<div class="empty"><div class="eico">📋</div><div class="etit">Select a unit</div></div>';return;}
+  if(!u||!md){list.innerHTML='<div class="empty"><div class="eico">📋</div><div class="etit">Select a meter</div></div>';return;}
   const rds=getMR(u.id,md.type).slice().reverse();
   if(!rds.length){list.innerHTML=`<div class="empty"><div class="eico">${md.icon}</div><div class="etit">No ${md.label} readings</div><div class="esub">Tap Capture to add the first one</div></div>`;return;}
   const sorted=getMR(u.id,md.type);
@@ -2178,7 +2263,8 @@ function setAnlScope(scope){
   document.getElementById('anlScopeBuilding').classList.toggle('active',scope==='building');
   document.getElementById('anlScopeUnit').classList.toggle('active',scope==='unit');
   document.getElementById('anlUnitRow').style.display=scope==='unit'?'':'none';
-  document.getElementById('anlMultiYearCard').style.display=scope==='building'?'':'none';
+  const multiCard=document.getElementById('anlMultiYearCard');
+  if(multiCard)multiCard.style.display=scope==='building'?'':'none';
   renderAnalytics();
 }
 function setAnlFY(sel){
@@ -2283,7 +2369,7 @@ function renderAnalytics(){
 
   const unitId=anlScope==='unit'?S.activeUnit:null;
   if(anlScope==='unit'&&!unitId){
-    document.getElementById('ytdCard').innerHTML='<div style="color:var(--tx3);font-size:13px;padding:8px 0;grid-column:1/-1">Select a unit above</div>';
+    document.getElementById('ytdCard').innerHTML='<div style="color:var(--tx3);font-size:13px;padding:8px 0;grid-column:1/-1">Select a meter above</div>';
     document.getElementById('anlInsights').innerHTML='';return;
   }
 
@@ -2750,7 +2836,7 @@ async function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MeterIQ v23 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MeterIQ v24 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2853,38 +2939,53 @@ async function renderAdminUsers(){
   const res=await API.call('getUsers',{});
   if(res?.ok&&res.users?.length) users=res.users;
   if(!users.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px">No users</div>';return;}
-  el.innerHTML=users.map(u=>`
-    <div class="si" style="padding:9px 0;border-bottom:1px solid var(--bd)">
+  el.innerHTML=users.map(u=>{
+    const lu=LOCAL_USERS.find(x=>x.name.toLowerCase()===u.name.toLowerCase());
+    const pinDisplay=lu?.pin||u.pin||'';
+    const uForEdit=JSON.stringify({name:u.name,role:u.role,propIds:u.propIds||[],pin:pinDisplay});
+    const roleColor=u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)';
+    return `<div class="si" style="padding:9px 0;border-bottom:1px solid var(--bd)">
       <div style="flex:1;min-width:0">
         <div class="slbl">${u.name}</div>
-        <div class="ssub"><span style="color:${u.role==='admin'?'var(--rd)':u.role==='manager'?'var(--bl)':'var(--gn)'}">${ROLES[u.role]||u.role}</span></div>
+        <div class="ssub" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="color:${roleColor}">${ROLES[u.role]||u.role}</span>
+          ${pinDisplay?`<span style="font-family:'Share Tech Mono',monospace;font-size:calc(11px * var(--fs));color:var(--tx3);background:var(--sf2);padding:1px 6px;border-radius:4px;border:1px solid var(--bd)">PIN: ${pinDisplay}</span>`:''}
+        </div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0">
-        <button class="btn btg" style="padding:5px 10px;font-size:11px" onclick='openEditUser(${JSON.stringify(u)})'>Edit</button>
+        <button class="btn btg" style="padding:5px 10px;font-size:11px" onclick='openEditUser(${uForEdit})'>Edit</button>
         <button class="btn btd" style="padding:5px 10px;font-size:11px" onclick="removeUser('${u.name}')">Remove</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function openAddUser(){
   document.getElementById('mAddUserTitle').textContent='Add User';
   document.getElementById('auIsEdit').value='';
-  ['auName','auPin'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('auName').value='';
   document.getElementById('auName').readOnly=false;
   document.getElementById('auName').style.opacity='';
-  document.getElementById('auRole').value='inspector';
   document.getElementById('auNameHint').style.display='none';
+  const pinField=document.getElementById('auPin');
+  pinField.value='';
+  pinField.type='password';
+  pinField.placeholder='••••••';
+  document.getElementById('auRole').value='inspector';
   renderPropChecks([]);
   openM('mAddUser');
 }
 function openEditUser(u){
   if(typeof u==='string') u=JSON.parse(u);
   document.getElementById('mAddUserTitle').textContent='Edit User';
-  document.getElementById('auIsEdit').value=u.name; // store original name
+  document.getElementById('auIsEdit').value=u.name;
   document.getElementById('auName').value=u.name||'';
   document.getElementById('auName').readOnly=false;
   document.getElementById('auName').style.opacity='';
   document.getElementById('auNameHint').style.display='';
-  document.getElementById('auPin').value='';
+  // Pre-populate PIN so admin sees/edits it without zeroing on save
+  const pinField=document.getElementById('auPin');
+  pinField.value=u.pin||'';
+  pinField.type='text';
   document.getElementById('auRole').value=u.role||'inspector';
   const pids=Array.isArray(u.propIds)?u.propIds:(u.propIds||'').toString().split(',').filter(Boolean);
   renderPropChecks(pids);
