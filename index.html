@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0c0c0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MetrIQ">
-<title>MetrIQ</title>
-<link rel="manifest" href="data:application/json,{%22name%22:%22MetrIQ%22,%22short_name%22:%22MetrIQ%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c0f%22,%22theme_color%22:%22%230c0c0f%22}">
+<meta name="apple-mobile-web-app-title" content="MeterIQ">
+<title>MeterIQ</title>
+<link rel="manifest" href="data:application/json,{%22name%22:%22MeterIQ%22,%22short_name%22:%22MeterIQ%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c0f%22,%22theme_color%22:%22%230c0c0f%22}">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Barlow:wght@300;400;500&display=swap');
@@ -323,14 +323,15 @@ select.fi option{background:var(--sf)}
 .mchip.active{border-color:var(--am);background:var(--amg);color:var(--am);box-shadow:0 0 12px var(--amg)}
 .mchip:active{opacity:.7}
 /* ── USER NAME IN HEADER ── */
-.uname-chip{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx2);letter-spacing:.5px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+.uname-chip{font-family:'Rajdhani',sans-serif;font-size:calc(11px * var(--fs));font-weight:600;color:var(--tx2);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px}
+.hdr-right{display:flex;align-items:center;gap:5px;flex-shrink:0;min-width:0;max-width:calc(100% - 80px)}
 </style>
 </head>
 <body>
 
 <!-- ═══ LOGIN ═══ -->
 <div id="loginScreen">
-  <div class="ll">⚡ MetrIQ</div>
+  <div class="ll">⚡ MeterIQ</div>
   <div class="lt">Smart Meter Reader</div>
   <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:0">
 
@@ -366,17 +367,17 @@ select.fi option{background:var(--sf)}
       style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
       ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v22</div>
+  <div class="lver">v23</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MetrIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v22</span></div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
+    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v23</span></div>
+    <div class="hdr-right">
       <span id="userNameDisp" class="uname-chip"></span>
-      <span id="roleChip" style="font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--amg);border:1px solid var(--am);color:var(--am)"></span>
-      <button class="sochip" onclick="logout()">🔒 Sign Out</button>
+      <span id="roleChip" style="font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--amg);border:1px solid var(--am);color:var(--am);white-space:nowrap;flex-shrink:0"></span>
+      <button class="sochip" onclick="logout()" style="padding:4px 8px;font-size:calc(11px * var(--fs));flex-shrink:0">🔒</button>
     </div>
   </div>
 
@@ -384,18 +385,16 @@ select.fi option{background:var(--sf)}
 
     <!-- DASHBOARD -->
     <div class="screen active" id="screen-dash">
-      <div class="psel-row">
-        <button class="psel" onclick="openPropPicker('dash')">
-          <span class="psel-ico">🏢</span>
-          <div class="psel-body"><div class="psel-lbl">Property</div><div class="psel-val" id="pselPropD">—</div></div>
-          <span class="psel-arr">▾</span>
-        </button>
-        <button class="psel" onclick="openUnitPicker()">
-          <span class="psel-ico">📍</span>
-          <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitD">—</div></div>
-          <span class="psel-arr">▾</span>
-        </button>
-      </div>
+      <button class="psel" style="width:100%" onclick="openPropPicker('dash')">
+        <span class="psel-ico">🏢</span>
+        <div class="psel-body"><div class="psel-lbl">Property</div><div class="psel-val" id="pselPropD">—</div></div>
+        <span class="psel-arr">▾</span>
+      </button>
+      <button class="psel" style="width:100%" onclick="openUnitPicker()">
+        <span class="psel-ico">📍</span>
+        <div class="psel-body"><div class="psel-lbl">Zone</div><div class="psel-val" id="pselUnitD">—</div></div>
+        <span class="psel-arr">▾</span>
+      </button>
       <div id="mChipsDash" class="mchips"></div>
       <div class="card">
         <div class="clbl">Latest Reading</div>
@@ -591,12 +590,12 @@ select.fi option{background:var(--sf)}
           <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="openReportModal()">Generate</button>
         </div>
         <div class="si" id="btnExportData">
-          <div><div class="slbl">Export Raw Data</div><div class="ssub">Download as JSON</div></div>
+          <div><div class="slbl">Export Raw Data</div><div class="ssub">Download as CSV</div></div>
           <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="exportData()">Export</button>
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MetrIQ v22 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v23 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -700,6 +699,10 @@ select.fi option{background:var(--sf)}
     <div class="mt">Generate Report</div>
     <div style="display:flex;flex-direction:column;gap:13px">
       <div class="fg">
+        <div class="fl">Property</div>
+        <select class="fi" id="rptProp" onchange="onRptPropChange()"></select>
+      </div>
+      <div class="fg">
         <div class="fl">Period</div>
         <select class="fi" id="rptPeriod">
           <option value="30">Last 30 days</option>
@@ -736,7 +739,7 @@ select.fi option{background:var(--sf)}
   <div class="modal"><div class="mh"></div><div class="mt" id="mAddUserTitle">Add User</div>
     <input type="hidden" id="auIsEdit">
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="fg"><div class="fl">Full Name</div><input class="fi ft" id="auName" placeholder="e.g. John Tan"></div>
+      <div class="fg"><div class="fl">Full Name</div><input class="fi ft" id="auName" placeholder="e.g. John Tan"><div class="fhint" id="auNameHint" style="margin-top:4px;display:none">Renaming will update both local and backend records</div></div>
       <div class="fg"><div class="fl">6-Digit PIN</div><input class="fi" type="password" id="auPin" placeholder="••••••" inputmode="numeric" maxlength="6"><div class="fhint" style="margin-top:4px">Leave blank to keep existing PIN</div></div>
       <div class="fg"><div class="fl">Role</div>
         <select class="fi" id="auRole">
@@ -2106,7 +2109,7 @@ async function saveReading(){
     if(shouldAlert){
       const lvEmoji=tr ? (tr.lv==='critical'?'🔴':tr.lv==='high'?'🟡':tr.lv==='low'?'🔵':'🟢') : 'ℹ️';
       const lvLbl=tr?tr.lbl:'Reading saved';
-      const msg=`${lvEmoji} <b>MetrIQ — ${S.prop?.name||''}</b>\n`+
+      const msg=`${lvEmoji} <b>MeterIQ — ${S.prop?.name||''}</b>\n`+
         `Unit: <b>${u2?.number||''}</b>${u2?.desc?' · '+u2.desc:''}\n`+
         `Meter: ${md.icon} ${md.label}\n\n`+
         `<b>${lvLbl}</b>${tr?'\n'+tr.txt:''}\n\n`+
@@ -2430,7 +2433,7 @@ async function testTelegram(){
   try{
     const url=`https://api.telegram.org/bot${tok}/sendMessage?`+
       `chat_id=${encodeURIComponent(cid)}`+
-      `&text=${encodeURIComponent('⚡ MetrIQ — Test alert!\nYour Telegram alerts are working ✓')}`+
+      `&text=${encodeURIComponent('⚡ MeterIQ — Test alert!\nYour Telegram alerts are working ✓')}`+
       `&parse_mode=HTML`;
     const res=await fetch(url);
     const d=await res.json();
@@ -2451,8 +2454,43 @@ async function sendTelegramAlert(msg){
   }catch(e){console.warn('Telegram alert failed:',e);}
 }
 function exportData(){
-  const d={property:S.prop?.name,units:S.units,readings:S.readings.map(r=>({...r,photoData:undefined})),exported:new Date().toISOString()};
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download='metriq_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('✓ Exported');
+  // Build CSV
+  const cols=['Date','Time','Property','Unit','Description','Meter Type','Unit of Measure','Reading','Consumption','Notes','AI Confidence','Saved At'];
+  const rows=[cols];
+  // Sort readings by date
+  const sorted=[...S.readings].sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  sorted.forEach(r=>{
+    const u=S.units.find(x=>x.id===r.unitId);
+    const md=MDEFS.find(m=>m.type===r.meterType);
+    // Calculate consumption vs prior reading for this unit+meter
+    const allR=getMR(r.unitId,r.meterType);
+    const idx=allR.findIndex(x=>x.id===r.id);
+    const prev=allR[idx-1];
+    const cons=prev?(parseFloat(r.reading)-parseFloat(prev.reading)).toFixed(md?.dec??2):'';
+    rows.push([
+      r.date, r.time,
+      S.prop?.name||'',
+      u?.number||r.unitId,
+      u?.desc||'',
+      md?.label||r.meterType,
+      md?.unit||'',
+      r.reading,
+      cons,
+      r.notes||'',
+      r.aiConf||'',
+      r.savedAt||''
+    ]);
+  });
+  const csv=rows.map(row=>row.map(v=>{
+    const s=String(v??'').replace(/"/g,'""');
+    return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s}"`:s;
+  }).join(',')).join('\r\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='meteriq_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('✓ CSV exported');
 }
 function clearAll(){if(!confirm('Delete ALL readings?'))return;S.readings=[];saveR();refreshAll();toast('Cleared');}
 
@@ -2460,6 +2498,22 @@ function clearAll(){if(!confirm('Delete ALL readings?'))return;S.readings=[];sav
 //  REPORT GENERATION
 // ═══════════════════════════════════════════
 function openReportModal(){
+  // Populate property selector (admin sees all, others see assigned)
+  const role=S.session?.user?.role||'inspector';
+  const allowed=role==='admin'?PROPS:PROPS.filter(p=>S.session?.user?.propIds?.includes(p.id));
+  const rptPropEl=document.getElementById('rptProp');
+  rptPropEl.innerHTML=allowed.map(p=>`<option value="${p.id}">${p.icon||'🏢'} ${p.name}</option>`).join('');
+  rptPropEl.value=S.prop?.id||allowed[0]?.id||'';
+  onRptPropChange();
+  openM('mReport');
+}
+
+async function onRptPropChange(){
+  const pid=document.getElementById('rptProp').value;
+  if(!pid)return;
+  // Load units for selected property
+  let units=await DB.get('units_'+pid)||[];
+  if(!units.length&&S.prop?.id===pid)units=S.units;
   // Populate meter checkboxes dynamically
   const mEl=document.getElementById('rptMeterChecks');
   if(mEl){
@@ -2470,18 +2524,27 @@ function openReportModal(){
   }
   // Populate unit checkboxes
   const el=document.getElementById('rptUnitList');
-  el.innerHTML=S.units.map(u=>`
+  el.innerHTML=units.map(u=>`
     <label style="display:flex;align-items:center;gap:5px;font-size:calc(12px * var(--fs));color:var(--tx2);cursor:pointer;background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:4px 9px;font-family:'Barlow',sans-serif;font-weight:400;letter-spacing:0;text-transform:none">
       <input type="checkbox" class="rptUnit" value="${u.id}" checked style="accent-color:var(--am);width:14px;height:14px"> ${u.number}
     </label>`).join('');
   document.getElementById('rptAllUnits').checked=true;
-  openM('mReport');
 }
 function toggleAllUnits(checked){
   document.querySelectorAll('.rptUnit').forEach(cb=>cb.checked=checked);
 }
 
-function generateReport(){
+async function generateReport(){
+  const rptPid=document.getElementById('rptProp').value;
+  const rptProp=PROPS.find(p=>p.id===rptPid)||S.prop;
+  // Load units + readings for the selected property
+  let rptUnits=await DB.get('units_'+rptPid)||[];
+  if(!rptUnits.length&&S.prop?.id===rptPid)rptUnits=S.units;
+  let rptReadings=await DB.get('readings_'+rptPid)||[];
+  if(!rptReadings.length&&S.prop?.id===rptPid)rptReadings=S.readings;
+  // Helper: get sorted readings for a unit+meter from rptReadings
+  function getRMR(uid,type){return rptReadings.filter(r=>r.unitId===uid&&r.meterType===type).sort((a,b)=>new Date(a.date+'T'+a.time)-new Date(b.date+'T'+b.time));}
+
   const days   = document.getElementById('rptPeriod').value;
   const selectedMTypes=[...document.querySelectorAll('.rptMeterCb:checked')].map(cb=>cb.value);
   const mTypes = ACTIVE_MDEFS.filter(m=>selectedMTypes.includes(m.type));
@@ -2491,18 +2554,17 @@ function generateReport(){
   const cutoff = days==='all' ? new Date(0) : (() => { const d=new Date(); d.setDate(d.getDate()-parseInt(days)); return d; })();
   const reportDate = new Date().toLocaleDateString('en-SG',{day:'numeric',month:'long',year:'numeric'});
   const periodLabel = days==='all' ? 'All time' : `Last ${days} days (to ${reportDate})`;
-  const units = S.units.filter(u=>unitIds.includes(u.id));
+  const units = rptUnits.filter(u=>unitIds.includes(u.id));
 
   // ── build data per unit per meter ──
   const unitData = units.map(u=>{
     const meters = mTypes.map(md=>{
-      const all = getMR(u.id,md.type);
+      const all = getRMR(u.id,md.type);
       const inPeriod = all.filter(r=>new Date(r.date)>=cutoff);
       if(inPeriod.length<2) return {md,total:null,avg:null,trend:null,readings:inPeriod};
       const total = parseFloat(inPeriod[inPeriod.length-1].reading)-parseFloat(inPeriod[0].reading);
       const span  = Math.max(1,dBetween(inPeriod[0].date,inPeriod[inPeriod.length-1].date));
       const avg   = total/span;
-      // Trend vs preceding period
       const pts=[];
       for(let i=1;i<all.length;i++){const d=Math.max(1,dBetween(all[i-1].date,all[i].date));const c=parseFloat(all[i].reading)-parseFloat(all[i-1].reading);if(c>=0)pts.push(c/d);}
       const tr = pts.length>=4 ? assessTrend(inPeriod.length>=5?inPeriod:all) : null;
@@ -2628,7 +2690,7 @@ function generateReport(){
     </table>` : `<h2>Flagged Units</h2><div style="padding:10px;background:#f0fdf4;border-radius:6px;color:#059669;font-size:13px">✓ No units flagged — all within normal operating parameters.</div>`;
 
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>MetrIQ Report — ${S.prop?.name} — ${reportDate}</title>
+  <title>MeterIQ Report — ${rptProp?.name} — ${reportDate}</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:28px 32px}
@@ -2649,8 +2711,8 @@ function generateReport(){
   </style></head><body>
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
     <div>
-      <h1>⚡ MetrIQ — Property Meter Report</h1>
-      <div class="meta"><strong>${S.prop?.icon||''} ${S.prop?.name||'Property'}</strong></div>
+      <h1>⚡ MeterIQ — Property Meter Report</h1>
+      <div class="meta"><strong>${rptProp?.icon||''} ${rptProp?.name||'Property'}</strong></div>
       <div class="meta">Period: ${periodLabel}</div>
       <div class="meta">Generated: ${reportDate} · ${units.length} units · ${mTypes.map(m=>m.label).join(', ')}</div>
     </div>
@@ -2688,7 +2750,7 @@ function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MetrIQ v22 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MeterIQ v23 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2810,16 +2872,18 @@ function openAddUser(){
   document.getElementById('auName').readOnly=false;
   document.getElementById('auName').style.opacity='';
   document.getElementById('auRole').value='inspector';
+  document.getElementById('auNameHint').style.display='none';
   renderPropChecks([]);
   openM('mAddUser');
 }
 function openEditUser(u){
   if(typeof u==='string') u=JSON.parse(u);
   document.getElementById('mAddUserTitle').textContent='Edit User';
-  document.getElementById('auIsEdit').value=u.name;
+  document.getElementById('auIsEdit').value=u.name; // store original name
   document.getElementById('auName').value=u.name||'';
-  document.getElementById('auName').readOnly=true;
-  document.getElementById('auName').style.opacity='.5';
+  document.getElementById('auName').readOnly=false;
+  document.getElementById('auName').style.opacity='';
+  document.getElementById('auNameHint').style.display='';
   document.getElementById('auPin').value='';
   document.getElementById('auRole').value=u.role||'inspector';
   const pids=Array.isArray(u.propIds)?u.propIds:(u.propIds||'').toString().split(',').filter(Boolean);
@@ -2837,24 +2901,38 @@ async function submitUser(){
   const pin=document.getElementById('auPin').value.trim();
   const role=document.getElementById('auRole').value;
   const propIds=[...document.querySelectorAll('.auPropCb:checked')].map(c=>c.value);
-  const originalName=document.getElementById('auIsEdit').value||name; // for lookup
+  const originalName=document.getElementById('auIsEdit').value; // blank = new user
+  const isEdit=!!originalName;
   if(!name){toast('Name required','err');return;}
   if(pin&&!/^\d{6}$/.test(pin)){toast('PIN must be 6 digits','err');return;}
-  if(!pin&&!document.getElementById('auIsEdit').value){toast('PIN required for new user','err');return;}
+  if(!pin&&!isEdit){toast('PIN required for new user','err');return;}
   const btn=document.querySelector('#mAddUser .btp');if(btn){btn.textContent='Saving…';btn.disabled=true;}
-  const res=await API.call('saveUser',{user:{name,pin,role,propIds,active:true}});
-  if(btn){btn.textContent='Save User';btn.disabled=false;}
-  // Use originalName to find existing LOCAL_USER (prevents duplicate when editing)
-  const idx=LOCAL_USERS.findIndex(u=>u.name.toLowerCase()===originalName.toLowerCase());
-  const existingPin=idx>=0?LOCAL_USERS[idx].pin:'';
-  const lu={pin:pin||existingPin||'000000',name,role,propIds};
-  if(idx>=0)LOCAL_USERS[idx]=lu; else LOCAL_USERS.push(lu);
-  if(res?.ok){
-    closeM('mAddUser');toast('✓ User saved','ok');renderAdminUsers();
-  } else {
-    toast(res?.error||'Backend unreachable — saved locally','err');
-    closeM('mAddUser');renderAdminUsers();
+
+  // If renaming, delete old record first
+  if(isEdit&&name!==originalName){
+    await API.call('deleteUser',{name:originalName});
+    const oidx=LOCAL_USERS.findIndex(u=>u.name.toLowerCase()===originalName.toLowerCase());
+    if(oidx>=0)LOCAL_USERS.splice(oidx,1);
   }
+
+  // Find existing LOCAL_USER by originalName for PIN preservation
+  const existingIdx=LOCAL_USERS.findIndex(u=>u.name.toLowerCase()===(originalName||name).toLowerCase());
+  const existingPin=existingIdx>=0?LOCAL_USERS[existingIdx].pin:'';
+  const lu={pin:pin||existingPin||'000000',name,role,propIds};
+
+  const res=await API.call('saveUser',{user:{name,pin:lu.pin,role,propIds,active:true}});
+  if(btn){btn.textContent='Save User';btn.disabled=false;}
+
+  // Update LOCAL_USERS — replace by original or append
+  if(existingIdx>=0)LOCAL_USERS[existingIdx]=lu; else LOCAL_USERS.push(lu);
+
+  if(res?.ok){
+    closeM('mAddUser');toast('✓ User saved','ok');
+  } else {
+    toast(res?.error||'Backend unreachable — saved locally');
+    closeM('mAddUser');
+  }
+  renderAdminUsers();
 }
 async function removeUser(name){
   if(!confirm(`Remove user "${name}"?`))return;
