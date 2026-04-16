@@ -328,6 +328,10 @@ select.fi option{background:var(--sf)}
 .hdr-identity{display:flex;flex-direction:column;align-items:flex-end;gap:0;max-width:110px;min-width:0}
 .hdr-name{font-family:'Rajdhani',sans-serif;font-size:calc(12px * var(--fs));font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;line-height:1.2}
 .hdr-role{font-family:'Rajdhani',sans-serif;font-size:calc(9px * var(--fs));font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:1.2}
+/* ── 6-BOX PIN INPUT ── */
+.pin-box{width:42px;height:50px;border-radius:var(--rs);border:2px solid var(--bd);background:var(--sf2);color:var(--tx);font-family:'Share Tech Mono',monospace;font-size:calc(22px * var(--fs));font-weight:600;text-align:center;outline:none;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
+.pin-box:focus{border-color:var(--am);background:var(--amg)}
+.pin-box.filled{border-color:var(--bd2)}
 </style>
 </head>
 <body>
@@ -370,13 +374,13 @@ select.fi option{background:var(--sf)}
       style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
       ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v24</div>
+  <div class="lver">v25</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v24</span></div>
+    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v25</span></div>
     <div class="hdr-right">
       <div class="hdr-identity">
         <div class="hdr-name" id="userNameDisp"></div>
@@ -599,7 +603,7 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v24 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v25 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -744,7 +748,19 @@ select.fi option{background:var(--sf)}
     <input type="hidden" id="auIsEdit">
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="fg"><div class="fl">Full Name</div><input class="fi ft" id="auName" placeholder="e.g. John Tan"><div class="fhint" id="auNameHint" style="margin-top:4px;display:none">Renaming will update both local and backend records</div></div>
-      <div class="fg"><div class="fl">6-Digit PIN</div><input class="fi" type="password" id="auPin" placeholder="••••••" inputmode="numeric" maxlength="6"><div class="fhint" style="margin-top:4px">Leave blank to keep existing PIN</div></div>
+      <div class="fg">
+        <div class="fl">6-Digit PIN</div>
+        <div id="auPinBoxes" style="display:flex;gap:7px;justify-content:flex-start">
+          <input class="pin-box" data-idx="0" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input class="pin-box" data-idx="1" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input class="pin-box" data-idx="2" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input class="pin-box" data-idx="3" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input class="pin-box" data-idx="4" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          <input class="pin-box" data-idx="5" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+        </div>
+        <input type="hidden" id="auPin">
+        <div class="fhint" style="margin-top:4px" id="auPinHint">Leave blank to keep existing PIN</div>
+      </div>
       <div class="fg"><div class="fl">Role</div>
         <select class="fi" id="auRole">
           <option value="inspector">Inspector — view + capture readings</option>
@@ -1088,7 +1104,16 @@ async function fetchLoginUsers(){
   try{
     const res=await API.call('getUsers',{});
     if(res?.ok&&res.users?.length){
+      // Backend list is authoritative for the login dropdown
       await DB.set('login_users_cache',res.users.map(u=>({name:u.name,role:u.role})));
+      // Sync PINs from backend into LOCAL_USERS so edit modal has them
+      res.users.forEach(u=>{
+        if(!u.pin||u.pin==='••••••')return; // skip masked
+        const li=LOCAL_USERS.findIndex(x=>x.name.toLowerCase()===u.name.toLowerCase());
+        if(li>=0)LOCAL_USERS[li].pin=u.pin;
+        else LOCAL_USERS.push({name:u.name,role:u.role,pin:u.pin,
+          propIds:u.propIds?u.propIds.toString().split(',').filter(Boolean):[]});
+      });
       populateLoginSelect();
     }
   }catch(e){}
@@ -1097,12 +1122,12 @@ async function fetchLoginUsers(){
 function populateLoginSelect(){
   const sel=document.getElementById('loginNameSelect');if(!sel)return;
   DB.get('login_users_cache').then(cached=>{
-    const merged={};
-    LOCAL_USERS.forEach(u=>merged[u.name]={name:u.name,role:u.role});
-    (cached||[]).forEach(u=>merged[u.name]={name:u.name,role:u.role});
+    // If we have a cached backend list, use it exclusively (authoritative)
+    // Fall back to LOCAL_USERS only when offline (no cache)
+    const source=cached?.length?cached:LOCAL_USERS.map(u=>({name:u.name,role:u.role}));
     const current=sel.value;
     sel.innerHTML='<option value="">— Select your name —</option>'+
-      Object.values(merged).map(u=>`<option value="${u.name}">${u.name} · ${ROLES[u.role]||u.role}</option>`).join('');
+      source.map(u=>`<option value="${u.name}">${u.name} · ${ROLES[u.role]||u.role}</option>`).join('');
     if(current)sel.value=current;
   });
 }
@@ -1157,9 +1182,11 @@ async function loginAs(sess){
     const rd=await API.call('syncDown',{});
     if(rd?.ok){
       if(rd.props?.length){
-        props=rd.props;
-        // ── Update global PROPS so admin panel + prop checks see live data ──
-        PROPS.length=0;rd.props.forEach(p=>PROPS.push(p));
+        // Merge: backend props override by id, but keep hardcoded entries (like p_test)
+        const backendMap={};rd.props.forEach(p=>backendMap[p.id]=p);
+        PROPS.forEach((p,i)=>{ if(backendMap[p.id])PROPS[i]={...PROPS[i],...backendMap[p.id]}; });
+        rd.props.forEach(p=>{ if(!PROPS.find(x=>x.id===p.id))PROPS.push(p); });
+        props=PROPS;
         await DB.set('props_cache',PROPS);
       }
       // If backend returned no units, auto-trigger setup to seed them
@@ -1169,7 +1196,11 @@ async function loginAs(sess){
           // Re-sync after seeding
           const rd2=await API.call('syncDown',{});
           if(rd2?.ok){
-            if(rd2.props?.length){PROPS.length=0;rd2.props.forEach(p=>PROPS.push(p));}
+            if(rd2.props?.length){
+              const bm2={};rd2.props.forEach(p=>bm2[p.id]=p);
+              PROPS.forEach((p,i)=>{if(bm2[p.id])PROPS[i]={...PROPS[i],...bm2[p.id]};});
+              rd2.props.forEach(p=>{if(!PROPS.find(x=>x.id===p.id))PROPS.push(p);});
+            }
             const byPropU2={};(rd2.units||[]).forEach(u=>{(byPropU2[u.propId]=byPropU2[u.propId]||[]).push(u);});
             for(const[pid,us]of Object.entries(byPropU2))await DB.set('units_'+pid,us);
           }
@@ -1183,7 +1214,16 @@ async function loginAs(sess){
       S.lastSync=new Date().toISOString();
     }
   }
-  const allowedProps=role==='admin'?props:props.filter(p=>user.propIds?.includes(p.id));
+  // For backend-authed users, combine their assigned props with any hardcoded-only props (e.g. p_test)
+  const backendPropIds=new Set(props.map(p=>p.id));
+  const hardcodedExtras=PROPS.filter(p=>!backendPropIds.has(p.id)); // e.g. p_test not in Sheet
+  const allAvailableProps=[...props,...hardcodedExtras];
+  const allowedProps=role==='admin'?allAvailableProps:allAvailableProps.filter(p=>{
+    // include if in user's propIds, OR if it's a hardcoded-only prop that LOCAL_USERS includes
+    if(user.propIds?.includes(p.id))return true;
+    const lu=LOCAL_USERS.find(x=>x.name.toLowerCase()===user.name.toLowerCase());
+    return lu?.propIds?.includes(p.id);
+  });
   if(!allowedProps.length){document.getElementById('loginErr').textContent='No properties assigned';lpe='';lupd();return;}
   S.prop=allowedProps[0];
   let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
@@ -1652,8 +1692,14 @@ function preprocess(dataUrl){
 // ═══════════════════════════════════════════
 function startCapture(){
   if(!S.units.length){toast('Add a unit first — go to Admin → Properties','err');return;}
-  cap={step:0,uid:S.activeUnit||S.units[0].id,mt:ACTIVE_MDEFS[0].type,photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
-  if(S.units.length===1)cap.step=1;
+  const uid=S.activeUnit||S.units[0].id;
+  const u=S.units.find(x=>x.id===uid);
+  const unitMTypes=Array.isArray(u?.meters)?u.meters:(u?.meters||'electricity').split(',');
+  const mt=unitMTypes.includes(S.activeMeter)?S.activeMeter:(unitMTypes[0]||ACTIVE_MDEFS[0].type);
+  cap={step:0,uid,mt,photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
+  // Skip unit-selection step if we already know which unit+meter to read
+  if(S.activeUnit) cap.step=1;
+  else if(S.units.length===1) cap.step=1;
   renderStep();go('capture');
 }
 
@@ -2165,6 +2211,7 @@ async function saveReading(){
   queueSync('reading',{...r,photoData:undefined});
   if(photoThumb){
     const capUnit=S.units.find(x=>x.id===cap.uid);
+    const md2=MDEFS.find(m=>m.type===cap.mt);
     queueSync('image',{
       readingId:r.id,
       propId:r.propId,
@@ -2173,6 +2220,7 @@ async function saveReading(){
       unitNumber:capUnit?.number||'',
       unitDesc:capUnit?.desc||'',
       meterType:cap.mt,
+      meterLabel:md2?.label||cap.mt,
       date:r.date,
       time:r.time,
       imageBase64:photoThumb.split(',')[1],
@@ -2836,7 +2884,7 @@ async function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MeterIQ v24 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MeterIQ v25 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2959,6 +3007,47 @@ async function renderAdminUsers(){
     </div>`;
   }).join('');
 }
+// ── 6-BOX PIN HELPERS ──────────────────────────────────────────────
+function initPinBoxes(){
+  document.querySelectorAll('.pin-box').forEach(box=>{
+    box.addEventListener('input',e=>{
+      const v=e.target.value.replace(/\D/g,'');
+      e.target.value=v.slice(-1);
+      e.target.classList.toggle('filled',!!v);
+      syncPinHidden();
+      if(v){const next=e.target.parentElement.querySelector(`[data-idx="${parseInt(e.target.dataset.idx)+1}"]`);if(next)next.focus();}
+    });
+    box.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!e.target.value){
+        const prev=e.target.parentElement.querySelector(`[data-idx="${parseInt(e.target.dataset.idx)-1}"]`);
+        if(prev){prev.value='';prev.classList.remove('filled');prev.focus();syncPinHidden();}
+      }
+    });
+    box.addEventListener('paste',e=>{
+      e.preventDefault();
+      const text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      const boxes=e.target.parentElement.querySelectorAll('.pin-box');
+      boxes.forEach((b,i)=>{b.value=text[i]||'';b.classList.toggle('filled',!!text[i]);});
+      const last=boxes[Math.min(text.length,5)];if(last)last.focus();
+      syncPinHidden();
+    });
+  });
+}
+function syncPinHidden(){
+  const boxes=document.querySelectorAll('.pin-box');
+  document.getElementById('auPin').value=[...boxes].map(b=>b.value).join('');
+}
+function setPinBoxes(pin){
+  const boxes=document.querySelectorAll('.pin-box');
+  const digits=(pin||'').split('');
+  boxes.forEach((b,i)=>{b.value=digits[i]||'';b.classList.toggle('filled',!!digits[i]);});
+  syncPinHidden();
+}
+function clearPinBoxes(){
+  document.querySelectorAll('.pin-box').forEach(b=>{b.value='';b.classList.remove('filled');});
+  document.getElementById('auPin').value='';
+}
+
 function openAddUser(){
   document.getElementById('mAddUserTitle').textContent='Add User';
   document.getElementById('auIsEdit').value='';
@@ -2966,10 +3055,8 @@ function openAddUser(){
   document.getElementById('auName').readOnly=false;
   document.getElementById('auName').style.opacity='';
   document.getElementById('auNameHint').style.display='none';
-  const pinField=document.getElementById('auPin');
-  pinField.value='';
-  pinField.type='password';
-  pinField.placeholder='••••••';
+  document.getElementById('auPinHint').textContent='Required for new user';
+  clearPinBoxes();
   document.getElementById('auRole').value='inspector';
   renderPropChecks([]);
   openM('mAddUser');
@@ -2982,10 +3069,8 @@ function openEditUser(u){
   document.getElementById('auName').readOnly=false;
   document.getElementById('auName').style.opacity='';
   document.getElementById('auNameHint').style.display='';
-  // Pre-populate PIN so admin sees/edits it without zeroing on save
-  const pinField=document.getElementById('auPin');
-  pinField.value=u.pin||'';
-  pinField.type='text';
+  document.getElementById('auPinHint').textContent='Leave blank to keep existing PIN';
+  setPinBoxes(u.pin||'');
   document.getElementById('auRole').value=u.role||'inspector';
   const pids=Array.isArray(u.propIds)?u.propIds:(u.propIds||'').toString().split(',').filter(Boolean);
   renderPropChecks(pids);
@@ -3221,8 +3306,8 @@ if('serviceWorker' in navigator){
 }
 
 init().then(()=>{
-  // Fallback: ensure login screen is visible if not already logged in
   if(!S.session) showLoginScreen();
+  initPinBoxes();
 });
 </script>
 </body>
