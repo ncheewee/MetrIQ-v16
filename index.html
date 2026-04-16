@@ -1105,25 +1105,20 @@ function setLoginSyncStatus(state,msg){
 
 async function fetchLoginUsers(){
   try{
-    const res=await API.call('getUsers',{});
+    // getLoginUsers is a public endpoint — no token required, returns name+role only
+    const res=await API.call('getLoginUsers',{});
     if(res?.ok&&res.users?.length){
-      // Backend list is authoritative for the login dropdown
+      // Cache the backend user list — authoritative source for the dropdown
       await DB.set('login_users_cache',res.users.map(u=>({name:u.name,role:u.role})));
-      // Sync PINs from backend into LOCAL_USERS so edit modal has them
-      res.users.forEach(u=>{
-        if(!u.pin||u.pin==='••••••')return;
-        const li=LOCAL_USERS.findIndex(x=>x.name.toLowerCase()===u.name.toLowerCase());
-        if(li>=0)LOCAL_USERS[li].pin=u.pin;
-        else LOCAL_USERS.push({name:u.name,role:u.role,pin:u.pin,
-          propIds:u.propIds?u.propIds.toString().split(',').filter(Boolean):[]});
-      });
       populateLoginSelect();
       setLoginSyncStatus('done','✓ User list updated');
     } else {
-      setLoginSyncStatus('offline','Offline — showing cached list');
+      // Backend reachable but returned empty — keep showing whatever is cached/local
+      setLoginSyncStatus('done','');
     }
   }catch(e){
-    setLoginSyncStatus('offline','Offline — showing cached list');
+    // Genuinely offline — show cached list silently, no scary message
+    setLoginSyncStatus('offline','Using cached list');
   }
 }
 
@@ -3043,7 +3038,17 @@ async function renderAdminUsers(){
   el.innerHTML='<div style="color:var(--tx3);font-size:12px;padding:4px 0">Loading…</div>';
   let users=[...LOCAL_USERS];
   const res=await API.call('getUsers',{});
-  if(res?.ok&&res.users?.length) users=res.users;
+  if(res?.ok&&res.users?.length){
+    users=res.users;
+    // Sync real PINs back into LOCAL_USERS so edit modal always has them
+    res.users.forEach(u=>{
+      if(!u.pin)return;
+      const li=LOCAL_USERS.findIndex(x=>x.name.toLowerCase()===u.name.toLowerCase());
+      if(li>=0)LOCAL_USERS[li].pin=u.pin;
+      else LOCAL_USERS.push({name:u.name,role:u.role,pin:u.pin,
+        propIds:u.propIds?u.propIds.toString().split(',').filter(Boolean):[]});
+    });
+  }
   if(!users.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px">No users</div>';return;}
   el.innerHTML=users.map(u=>{
     const lu=LOCAL_USERS.find(x=>x.name.toLowerCase()===u.name.toLowerCase());
