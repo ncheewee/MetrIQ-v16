@@ -349,6 +349,10 @@ select.fi option{background:var(--sf)}
         style="font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:600;padding:11px 13px;width:100%;cursor:pointer">
         <option value="">— Select your name —</option>
       </select>
+      <div id="loginSyncStatus" style="display:flex;align-items:center;gap:7px;margin-top:7px;font-size:calc(11px * var(--fs));color:var(--tx3)">
+        <div class="spin" id="loginSyncSpinner" style="width:13px;height:13px;border-width:2px;display:none"></div>
+        <span id="loginSyncMsg"></span>
+      </div>
     </div>
 
     <!-- PIN label + dots -->
@@ -374,13 +378,13 @@ select.fi option{background:var(--sf)}
       style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
       ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v25</div>
+  <div class="lver">v26</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v25</span></div>
+    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v26</span></div>
     <div class="hdr-right">
       <div class="hdr-identity">
         <div class="hdr-name" id="userNameDisp"></div>
@@ -470,32 +474,27 @@ select.fi option{background:var(--sf)}
           <span class="psel-arr">▾</span>
         </button>
       </div>
-      <!-- 4. FY selector + meter type tabs -->
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <div class="anl-period" style="flex-shrink:0">
-          <button class="ptab" id="anlFYPrev" onclick="setAnlFY('prev')">FY <span id="anlFYPrevLbl"></span></button>
-          <button class="ptab active" id="anlFYCur"  onclick="setAnlFY('cur')">FY <span id="anlFYCurLbl"></span></button>
-        </div>
-        <div class="mtabs" id="mTabsAnal" style="flex:1"></div>
-      </div>
+      <!-- 4. Meter type tabs -->
+      <div class="mtabs" id="mTabsAnal"></div>
       <!-- YTD summary -->
       <div class="ytd-card" id="ytdCard"></div>
       <!-- Main chart: monthly actuals + prediction -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="clbl">Monthly Consumption & Forecast</div>
-          <div style="display:flex;gap:8px;font-size:calc(10px * var(--fs));color:var(--tx3)">
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:rgba(245,158,11,.4);border-radius:2px;display:inline-block"></span>Actual</span>
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:20px;height:2px;background:#f59e0b;display:inline-block;border-top:2px dashed #f59e0b"></span>Forecast</span>
+          <div style="display:flex;gap:8px;font-size:calc(10px * var(--fs));color:var(--tx3);flex-wrap:wrap;justify-content:flex-end">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:rgba(59,130,246,.55);border-radius:2px;display:inline-block"></span>Last FY</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:rgba(245,158,11,.65);border-radius:2px;display:inline-block"></span>This FY</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:rgba(245,158,11,.18);border:1.5px dashed #f59e0b;border-radius:2px;display:inline-block"></span>Forecast</span>
           </div>
         </div>
-        <div class="cw" style="height:220px"><canvas id="anlMainChart"></canvas></div>
+        <div class="cw" style="height:240px"><canvas id="anlMainChart"></canvas></div>
       </div>
       <!-- Insights -->
       <div class="card"><div class="clbl" style="margin-bottom:8px">AI Insights</div><div id="anlInsights"></div></div>
-      <!-- Multi-year chart (building scope only) -->
+      <!-- Cumulative comparison chart (building scope only) -->
       <div class="card" id="anlMultiYearCard" style="display:none">
-        <div class="clbl" style="margin-bottom:8px">Multi-Year Comparison</div>
+        <div class="clbl" style="margin-bottom:8px">Cumulative Consumption (FY Apr→Mar)</div>
         <div class="cw" style="height:180px"><canvas id="anlMultiChart"></canvas></div>
       </div>
     </div>
@@ -517,10 +516,6 @@ select.fi option{background:var(--sf)}
           <button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="testBackend()">Test</button>
         </div>
         <div style="font-size:calc(11px * var(--fs));color:var(--tx3)">Backend URL is pre-configured. Contact admin to change.</div>
-      </div>
-      <div class="card">
-        <div class="stitle" style="margin-bottom:4px">Property Access</div>
-        <div class="si"><div><div class="slbl" id="setPropName">—</div><div class="ssub" id="setUserRole">—</div></div></div>
       </div>
       <div class="card" id="setCardAI">
         <div class="stitle" style="margin-bottom:11px">AI Provider</div>
@@ -603,7 +598,7 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v25 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v26 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -642,6 +637,13 @@ select.fi option{background:var(--sf)}
           <div class="si"><div><div class="slbl">Pending uploads</div><div class="ssub" id="syncPending">—</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="forcSync()">Sync Now</button></div>
           <div class="si"><div><div class="slbl">Last synced</div><div class="ssub" id="syncLastTime">—</div></div></div>
           <div class="si"><div><div class="slbl">Backend</div><div class="ssub" id="backendStatus">Checking…</div></div><button class="btn btg" style="padding:6px 11px;font-size:12px" onclick="testBackend()">Test</button></div>
+        </div>
+        <div class="card" style="border:1px dashed var(--bd2)">
+          <div class="stitle" style="margin-bottom:4px">🧪 Test Data</div>
+          <div class="si" style="border:none;padding-top:0">
+            <div><div class="slbl">Push Test Building to Sheet</div><div class="ssub" id="testPushStatus">Pushes 🧪 Test Building + #WM-01 water readings to Google Sheets for demo</div></div>
+            <button class="btn btg" style="padding:6px 11px;font-size:12px;flex-shrink:0" onclick="pushTestData()">Push</button>
+          </div>
         </div>
       </div>
     </div>
@@ -901,12 +903,10 @@ let S={
   syncQueue:[],
   lastSync:null,
 };
-let anlScope='building', anlFYSel='cur'; // 'cur' = this FY, 'prev' = last FY
+let anlScope='building';
 function currentFYYear(){ // returns the "end year" of current FY (e.g. 2026 for FY25/26)
   const now=new Date(); return now.getMonth()>=3?now.getFullYear()+1:now.getFullYear();
 }
-function getFYYear(){ return anlFYSel==='cur'?currentFYYear():currentFYYear()-1; }
-let anlYear=currentFYYear(); // keep for multi-year chart compat
 let cap={step:0,uid:null,mt:'electricity',photo:null,extracted:null,conf:null,notes:null,confirmed:null,bbox:null,croppedPhoto:null,manualMode:false};
 let CH={mini:null,anlMain:null,anlMulti:null};
 let apd=7;
@@ -920,81 +920,72 @@ let CR={img:null,box:{x:.05,y:.2,w:.9,h:.6},drag:null,canvas:null,ctx:null};
 //  SINGAPORE SEASONAL TEST DATA — 24 months water
 // ═══════════════════════════════════════════
 function genTestBuilding(){
-  // Singapore water seasonality (m³/day baseline multiplier by calendar month 0=Jan):
-  // Northeast monsoon (Nov–Jan): heavy rain, lower cooling tower + irrigation usage → lower
+  // Singapore water seasonality (m³/day baseline multiplier by calendar month, 0=Jan)
+  // NE monsoon (Nov–Jan): heavy rain → lower cooling/irrigation → lower usage
   // Dry spells (Feb–Apr, Jun–Aug): higher demand
-  // Inter-monsoon (May, Oct): moderate
-  // Southwest monsoon (Jul–Sep): moderate rain
   const sgSeasonalIdx=[
-    0.78, // Jan  — wet NE monsoon
-    0.85, // Feb  — transitional, dry
-    0.92, // Mar  — dry, peak demand ramp
-    0.98, // Apr  — inter-monsoon, warm
-    1.02, // May  — inter-monsoon
-    1.08, // Jun  — dry spell, high cooling
-    1.12, // Jul  — dry spell peak
-    1.10, // Aug  — dry spell, still high
-    1.05, // Sep  — SW monsoon trailing
-    0.97, // Oct  — inter-monsoon
-    0.82, // Nov  — NE monsoon onset
-    0.74, // Dec  — NE monsoon peak (lowest)
+    0.78, // Jan  — NE monsoon peak (lowest)
+    0.85, // Feb  — transitional, drying
+    0.93, // Mar  — warming up
+    0.99, // Apr  — inter-monsoon
+    1.03, // May  — inter-monsoon, warm
+    1.09, // Jun  — dry spell, high cooling
+    1.13, // Jul  — dry spell peak (highest)
+    1.11, // Aug  — dry spell, still high
+    1.06, // Sep  — SW monsoon trailing off
+    0.98, // Oct  — inter-monsoon
+    0.83, // Nov  — NE monsoon onset
+    0.75, // Dec  — NE monsoon (low)
   ];
 
   const units=[{
-    id:'u_test_w1',propId:'p_test',
+    id:'u_test_w1', propId:'p_test',
     number:'#WM-01',
     desc:'Cooling Tower & Common Area',
     meters:['water']
   }];
 
   const readings=[];
-  // Generate readings from 24 months ago to today (~2 readings/month = ~48 readings)
   const today=new Date();
-  const baseDaily=4.8; // m³/day baseline for a mid-size commercial unit
-  const startReading=2180.00; // starting meter value
+  const baseDaily=4.8;        // m³/day baseline
+  const startReading=1800.00; // starting meter value
+  const intervalDays=7;       // weekly readings = ~4/month = ~113 readings over 26 months
+  const totalDays=26*30;      // 26 months to ensure 2 complete FY years visible
 
-  // Generate one reading every ~15 days over 24 months = ~48 readings
   let currentReading=startReading;
-  const intervalDays=15;
-  const totalDays=24*30;
   let d=new Date(today);
   d.setDate(d.getDate()-totalDays);
 
-  // Small trend: slight upward drift over 2 years (+8% total) simulating business growth
-  const totalPeriods=totalDays/intervalDays;
+  const totalPeriods=Math.ceil(totalDays/intervalDays);
 
   for(let i=0;i<=totalPeriods;i++){
-    const mo=d.getMonth(); // 0=Jan
+    const mo=d.getMonth();
     const seasonal=sgSeasonalIdx[mo];
-    // Gradual growth trend factor
-    const growthFactor=1+(i/totalPeriods)*0.08;
-    // Add realistic day-to-day noise (±6%)
-    const noise=0.94+Math.random()*0.12;
+    // Gradual growth trend (+10% over 26 months)
+    const growthFactor=1+(i/totalPeriods)*0.10;
+    // Realistic ±5% noise
+    const noise=0.95+Math.random()*0.10;
     const dailyRate=baseDaily*seasonal*growthFactor*noise;
-    const consumption=dailyRate*intervalDays;
-    currentReading+=consumption;
+    currentReading+=dailyRate*intervalDays;
 
     const dateStr=d.toISOString().split('T')[0];
     const hour=8+Math.floor(Math.random()*3);
-    const min=Math.floor(Math.random()*60);
-    const timeStr=`${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+    const timeStr=`${String(hour).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`;
 
     readings.push({
       id:`rd_test_w1_${i}`,
-      propId:'p_test',unitId:'u_test_w1',
+      propId:'p_test', unitId:'u_test_w1',
       meterType:'water',
       reading:currentReading.toFixed(2),
-      date:dateStr,time:timeStr,
-      notes:'',aiConf:'high',
+      date:dateStr, time:timeStr,
+      notes:'', aiConf:'high',
       savedAt:d.toISOString()
     });
 
-    // Advance by ~15 days with slight jitter
     d=new Date(d);
-    d.setDate(d.getDate()+intervalDays+Math.floor(Math.random()*3)-1);
+    d.setDate(d.getDate()+intervalDays);
     if(d>today)break;
   }
-
   return{units,readings};
 }
 
@@ -1097,7 +1088,19 @@ function showLoginScreen(){
   const sel=document.getElementById('loginNameSelect');
   if(sel)sel.value='';
   populateLoginSelect();
+  // Show spinner while fetching live user list from backend
+  setLoginSyncStatus('syncing','Syncing user list…');
   fetchLoginUsers();
+}
+
+function setLoginSyncStatus(state,msg){
+  const spinner=document.getElementById('loginSyncSpinner');
+  const msgEl=document.getElementById('loginSyncMsg');
+  if(!spinner||!msgEl)return;
+  if(state==='syncing'){spinner.style.display='';msgEl.textContent=msg;}
+  else if(state==='done'){spinner.style.display='none';msgEl.textContent=msg;
+    setTimeout(()=>{if(msgEl)msgEl.textContent='';},2000);}
+  else{spinner.style.display='none';msgEl.textContent=msg;}
 }
 
 async function fetchLoginUsers(){
@@ -1108,15 +1111,20 @@ async function fetchLoginUsers(){
       await DB.set('login_users_cache',res.users.map(u=>({name:u.name,role:u.role})));
       // Sync PINs from backend into LOCAL_USERS so edit modal has them
       res.users.forEach(u=>{
-        if(!u.pin||u.pin==='••••••')return; // skip masked
+        if(!u.pin||u.pin==='••••••')return;
         const li=LOCAL_USERS.findIndex(x=>x.name.toLowerCase()===u.name.toLowerCase());
         if(li>=0)LOCAL_USERS[li].pin=u.pin;
         else LOCAL_USERS.push({name:u.name,role:u.role,pin:u.pin,
           propIds:u.propIds?u.propIds.toString().split(',').filter(Boolean):[]});
       });
       populateLoginSelect();
+      setLoginSyncStatus('done','✓ User list updated');
+    } else {
+      setLoginSyncStatus('offline','Offline — showing cached list');
     }
-  }catch(e){}
+  }catch(e){
+    setLoginSyncStatus('offline','Offline — showing cached list');
+  }
 }
 
 function populateLoginSelect(){
@@ -1227,7 +1235,7 @@ async function loginAs(sess){
   if(!allowedProps.length){document.getElementById('loginErr').textContent='No properties assigned';lpe='';lupd();return;}
   S.prop=allowedProps[0];
   let u=await DB.get('units_'+S.prop.id),r=await DB.get('readings_'+S.prop.id);
-  if(!u||!u.length){const d=S.prop.id==='p_test'?genTestBuilding():genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
+  if(!u||!u.length||S.prop.id==='p_test'){const d=S.prop.id==='p_test'?genTestBuilding():genDemo(S.prop.id);u=d.units;r=d.readings;await DB.set('units_'+S.prop.id,u);await DB.set('readings_'+S.prop.id,r);}
   S.units=u||[];S.readings=r||[];S.activeUnit=S.units[0]?.id||null;
   // Set activeMeter to first meter available for the first unit
   if(S.activeUnit){
@@ -2315,25 +2323,6 @@ function setAnlScope(scope){
   if(multiCard)multiCard.style.display=scope==='building'?'':'none';
   renderAnalytics();
 }
-function setAnlFY(sel){
-  anlFYSel=sel;
-  anlYear=getFYYear();
-  document.getElementById('anlFYPrev').classList.toggle('active',sel==='prev');
-  document.getElementById('anlFYCur').classList.toggle('active',sel==='cur');
-  renderAnalytics();
-}
-function getAnlPeriodMonths(){
-  // FY Apr(3)→Mar(2): starts Apr of (anlYear-1), ends Mar of anlYear
-  return Array.from({length:12},(_,i)=>{
-    const mo=(3+i)%12;
-    const yr=(3+i)<12?anlYear-1:anlYear;
-    return{year:yr,month:mo,label:new Date(yr,mo).toLocaleString('en',{month:'short'})};
-  });
-}
-function getAnlPeriodLabel(){
-  const fy0=String(anlYear-1).slice(2),fy1=String(anlYear).slice(2);
-  return`FY ${fy0}/${fy1}`;
-}
 
 // Get monthly consumption totals for a unit (or all units if null)
 function getMonthlyConsumption(unitId, meterType){
@@ -2352,68 +2341,17 @@ function getMonthlyConsumption(unitId, meterType){
 }
 
 // Polynomial fit (degree 2) — returns [a, b, c] for y = a + bx + cx²
-function polyFit2(xs, ys){
-  const n=xs.length; if(n<3)return[ys[0]||0,0,0];
-  let s0=n,s1=0,s2=0,s3=0,s4=0,t0=0,t1=0,t2=0;
-  xs.forEach((x,i)=>{const y=ys[i];s1+=x;s2+=x*x;s3+=x*x*x;s4+=x*x*x*x;t0+=y;t1+=x*y;t2+=x*x*y;});
-  const A=[[s0,s1,s2,t0],[s1,s2,s3,t1],[s2,s3,s4,t2]];
-  for(let col=0;col<3;col++){
-    let mx=col;for(let r=col+1;r<3;r++)if(Math.abs(A[r][col])>Math.abs(A[mx][col]))mx=r;
-    [A[col],A[mx]]=[A[mx],A[col]];
-    for(let r=col+1;r<3;r++){const f=A[r][col]/A[col][col]||0;for(let k=col;k<=3;k++)A[r][k]-=f*A[col][k];}
-  }
-  const c=[0,0,0];
-  for(let i=2;i>=0;i--){c[i]=A[i][3];for(let k=i+1;k<3;k++)c[i]-=A[i][k]*c[k];c[i]/=A[i][i]||1;}
-  return c;
-}
 
 // Compute seasonal indices from historical monthly data (24+ months preferred)
-function seasonalIdx(monthlyMap){
-  const byMonth=Array.from({length:12},()=>[]);
-  Object.entries(monthlyMap).forEach(([k,v])=>{const mo=parseInt(k.slice(5))-1;byMonth[mo].push(v);});
-  const allVals=Object.values(monthlyMap);
-  if(!allVals.length)return Array(12).fill(1);
-  const overall=allVals.reduce((s,v)=>s+v,0)/allVals.length;
-  return byMonth.map(vals=>{if(!vals.length)return 1;const avg=vals.reduce((s,v)=>s+v,0)/vals.length;return overall>0?avg/overall:1;});
-}
 
 // Compute prediction for remaining months of period
-function computePrediction(periodMonths, monthlyMap, allMonthlyMap){
-  const seIdx=seasonalIdx(allMonthlyMap);
-  // Deseasonalize actuals for poly fit
-  const actuals=periodMonths.map(m=>{const k=`${m.year}-${String(m.month+1).padStart(2,'0')}`;return monthlyMap[k]??null;});
-  const knownIdx=actuals.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
-  const knownVals=knownIdx.map(i=>actuals[i]/(seIdx[periodMonths[i].month]||1));
-  if(knownVals.length<2)return{pred:Array(12).fill(null),upper:Array(12).fill(null),lower:Array(12).fill(null)};
-  // Fit poly to known deseasonalized values
-  const coef=polyFit2(knownIdx.map(i=>i),knownVals);
-  const polyVal=x=>coef[0]+coef[1]*x+coef[2]*x*x;
-  // RMSE for CI
-  const rmse=Math.sqrt(knownVals.reduce((s,v,j)=>{const diff=v-polyVal(knownIdx[j]);return s+diff*diff;},0)/knownVals.length)||0;
-  const pred=periodMonths.map((_,i)=>{
-    if(actuals[i]!==null)return null; // don't predict known months
-    const deSeas=polyVal(i);
-    return Math.max(0,deSeas*(seIdx[periodMonths[i].month]||1));
-  });
-  const upper=pred.map((v,i)=>{if(v===null)return null;const ds=polyVal(i);return Math.max(0,(ds+1.5*rmse)*(seIdx[periodMonths[i].month]||1));});
-  const lower=pred.map((v,i)=>{if(v===null)return null;const ds=polyVal(i);return Math.max(0,(ds-1.5*rmse)*(seIdx[periodMonths[i].month]||1));});
-  return{pred,upper,lower};
-}
 
 function renderAnalytics(){
   renderMTabs('mTabsAnal','analytics');
   ['anlMain','anlMulti'].forEach(k=>{if(CH[k]){CH[k].destroy();CH[k]=null;}});
   const md=MDEFS.find(m=>m.type===S.activeMeter);
-  anlYear=getFYYear();
-  const periodMos=getAnlPeriodMonths();
   const now=new Date();
-  // Update FY button labels
-  const cyFY=currentFYYear();
-  const fmt=y=>`${String(y-1).slice(2)}/${String(y).slice(2)}`;
-  const prevEl=document.getElementById('anlFYPrevLbl');
-  const curEl=document.getElementById('anlFYCurLbl');
-  if(prevEl)prevEl.textContent=fmt(cyFY-1);
-  if(curEl)curEl.textContent=fmt(cyFY);
+  const cyFY=currentFYYear(); // e.g. 2026 means FY Apr2025–Mar2026
 
   const unitId=anlScope==='unit'?S.activeUnit:null;
   if(anlScope==='unit'&&!unitId){
@@ -2421,109 +2359,201 @@ function renderAnalytics(){
     document.getElementById('anlInsights').innerHTML='';return;
   }
 
+  // ── FY month labels: Apr→Mar ──────────────────────────────────────
+  // FY months: index 0=Apr, 1=May, … 11=Mar
+  const FY_MONTHS=[
+    {mo:3,label:'Apr'},{mo:4,label:'May'},{mo:5,label:'Jun'},
+    {mo:6,label:'Jul'},{mo:7,label:'Aug'},{mo:8,label:'Sep'},
+    {mo:9,label:'Oct'},{mo:10,label:'Nov'},{mo:11,label:'Dec'},
+    {mo:0,label:'Jan'},{mo:1,label:'Feb'},{mo:2,label:'Mar'},
+  ];
+  // For a given FY end-year (e.g. 2026), map month→year:
+  // Apr–Dec of (fyYear-1), Jan–Mar of fyYear
+  function fyKey(fyYear, moIdx){ // moIdx 0=Apr
+    const {mo}=FY_MONTHS[moIdx];
+    const yr = mo>=3 ? fyYear-1 : fyYear;
+    return `${yr}-${String(mo+1).padStart(2,'0')}`;
+  }
+
   const monthlyMap=getMonthlyConsumption(unitId,md.type);
-  // Historical: last 3 years for seasonal + poly baseline
-  const allMonthlyMap=getMonthlyConsumption(unitId,md.type); // same but we have all time
+  const labels=FY_MONTHS.map(m=>m.label);
 
-  const {pred,upper,lower}=computePrediction(periodMos,monthlyMap,allMonthlyMap);
-
-  // Build chart data
-  const labels=periodMos.map(m=>m.label);
-  const actuals=periodMos.map(m=>{const k=`${m.year}-${String(m.month+1).padStart(2,'0')}`;return monthlyMap[k]??null;});
-  // Is this month past, current, or future?
-  const periodKeys=periodMos.map(m=>`${m.year}-${String(m.month+1).padStart(2,'0')}`);
+  // ── Current FY actuals ────────────────────────────────────────────
   const nowKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const currentIdx=periodKeys.indexOf(nowKey);
+  const curActuals=FY_MONTHS.map((_,i)=>{
+    const k=fyKey(cyFY,i);
+    // Future months → null
+    return k<=nowKey ? (monthlyMap[k]??null) : null;
+  });
 
-  // YTD stats
-  const ytdActuals=actuals.filter(v=>v!==null);
-  const ytdTotal=ytdActuals.reduce((s,v)=>s+v,0);
-  const ytdMonths=ytdActuals.length;
-  const predFuture=pred.filter(v=>v!==null);
-  const projTotal=ytdTotal+predFuture.reduce((s,v)=>s+v,0);
-  const projUpper=ytdTotal+upper.filter(v=>v!==null).reduce((s,v)=>s+v,0);
-  const projLower=ytdTotal+lower.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+  // ── Last FY actuals ───────────────────────────────────────────────
+  const prevActuals=FY_MONTHS.map((_,i)=>{
+    const k=fyKey(cyFY-1,i);
+    return monthlyMap[k]??null;
+  });
+
+  // ── Forecast for remaining current FY months ──────────────────────
+  const knownIdxs=curActuals.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
+  const knownVals=knownIdxs.map(i=>curActuals[i]);
+  let forecast=Array(12).fill(null);
+  if(knownVals.length>=2){
+    // Use seasonal index from prevActuals as shape, scale to recent actual avg
+    const recentAvg=knownVals.slice(-3).reduce((s,v)=>s+v,0)/Math.min(3,knownVals.length);
+    const prevKnown=prevActuals.filter(v=>v!==null);
+    const prevAvg=prevKnown.length?prevKnown.reduce((s,v)=>s+v,0)/prevKnown.length:recentAvg;
+    const scale=prevAvg>0?recentAvg/prevAvg:1;
+    FY_MONTHS.forEach((_,i)=>{
+      if(curActuals[i]!==null)return; // already have actual
+      const prevVal=prevActuals[i];
+      if(prevVal!==null)forecast[i]=Math.max(0,prevVal*scale);
+    });
+  }
+
+  // ── YTD stats ─────────────────────────────────────────────────────
+  const ytdVals=curActuals.filter(v=>v!==null);
+  const ytdTotal=ytdVals.reduce((s,v)=>s+v,0);
+  const ytdMonths=ytdVals.length;
+  const predVals=forecast.filter(v=>v!==null);
+  const projTotal=ytdTotal+predVals.reduce((s,v)=>s+v,0);
+  const prevTotal=prevActuals.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+  const prevFull=prevActuals.filter(v=>v!==null).length===12;
+  const fyFmt=y=>`FY${String(y-1).slice(2)}/${String(y).slice(2)}`;
   const scopeLabel=anlScope==='building'?`All ${S.units.length} units`:(S.units.find(u=>u.id===unitId)?.number||'Unit');
+
   document.getElementById('ytdCard').innerHTML=`
-    <div class="ytd-cell"><div class="ytd-lbl">YTD Consumed</div><div class="ytd-val">${fNum(ytdTotal,md.dec)}</div><div class="ytd-sub">${md.unit} · ${ytdMonths} month${ytdMonths!==1?'s':''} · ${scopeLabel}</div></div>
-    <div class="ytd-cell"><div class="ytd-lbl">Monthly Avg</div><div class="ytd-val">${ytdMonths>0?fNum(ytdTotal/ytdMonths,md.dec):'—'}</div><div class="ytd-sub">${md.unit}/month</div></div>
-    ${predFuture.length>0?`<div class="ytd-proj">
-      ${getAnlPeriodLabel()} projected total: <strong>${fNum(projTotal,md.dec)} ${md.unit}</strong>
-      <span style="color:var(--tx3)"> (range: ${fNum(projLower,md.dec)}–${fNum(projUpper,md.dec)})</span>
+    <div class="ytd-cell"><div class="ytd-lbl">YTD ${fyFmt(cyFY)}</div><div class="ytd-val">${fNum(ytdTotal,md.dec)}</div><div class="ytd-sub">${md.unit} · ${ytdMonths} month${ytdMonths!==1?'s':''} · ${scopeLabel}</div></div>
+    <div class="ytd-cell"><div class="ytd-lbl">${prevFull?`Full ${fyFmt(cyFY-1)}`:`${fyFmt(cyFY-1)} (partial)`}</div><div class="ytd-val">${fNum(prevTotal,md.dec)}</div><div class="ytd-sub">${md.unit} full year</div></div>
+    ${predVals.length>0?`<div class="ytd-proj">
+      ${fyFmt(cyFY)} projected total: <strong>${fNum(projTotal,md.dec)} ${md.unit}</strong>
+      ${prevFull&&prevTotal>0?`<span style="color:var(--tx3)"> (${projTotal>prevTotal?'+':''}${((projTotal-prevTotal)/prevTotal*100).toFixed(1)}% vs last FY)</span>`:''}
     </div>`:''}`;
 
-  // Main chart
-  const am='#f59e0b';
-  const barColors=actuals.map((_,i)=>i===currentIdx?'rgba(245,158,11,.7)':'rgba(245,158,11,.38)');
+  // ── Main chart: side-by-side bars ─────────────────────────────────
   const mc=document.getElementById('anlMainChart');if(!mc)return;
+  const gridCol=document.body.classList.contains('light')?'rgba(0,0,0,.06)':'rgba(255,255,255,.04)';
+  // Custom plugin to draw dashed border on forecast bars
+  const forecastBorderPlugin={
+    id:'forecastBorder',
+    afterDatasetsDraw(chart){
+      const ds=chart.data.datasets;
+      const fcIdx=ds.findIndex(d=>d.label==='Forecast');
+      if(fcIdx<0)return;
+      const meta=chart.getDatasetMeta(fcIdx);
+      const ctx2=chart.ctx;
+      ctx2.save();
+      ctx2.strokeStyle='#f59e0b';
+      ctx2.lineWidth=1.5;
+      ctx2.setLineDash([4,3]);
+      meta.data.forEach(bar=>{
+        if(!bar||bar.base===bar.y)return;
+        const {x,y,width,base}=bar;
+        const x1=x-width/2, y1=y, w=width, h=base-y;
+        ctx2.strokeRect(x1,y1,w,h);
+      });
+      ctx2.restore();
+    }
+  };
+
   CH.anlMain=new Chart(mc.getContext('2d'),{
     type:'bar',
+    plugins:[forecastBorderPlugin],
     data:{
       labels,
       datasets:[
-        {label:'Actual',data:actuals,backgroundColor:barColors,borderRadius:3,order:2},
-        {label:'Forecast',data:pred,backgroundColor:'rgba(245,158,11,.18)',borderColor:am,borderWidth:2,borderDash:[5,4],type:'line',tension:.4,pointRadius:4,pointBackgroundColor:am,fill:false,order:1},
-        {label:'Upper',data:upper,borderColor:'transparent',backgroundColor:'rgba(245,158,11,.09)',type:'line',tension:.4,pointRadius:0,fill:'+1',order:0},
-        {label:'Lower',data:lower,borderColor:'transparent',backgroundColor:'transparent',type:'line',tension:.4,pointRadius:0,fill:false,order:0},
+        {label:'Last FY',   data:prevActuals, backgroundColor:'rgba(59,130,246,.55)', borderRadius:3, order:2, barPercentage:.4, categoryPercentage:.85},
+        {label:'This FY',   data:curActuals,  backgroundColor:'rgba(245,158,11,.65)', borderRadius:3, order:2, barPercentage:.4, categoryPercentage:.85},
+        {label:'Forecast',  data:forecast,    backgroundColor:'rgba(245,158,11,.15)', borderRadius:3, order:2, barPercentage:.4, categoryPercentage:.85},
       ]
     },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y!==null?ctx.parsed.y.toFixed(md.dec)+' '+md.unit:'—'}`}}},
-      scales:{x:{grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{callback:v=>v.toFixed(md.dec)},grid:{color:'rgba(255,255,255,.04)'}}}}
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:ctx=>{
+            const i=ctx[0].dataIndex;
+            return `${labels[i]}  (Last: ${fyKey(cyFY-1,i).slice(0,7)}  |  This: ${fyKey(cyFY,i).slice(0,7)})`;
+          },
+          label:ctx=>{
+            const v=ctx.parsed.y;
+            return v!==null?`${ctx.dataset.label}: ${v.toFixed(md.dec)} ${md.unit}`:`${ctx.dataset.label}: —`;
+          }
+        }}
+      },
+      scales:{
+        x:{stacked:false, grid:{color:gridCol}},
+        y:{ticks:{callback:v=>v.toFixed(md.dec)}, grid:{color:gridCol}}
+      }
+    }
   });
 
-  // Insights
+  // ── AI Insights ───────────────────────────────────────────────────
   const allRds=anlScope==='unit'?(S.activeUnit?getMR(S.activeUnit,md.type):[]):
     S.units.flatMap(u=>getMR(u.id,md.type)).sort((a,b)=>a.date.localeCompare(b.date));
   const tr=assessTrend(allRds);
-  const annualGrowthPct=coefToGrowth(actuals.filter(v=>v!==null),predFuture);
   let insightText='';
-  if(ytdMonths<2){insightText=`<div style="color:var(--tx3);font-size:calc(13px * var(--fs))">Need at least 2 months of data for analytics.</div>`;}
-  else{
+  if(ytdMonths<2){
+    insightText=`<div style="color:var(--tx3);font-size:calc(13px * var(--fs))">Need at least 2 months of data for analytics insights.</div>`;
+  } else {
     const avgMo=ytdMonths>0?ytdTotal/ytdMonths:0;
     const trendTxt=tr?`${tr.icon} <strong>${tr.lbl}</strong> — ${tr.txt}`:'Insufficient data for trend analysis.';
-    const projPct=avgMo>0?((projTotal-(avgMo*12))/(avgMo*12)*100):0;
+    const projPct=prevFull&&prevTotal>0?((projTotal-prevTotal)/prevTotal*100):null;
     insightText=`
       <div class="irow">
         ${tr?`<div class="ii"><div class="il">Trend</div><div class="iv" style="color:${tr.lv==='critical'?'var(--rd)':tr.lv==='high'?'var(--yl)':tr.lv==='low'?'var(--bl)':'var(--gn)'};font-size:calc(12px * var(--fs));white-space:normal;line-height:1.4">${trendTxt}</div></div>`:''}
         <div class="ii"><div class="il">YTD total</div><div class="iv">${fNum(ytdTotal,md.dec)} ${md.unit}</div></div>
         <div class="ii"><div class="il">Monthly avg</div><div class="iv">${fNum(avgMo,md.dec)} ${md.unit}</div></div>
-        ${predFuture.length>0?`
-        <div class="ii"><div class="il">Full-year forecast</div><div class="iv">${fNum(projTotal,md.dec)} ${md.unit}</div></div>
-        <div class="ii"><div class="il">vs flat projection</div><div class="iv" style="color:${projPct>10?'var(--rd)':projPct<-10?'var(--bl)':'var(--gn)'}">${projPct>0?'+':''}${projPct.toFixed(1)}%</div></div>
-        <div class="ii"><div class="il">Forecast range</div><div class="iv" style="font-size:calc(11px * var(--fs))">${fNum(projLower,md.dec)} – ${fNum(projUpper,md.dec)} ${md.unit}</div></div>`:''}
+        ${predVals.length>0?`<div class="ii"><div class="il">Full-year forecast</div><div class="iv">${fNum(projTotal,md.dec)} ${md.unit}</div></div>`:''}
+        ${projPct!==null?`<div class="ii"><div class="il">vs last FY</div><div class="iv" style="color:${projPct>10?'var(--rd)':projPct<-10?'var(--bl)':'var(--gn)'}">${projPct>0?'+':''}${projPct.toFixed(1)}%</div></div>`:''}
       </div>`;
   }
   document.getElementById('anlInsights').innerHTML=insightText;
 
-  // Multi-year chart (building scope)
+  // ── Cumulative FY comparison chart ───────────────────────────────
   if(anlScope==='building'){
     document.getElementById('anlMultiYearCard').style.display='';
     const mc2=document.getElementById('anlMultiChart');if(!mc2)return;
-    const years=[anlYear-2,anlYear-1,anlYear];
-    const colors=['rgba(245,158,11,.3)','rgba(245,158,11,.55)','#f59e0b'];
-    const datasets=years.map((yr,yi)=>{
-      const map=getMonthlyConsumption(null,md.type);
-      const data=Array.from({length:12},(_,mo)=>{
-        const k=`${yr}-${String(mo+1).padStart(2,'0')}`;
-        return map[k]??null;
-      });
-      return{label:String(yr),data,borderColor:colors[yi],backgroundColor:'transparent',type:'line',tension:.4,pointRadius:yi===2?4:2,borderWidth:yi===2?2:1,fill:false};
+
+    // Build cumulative arrays (running total Apr→Mar)
+    function cumulative(arr){
+      let sum=0;
+      return arr.map(v=>{ if(v===null)return null; sum+=v; return sum; });
+    }
+    const cumPrev=cumulative(prevActuals);
+    const cumCur =cumulative(curActuals);
+    // Forecast projected cumulative (continues from last known actual)
+    const lastKnownCum=cumCur.filter(v=>v!==null).slice(-1)[0]||0;
+    let runSum=lastKnownCum;
+    const cumForecast=forecast.map((v,i)=>{
+      if(curActuals[i]!==null)return null; // already in curActuals
+      if(v===null)return null;
+      runSum+=v; return runSum;
     });
-    CH.anlMulti=new Chart(mc2.getContext('2d'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{boxWidth:12,font:{size:11}}}},
-        scales:{x:{grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{callback:v=>v.toFixed(md.dec)},grid:{color:'rgba(255,255,255,.04)'}}}}});
+
+    CH.anlMulti=new Chart(mc2.getContext('2d'),{
+      type:'line',
+      data:{
+        labels,
+        datasets:[
+          {label:fyFmt(cyFY-1), data:cumPrev,    borderColor:'rgba(59,130,246,.8)',  backgroundColor:'rgba(59,130,246,.08)', fill:true, tension:.3, pointRadius:3, borderWidth:2},
+          {label:fyFmt(cyFY)+' YTD', data:cumCur, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,.08)', fill:true, tension:.3, pointRadius:3, borderWidth:2},
+          {label:'Projected',  data:cumForecast, borderColor:'#f59e0b', backgroundColor:'transparent', borderDash:[5,4], fill:false, tension:.3, pointRadius:3, borderWidth:1.5, pointStyle:'circle'},
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{boxWidth:12,font:{size:11},color:document.body.classList.contains('light')?'#44445a':'#8888a0'}}},
+        scales:{
+          x:{grid:{color:gridCol}},
+          y:{ticks:{callback:v=>v.toFixed(md.dec)}, grid:{color:gridCol}}
+        }
+      }
+    });
   } else {
     document.getElementById('anlMultiYearCard').style.display='none';
   }
 }
 
-function coefToGrowth(actuals, future){
-  if(!actuals.length||!future.length)return 0;
-  const lastAct=actuals[actuals.length-1];
-  const lastFut=future[future.length-1];
-  return lastAct>0?((lastFut-lastAct)/lastAct*100):0;
-}
 function initMC(){
   Chart.defaults.color='#5a5a70';Chart.defaults.borderColor='#2a2a38';Chart.defaults.font.family="'Share Tech Mono',monospace";
   CH.mini=new Chart(document.getElementById('miniChart').getContext('2d'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:'rgba(245,158,11,.4)',borderColor:'#f59e0b',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}});
@@ -2884,7 +2914,7 @@ async function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MeterIQ v25 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MeterIQ v26 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2960,6 +2990,34 @@ async function processSyncQueue(){
   }finally{_syncRunning=false;}
 }
 function forcSync(){toast('Syncing…');processSyncQueue().then(()=>toast('✓ Sync complete','ok'));}
+
+async function pushTestData(){
+  const statusEl=document.getElementById('testPushStatus');
+  if(statusEl)statusEl.textContent='Pushing…';
+  toast('Pushing test data…');
+  const d=genTestBuilding();
+  let ok=0,fail=0;
+  // Push property
+  const pRes=await API.call('saveProperty',{prop:{id:'p_test',name:'Test Building',addr:'1 Test Street, S000001',icon:'🧪'}});
+  if(pRes?.ok)ok++; else fail++;
+  // Push unit
+  const uRes=await API.call('saveUnit',{unit:d.units[0]});
+  if(uRes?.ok)ok++; else fail++;
+  // Push readings in batches (avoid URL length limits — send 20 at a time)
+  const batchSize=20;
+  for(let i=0;i<d.readings.length;i+=batchSize){
+    const batch=d.readings.slice(i,i+batchSize);
+    for(const r of batch){
+      const rRes=await API.call('pushReading',{reading:r});
+      if(rRes?.ok||rRes?.duplicate)ok++; else fail++;
+    }
+  }
+  const msg=fail===0
+    ?`✓ Pushed: 1 property, 1 unit, ${d.readings.length} readings`
+    :`Done with ${fail} errors — check network`;
+  if(statusEl)statusEl.textContent=msg;
+  toast(fail===0?'✓ Test data pushed!':'Partial push — check network',fail===0?'ok':'err');
+}
 
 // ═══════════════════════════════════════════
 //  ADMIN — tabbed CRUD
