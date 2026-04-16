@@ -1247,8 +1247,8 @@ async function loginAs(sess){
   // Show logged-in user name in header
   const uNameEl=document.getElementById('userNameDisp');
   if(uNameEl)uNameEl.textContent=user.name;
-  document.getElementById('setPropName').textContent=(S.prop?.icon||'')+' '+S.prop?.name;
-  document.getElementById('setUserRole').textContent=user.name+' · '+(ROLES[role]||role);
+  const _spn=document.getElementById('setPropName');if(_spn)_spn.textContent=(S.prop?.icon||'')+' '+S.prop?.name;
+  const _sur=document.getElementById('setUserRole');if(_sur)_sur.textContent=user.name+' · '+(ROLES[role]||role);
   document.getElementById('acOnSave').checked=S.alertCfg.onSave;
   document.getElementById('acOnCritical').checked=S.alertCfg.onCritical;
   document.getElementById('acOnHigh').checked=S.alertCfg.onHigh;
@@ -1473,7 +1473,7 @@ async function pickProp(pid){
   renderMTabs('mTabsHist','history');renderMTabs('mTabsAnal','analytics');
   renderDashboard();renderHistory();
   if(document.getElementById('screen-analytics').classList.contains('active'))renderAnalytics();
-  document.getElementById('setPropName').textContent=(S.prop?.icon||'')+' '+S.prop?.name;
+  const _spn=document.getElementById('setPropName');if(_spn)_spn.textContent=(S.prop?.icon||'')+' '+S.prop?.name;
 }
 
 // ═══════════════════════════════════════════
