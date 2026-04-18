@@ -378,13 +378,13 @@ select.fi option{background:var(--sf)}
       style="margin-top:10px;width:100%;padding:13px;border-radius:var(--r);background:var(--am);border:none;font-family:'Rajdhani',sans-serif;font-size:calc(15px * var(--fs));font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;cursor:pointer;transition:opacity .15s"
       ontouchstart="this.style.opacity='.75'" ontouchend="this.style.opacity='1'">SIGN IN →</button>
   </div>
-  <div class="lver">v26</div>
+  <div class="lver">v27</div>
 </div>
 
 <!-- ═══ APP ═══ -->
 <div id="app">
   <div id="hdr">
-    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v26</span></div>
+    <div class="logo">⚡ MeterIQ<span style="display:block;font-family:'Share Tech Mono',monospace;font-size:calc(9px * var(--fs));font-weight:400;letter-spacing:1px;color:var(--tx3);margin-top:-2px">v27</span></div>
     <div class="hdr-right">
       <div class="hdr-identity">
         <div class="hdr-name" id="userNameDisp"></div>
@@ -598,7 +598,7 @@ select.fi option{background:var(--sf)}
         </div>
         <div class="si" id="btnClearData"><div><div class="slbl">Clear All</div><div class="ssub">Cannot be undone</div></div><button class="btn btd" style="padding:6px 11px;font-size:12px" onclick="clearAll()">Clear</button></div>
       </div>
-      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v26 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
+      <div style="text-align:center;padding:12px;color:var(--tx3);font-size:11px">MeterIQ v27 · Property Meter Management<br><span style="color:var(--am)">Groq · Llama · Gemini · Claude Vision AI</span></div>
     </div>
 
     <!-- ADMIN (role-gated) -->
@@ -641,7 +641,16 @@ select.fi option{background:var(--sf)}
         <div class="card" style="border:1px dashed var(--bd2)">
           <div class="stitle" style="margin-bottom:4px">🧪 Test Data</div>
           <div class="si" style="border:none;padding-top:0">
-            <div><div class="slbl">Push Test Building to Sheet</div><div class="ssub" id="testPushStatus">Pushes 🧪 Test Building + #WM-01 water readings to Google Sheets for demo</div></div>
+            <div>
+              <div class="slbl">Push Test Building to Sheet</div>
+              <div class="ssub" id="testPushStatus">Pushes 🧪 Test Building + #WM-01 water readings to Google Sheets for demo</div>
+              <div id="testPushBarWrap" style="display:none;margin-top:8px">
+                <div style="background:var(--bd);border-radius:4px;height:6px;overflow:hidden">
+                  <div id="testPushBar" style="height:100%;background:var(--am);border-radius:4px;width:0%;transition:width .2s"></div>
+                </div>
+                <div id="testPushCount" style="font-family:'Share Tech Mono',monospace;font-size:calc(11px * var(--fs));color:var(--tx3);margin-top:4px"></div>
+              </div>
+            </div>
             <button class="btn btg" style="padding:6px 11px;font-size:12px;flex-shrink:0" onclick="pushTestData()">Push</button>
           </div>
         </div>
@@ -861,6 +870,15 @@ const LOCAL_USERS=[
 const API={
   async call(action, body={}){
     try{
+      // pushImage sends large base64 — must use POST body to avoid URL param truncation
+      if(action==='pushImage'){
+        const res=await fetch(BACKEND_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action,token:S.session?.token||'',...body})
+        });
+        return await res.json();
+      }
       const params=new URLSearchParams({
         action,
         token:S.session?.token||'',
@@ -920,22 +938,22 @@ let CR={img:null,box:{x:.05,y:.2,w:.9,h:.6},drag:null,canvas:null,ctx:null};
 //  SINGAPORE SEASONAL TEST DATA — 24 months water
 // ═══════════════════════════════════════════
 function genTestBuilding(){
-  // Singapore water seasonality (m³/day baseline multiplier by calendar month, 0=Jan)
-  // NE monsoon (Nov–Jan): heavy rain → lower cooling/irrigation → lower usage
-  // Dry spells (Feb–Apr, Jun–Aug): higher demand
-  const sgSeasonalIdx=[
-    0.78, // Jan  — NE monsoon peak (lowest)
-    0.85, // Feb  — transitional, drying
-    0.93, // Mar  — warming up
+  // Singapore water seasonality — m³/day multiplier by calendar month (0=Jan)
+  // NE monsoon (Nov–Jan): heavy rain → lower cooling load → lower usage
+  // Dry spells (Feb–Apr, Jun–Aug): higher cooling demand
+  const sgSeasonal=[
+    0.78, // Jan  — NE monsoon (lowest)
+    0.85, // Feb  — transitional
+    0.93, // Mar  — warming
     0.99, // Apr  — inter-monsoon
-    1.03, // May  — inter-monsoon, warm
-    1.09, // Jun  — dry spell, high cooling
+    1.03, // May  — warm
+    1.09, // Jun  — dry spell
     1.13, // Jul  — dry spell peak (highest)
-    1.11, // Aug  — dry spell, still high
-    1.06, // Sep  — SW monsoon trailing off
+    1.11, // Aug  — still high
+    1.06, // Sep  — SW monsoon easing
     0.98, // Oct  — inter-monsoon
     0.83, // Nov  — NE monsoon onset
-    0.75, // Dec  — NE monsoon (low)
+    0.75, // Dec  — NE monsoon
   ];
 
   const units=[{
@@ -945,47 +963,43 @@ function genTestBuilding(){
     meters:['water']
   }];
 
+  // One reading per month: Mar 2025 → Apr 2026 = 14 readings
+  const months=[
+    {y:2025,m:3},{y:2025,m:4},{y:2025,m:5},{y:2025,m:6},
+    {y:2025,m:7},{y:2025,m:8},{y:2025,m:9},{y:2025,m:10},
+    {y:2025,m:11},{y:2025,m:12},
+    {y:2026,m:1},{y:2026,m:2},{y:2026,m:3},{y:2026,m:4}
+  ];
+
+  const baseDaily=4.8;    // m³/day baseline
+  let currentReading=2400.00;
   const readings=[];
-  const today=new Date();
-  const baseDaily=4.8;        // m³/day baseline
-  const startReading=1800.00; // starting meter value
-  const intervalDays=7;       // weekly readings = ~4/month = ~113 readings over 26 months
-  const totalDays=26*30;      // 26 months to ensure 2 complete FY years visible
 
-  let currentReading=startReading;
-  let d=new Date(today);
-  d.setDate(d.getDate()-totalDays);
+  months.forEach((mo,i)=>{
+    const daysInMonth=new Date(mo.y,mo.m,0).getDate();
+    const seasonal=sgSeasonal[mo.m-1];
+    // Gentle upward trend across 14 months (+8% total)
+    const trend=1+(i/13)*0.08;
+    // Small noise ±3%
+    const noise=0.97+Math.random()*0.06;
+    currentReading+=baseDaily*seasonal*trend*noise*daysInMonth;
 
-  const totalPeriods=Math.ceil(totalDays/intervalDays);
-
-  for(let i=0;i<=totalPeriods;i++){
-    const mo=d.getMonth();
-    const seasonal=sgSeasonalIdx[mo];
-    // Gradual growth trend (+10% over 26 months)
-    const growthFactor=1+(i/totalPeriods)*0.10;
-    // Realistic ±5% noise
-    const noise=0.95+Math.random()*0.10;
-    const dailyRate=baseDaily*seasonal*growthFactor*noise;
-    currentReading+=dailyRate*intervalDays;
-
-    const dateStr=d.toISOString().split('T')[0];
-    const hour=8+Math.floor(Math.random()*3);
-    const timeStr=`${String(hour).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`;
+    // Reading taken on the last day of each month at ~9am
+    const day=daysInMonth;
+    const dateStr=`${mo.y}-${String(mo.m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const timeStr=`09:${String(Math.floor(Math.random()*30)+10).padStart(2,'0')}`;
 
     readings.push({
-      id:`rd_test_w1_${i}`,
+      id:`rd_test_w1_${mo.y}_${mo.m}`,
       propId:'p_test', unitId:'u_test_w1',
       meterType:'water',
       reading:currentReading.toFixed(2),
       date:dateStr, time:timeStr,
       notes:'', aiConf:'high',
-      savedAt:d.toISOString()
+      savedAt:new Date(mo.y,mo.m-1,day,9,0).toISOString()
     });
+  });
 
-    d=new Date(d);
-    d.setDate(d.getDate()+intervalDays);
-    if(d>today)break;
-  }
   return{units,readings};
 }
 
@@ -2388,19 +2402,38 @@ function renderAnalytics(){
   });
 
   // ── Forecast for remaining current FY months ──────────────────────
+  // Strategy: seasonal SHAPE from all available history (calendar-month averages),
+  // BASELINE from the most recent 6 months of actuals — captures current usage level
+  // better than full-year average when usage is trending up/down.
   const knownIdxs=curActuals.map((v,i)=>v!==null?i:-1).filter(i=>i>=0);
   const knownVals=knownIdxs.map(i=>curActuals[i]);
   let forecast=Array(12).fill(null);
   if(knownVals.length>=2){
-    // Use seasonal index from prevActuals as shape, scale to recent actual avg
-    const recentAvg=knownVals.slice(-3).reduce((s,v)=>s+v,0)/Math.min(3,knownVals.length);
-    const prevKnown=prevActuals.filter(v=>v!==null);
-    const prevAvg=prevKnown.length?prevKnown.reduce((s,v)=>s+v,0)/prevKnown.length:recentAvg;
-    const scale=prevAvg>0?recentAvg/prevAvg:1;
-    FY_MONTHS.forEach((_,i)=>{
-      if(curActuals[i]!==null)return; // already have actual
-      const prevVal=prevActuals[i];
-      if(prevVal!==null)forecast[i]=Math.max(0,prevVal*scale);
+    // Build seasonal shape from ALL monthly data (all years, all history)
+    // monthlyMap keys are YYYY-MM, values are monthly consumption
+    const calMonthAvg=Array(12).fill(null);
+    const calMonthCount=Array(12).fill(0);
+    const calMonthSum=Array(12).fill(0);
+    Object.entries(monthlyMap).forEach(([k,v])=>{
+      const mo=parseInt(k.slice(5))-1; // 0=Jan
+      calMonthSum[mo]+=v; calMonthCount[mo]++;
+    });
+    calMonthSum.forEach((s,i)=>{ if(calMonthCount[i]>0)calMonthAvg[i]=s/calMonthCount[i]; });
+
+    // Seasonal index = calMonthAvg[mo] / overall average
+    const validAvgs=calMonthAvg.filter(v=>v!==null);
+    const overallAvg=validAvgs.length?validAvgs.reduce((s,v)=>s+v,0)/validAvgs.length:1;
+    const seasonalShape=calMonthAvg.map(v=>v!==null&&overallAvg>0?v/overallAvg:1);
+
+    // Baseline = average of last 6 months of current actuals (or fewer if not enough)
+    const recent6=knownVals.slice(-6);
+    const recentAvg=recent6.reduce((s,v)=>s+v,0)/recent6.length;
+
+    // For each future month: seasonal_shape[calMonth] × recentAvg
+    FY_MONTHS.forEach(({mo},i)=>{
+      if(curActuals[i]!==null)return;
+      const shape=seasonalShape[mo]||1;
+      forecast[i]=Math.max(0,recentAvg*shape);
     });
   }
 
@@ -2909,7 +2942,7 @@ async function generateReport(){
     <span>🔵 Low — −40%+ below avg, check meter/supply</span>
   </div>
 
-  <div class="footer">MeterIQ v26 · Smart Meter Management · ${new Date().toISOString()}</div>
+  <div class="footer">MeterIQ v27 · Smart Meter Management · ${new Date().toISOString()}</div>
   </body></html>`;
 
   closeM('mReport');
@@ -2988,29 +3021,48 @@ function forcSync(){toast('Syncing…');processSyncQueue().then(()=>toast('✓ S
 
 async function pushTestData(){
   const statusEl=document.getElementById('testPushStatus');
-  if(statusEl)statusEl.textContent='Pushing…';
-  toast('Pushing test data…');
+  const barWrap=document.getElementById('testPushBarWrap');
+  const bar=document.getElementById('testPushBar');
+  const countEl=document.getElementById('testPushCount');
+  const btn=document.querySelector('[onclick="pushTestData()"]');
+
+  if(btn){btn.disabled=true;btn.textContent='Pushing…';}
+  if(statusEl)statusEl.textContent='Starting push…';
+  if(barWrap)barWrap.style.display='';
+  if(bar)bar.style.width='0%';
+
   const d=genTestBuilding();
-  let ok=0,fail=0;
-  // Push property
-  const pRes=await API.call('saveProperty',{prop:{id:'p_test',name:'Test Building',addr:'1 Test Street, S000001',icon:'🧪'}});
-  if(pRes?.ok)ok++; else fail++;
-  // Push unit
-  const uRes=await API.call('saveUnit',{unit:d.units[0]});
-  if(uRes?.ok)ok++; else fail++;
-  // Push readings in batches (avoid URL length limits — send 20 at a time)
-  const batchSize=20;
-  for(let i=0;i<d.readings.length;i+=batchSize){
-    const batch=d.readings.slice(i,i+batchSize);
-    for(const r of batch){
-      const rRes=await API.call('pushReading',{reading:r});
-      if(rRes?.ok||rRes?.duplicate)ok++; else fail++;
-    }
+  const totalItems=2+d.readings.length; // property + unit + readings
+  let pushed=0;
+
+  function updateProgress(){
+    pushed++;
+    const pct=Math.round((pushed/totalItems)*100);
+    if(bar)bar.style.width=pct+'%';
+    if(countEl)countEl.textContent=`${pushed} of ${totalItems} pushed`;
   }
+
+  let fail=0;
+  // 1. Push property
+  const pRes=await API.call('saveProperty',{prop:{id:'p_test',name:'Test Building',addr:'1 Test Street, S000001',icon:'🧪'}});
+  if(pRes?.ok)updateProgress(); else{fail++;pushed++;}
+  // 2. Push unit
+  const uRes=await API.call('saveUnit',{unit:d.units[0]});
+  if(uRes?.ok)updateProgress(); else{fail++;pushed++;}
+  // 3. Push readings one by one (no batching needed — 14 readings)
+  for(const r of d.readings){
+    const rRes=await API.call('pushReading',{reading:r});
+    if(rRes?.ok||rRes?.duplicate)updateProgress(); else{fail++;pushed++;}
+    if(countEl)countEl.textContent=`${pushed} of ${totalItems} pushed`;
+  }
+
+  if(bar)bar.style.width='100%';
   const msg=fail===0
-    ?`✓ Pushed: 1 property, 1 unit, ${d.readings.length} readings`
-    :`Done with ${fail} errors — check network`;
+    ?`✓ Done — 1 property, 1 unit, ${d.readings.length} readings pushed`
+    :`Done with ${fail} error${fail>1?'s':''} — check network`;
   if(statusEl)statusEl.textContent=msg;
+  if(countEl)countEl.textContent='';
+  if(btn){btn.disabled=false;btn.textContent='Push';}
   toast(fail===0?'✓ Test data pushed!':'Partial push — check network',fail===0?'ok':'err');
 }
 
